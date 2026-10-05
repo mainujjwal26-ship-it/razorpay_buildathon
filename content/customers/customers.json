@@ -1,0 +1,18 @@
+[
+  {
+    "id": "c-ujjwal",
+    "name": "Ujjwal Goel",
+    "displayName": "Ujjwal",
+    "emiAmount": 4200,
+    "emiDueDate": "5th of this month",
+    "bounced": true,
+    "daysPastDue": 6,
+    "emisPaid": 8,
+    "lastPayment": "₹4,200 on the 5th of last month",
+    "callNumberThisWeek": 3,
+    "lastCall": "Irritated about repeated calls; no commitment made",
+    "brokenPromise": "Promised to pay on the 9th; did not",
+    "language": "Hindi/Hinglish",
+    "notes": "Demo customer. Facts above are the only loan facts the agent may state."
+  }
+]

@@ -1,0 +1,65 @@
+import {
+  loadAgentTemplate,
+  loadGuardrails,
+  loadPolicy,
+  loadPolicyNotes,
+  loadScript,
+  loadTalking,
+  type Customer,
+} from "../lib/content";
+import { cleanScriptText } from "./script";
+
+function renderCustomer(c: Customer): string {
+  return [
+    `- Name: ${c.name} (address as "${c.displayName} ji")`,
+    `- EMI amount: ₹${c.emiAmount.toLocaleString("en-IN")}`,
+    `- EMI due date: ${c.emiDueDate}; the auto-debit bounced`,
+    `- Days past due: ${c.daysPastDue}`,
+    `- EMIs paid so far: ${c.emisPaid}`,
+    `- Last payment: ${c.lastPayment}`,
+    `- Language: ${c.language}`,
+  ].join("\n");
+}
+
+function renderPolicy(): string {
+  const p = loadPolicy();
+  return [
+    `- Lender: ${p.lenderName}`,
+    `- Minimum part payment: ${p.minPartPaymentPercent}% of the EMI. No other offers.`,
+    `- A charge waiver is not offered (an open point).`,
+  ].join("\n");
+}
+
+function renderGuardrails(): string {
+  return loadGuardrails()
+    .map((g) => {
+      const items = g.items
+        .map((i) => `- ${i.id} [${i.type}] ${i.text}`)
+        .join("\n");
+      return `### ${g.group}. ${g.name}${g.note ? ` (${g.note})` : ""}\n${items}`;
+    })
+    .join("\n\n");
+}
+
+function renderTalking(): string {
+  return Object.entries(loadTalking())
+    .filter(([k]) => k !== "version")
+    .map(([k, v]) => `- ${k}: ${String(v)}`)
+    .join("\n");
+}
+
+/** Assembles the agent's instructions from the /content files. No script text lives in code. */
+export function buildSystemPrompt(customer: Customer): string {
+  const policy = loadPolicy();
+  const slots: Record<string, string> = {
+    agentName: policy.agentName,
+    lenderName: policy.lenderName,
+    customer: renderCustomer(customer),
+    policy: renderPolicy(),
+    policyNotes: loadPolicyNotes(),
+    guardrails: renderGuardrails(),
+    talking: renderTalking(),
+    script: cleanScriptText(loadScript()),
+  };
+  return loadAgentTemplate().replace(/\{\{(\w+)\}\}/g, (m, key: string) => slots[key] ?? m);
+}

@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "lenderName": "Goel Small Finance Bank",
+  "agentName": "Meera",
+  "minPartPaymentPercent": 50,
+  "callingHours": { "start": "08:00", "end": "19:00", "timezone": "Asia/Kolkata" },
+  "testMode": true
+}
