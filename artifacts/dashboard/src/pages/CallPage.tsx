@@ -50,6 +50,8 @@ export function CallPage() {
       onEnd={call.end}
       onSubmit={call.submitTyped}
       micOn={call.micOn}
+      recording={call.recording}
+      onFinishVoice={call.finishVoiceReply}
       onMic={call.toggleMic}
     />
   );

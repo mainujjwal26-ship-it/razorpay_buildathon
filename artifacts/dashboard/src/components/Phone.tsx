@@ -39,9 +39,11 @@ export function Phone(props: {
   onEnd: () => void;
   onSubmit: (text: string) => void;
   micOn: boolean;
+  recording: boolean;
+  onFinishVoice: () => void;
   onMic: () => void;
 }) {
-  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, onMic } = props;
+  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onFinishVoice, onMic } = props;
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -70,7 +72,9 @@ export function Phone(props: {
           {live || phase === "ended" ? (
             <div className={`pill s-${phase}`} aria-live="polite">
               <span className="dot" aria-hidden="true" />
-              {STATUS[phase]}
+              {phase === "listening"
+                ? !micOn ? "Mic muted" : micIssue ? "Type a reply" : recording ? "Listening" : "Preparing voice input…"
+                : STATUS[phase]}
             </div>
           ) : null}
         </div>
@@ -121,6 +125,9 @@ export function Phone(props: {
               )}
               {phase === "thinking" && <div className="think">Meera is thinking…</div>}
               {micIssue && <p className="note bad">{micIssue}</p>}
+              {phase === "listening" && micOn && recording && (
+                <button type="button" className="btn" onClick={onFinishVoice}>Send voice reply</button>
+              )}
             </div>
             {showTyped && (
               <form className="typed" onSubmit={send}>
@@ -141,7 +148,7 @@ export function Phone(props: {
               <span className="timer">{mmss(seconds)}</span>
               <button
                 type="button"
-                className={`mic ${micOn ? "on" : "off"} ${micOn && phase === "listening" ? "live" : ""}`}
+                className={`mic ${micOn ? "on" : "off"} ${micOn && recording ? "live" : ""}`}
                 onClick={onMic}
                 aria-pressed={micOn}
                 aria-label={micOn ? "Mic is on. Tap to mute" : "Mic is muted. Tap to unmute"}

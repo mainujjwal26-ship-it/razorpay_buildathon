@@ -2,7 +2,8 @@
  * Voice adapter (browser). The call screen only uses this interface, so the browser's
  * built-in speech can later be replaced by ElevenLabs or Sarvam in this one file.
  */
-import { speakText, transcribeAudio } from "./api";
+import { speakText } from "./api";
+import { listenToMicrophone, resumeMicrophoneContext } from "./microphone";
 
 export interface Listener {
   result: Promise<string | null>;
@@ -15,8 +16,9 @@ export interface VoiceAdapter {
   canSpeak: boolean;
   canListen: boolean;
   hasHindiVoice(): boolean;
+  prepare?(): Promise<void>;
   speak(text: string): Promise<void>;
-  listen(timeoutMs: number, onIssue?: (msg: string) => void): Listener;
+  listen(timeoutMs: number, onIssue?: (msg: string) => void, onRecording?: (recording: boolean) => void): Listener;
   cancel(): void;
 }
 
@@ -28,6 +30,7 @@ interface Recognition {
   lang: string;
   interimResults: boolean;
   continuous: boolean;
+  onstart: (() => void) | null;
   onresult: ((e: RecognitionResultEvent) => void) | null;
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
@@ -81,8 +84,11 @@ export function createBrowserVoice(): VoiceAdapter {
       });
     },
 
-    listen(timeoutMs, onIssue) {
-      if (!Ctor) return { result: new Promise<string | null>(() => undefined), abort: () => undefined, finishNow: () => undefined };
+    listen(timeoutMs, onIssue, onRecording) {
+      if (!Ctor) {
+        onIssue?.("Voice input is not supported by this browser. You can type your reply instead.");
+        return { result: new Promise<string | null>(() => undefined), abort: () => undefined, finishNow: () => undefined };
+      }
       const rec = new Ctor();
       rec.lang = "hi-IN";
       rec.interimResults = true;
@@ -91,17 +97,16 @@ export function createBrowserVoice(): VoiceAdapter {
       let heard = "";
       let noSpeechTimer: ReturnType<typeof setTimeout> | undefined;
       let endTimer: ReturnType<typeof setTimeout> | undefined;
-      let errTimer: ReturnType<typeof setTimeout> | undefined;
       const clearAll = () => {
         if (noSpeechTimer) clearTimeout(noSpeechTimer);
         if (endTimer) clearTimeout(endTimer);
-        if (errTimer) clearTimeout(errTimer);
       };
       const result = new Promise<string | null>((resolve) => {
         const finish = (v: string | null) => {
           if (settled) return;
           settled = true;
           clearAll();
+          onRecording?.(false);
           try {
             rec.abort();
           } catch {
@@ -117,20 +122,22 @@ export function createBrowserVoice(): VoiceAdapter {
           if (endTimer) clearTimeout(endTimer);
           endTimer = setTimeout(() => finish(heard || null), END_OF_SPEECH_MS);
         };
+        rec.onstart = () => { if (!settled) onRecording?.(true); };
         let errored = false;
         rec.onerror = (e) => {
           if (e.error === "no-speech") return; // keep waiting until our own timeout
           if (e.error === "aborted") return;
           errored = true;
+          onRecording?.(false);
           onIssue?.(
             e.error === "not-allowed" || e.error === "service-not-allowed"
               ? "Microphone is blocked. Allow it for this site, or open the app in its own browser tab. You can type your reply instead."
               : `Speech recognition is not working (${e.error}). You can type your reply instead.`,
           );
           clearAll();
-          errTimer = setTimeout(() => finish(null), 45000);
         };
         rec.onend = () => {
+          onRecording?.(false);
           if (errored || settled) return;
           // The browser stopped by itself (it does after a long quiet spell). Use what we have or restart.
           if (heard) return finish(heard);
@@ -143,8 +150,9 @@ export function createBrowserVoice(): VoiceAdapter {
         noSpeechTimer = setTimeout(() => finish(null), timeoutMs);
         try {
           rec.start();
-        } catch {
-          finish(null);
+        } catch (error) {
+          clearAll();
+          onIssue?.(`Voice input could not start: ${error instanceof Error ? error.message : "unknown error"}. You can type your reply instead.`);
         }
       });
       return {
@@ -152,6 +160,7 @@ export function createBrowserVoice(): VoiceAdapter {
         abort: () => {
           settled = true;
           clearAll();
+          onRecording?.(false);
           try {
             rec.abort();
           } catch {
@@ -183,11 +192,23 @@ export function createSarvamVoice(): VoiceAdapter {
   const canListen =
     typeof window !== "undefined" && typeof MediaRecorder !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia);
   let audio: HTMLAudioElement | null = null;
+  let context: AudioContext | null = null;
+  const getContext = () => {
+    if (!context || context.state === "closed") {
+      const Constructor = window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!Constructor) throw new Error("This browser does not support microphone audio analysis");
+      context = new Constructor();
+    }
+    return context;
+  };
 
   return {
     canSpeak: true,
     canListen,
     hasHindiVoice: () => true,
+    // Called directly from the user's start/unmute click to unlock browser audio.
+    prepare: () => resumeMicrophoneContext(getContext()),
 
     async speak(text) {
       try {
@@ -206,118 +227,17 @@ export function createSarvamVoice(): VoiceAdapter {
       }
     },
 
-    listen(timeoutMs, onIssue) {
-      if (!canListen) return { result: new Promise<string | null>(() => undefined), abort: () => undefined, finishNow: () => undefined };
-      let stopped = false;
-      let cleanup: () => void = () => undefined;
-      let forceStop: () => void = () => undefined;
-      let forced = false;
-      const result = new Promise<string | null>((resolve) => {
-        let settled = false;
-        const finish = (v: string | null) => {
-          if (settled) return;
-          settled = true;
-          resolve(v);
-        };
-        const issue = (msg: string) => {
-          onIssue?.(msg);
-          setTimeout(() => finish(null), 45000);
-        };
-        (async () => {
-          let stream: MediaStream;
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-          } catch {
-            return issue("Microphone is blocked. Allow it for this site, or open the app in its own browser tab. You can type your reply instead.");
-          }
-          if (stopped) return stream.getTracks().forEach((t) => t.stop());
-
-          const ctx = new AudioContext();
-          const analyser = ctx.createAnalyser();
-          analyser.fftSize = 1024;
-          ctx.createMediaStreamSource(stream).connect(analyser);
-          const buf = new Uint8Array(analyser.fftSize);
-          const chunks: Blob[] = [];
-          const rec = new MediaRecorder(stream);
-          rec.ondataavailable = (e) => e.data.size > 0 && chunks.push(e.data);
-
-          const t0 = Date.now();
-          let speechAt = 0;
-          let lastLoud = 0;
-          let floor = 0;
-          let samples = 0;
-          let tick: ReturnType<typeof setInterval> | undefined;
-          let ended = false;
-
-          const release = () => {
-            if (tick) clearInterval(tick);
-            stream.getTracks().forEach((t) => t.stop());
-            void ctx.close().catch(() => undefined);
-          };
-          cleanup = () => {
-            ended = true;
-            release();
-            if (rec.state !== "inactive") rec.stop();
-          };
-
-          rec.onstop = async () => {
-            release();
-            if (stopped || ended) return;
-            if (!speechAt && !forced) return finish(null);
-            try {
-              const text = await transcribeAudio(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
-              finish(text || null);
-            } catch (e) {
-              issue(`Speech recognition is not working (${e instanceof Error ? e.message : "error"}). You can type your reply instead.`);
-            }
-          };
-
-          forceStop = () => {
-            forced = true;
-            if (rec.state !== "inactive") rec.stop();
-            if (tick) clearInterval(tick);
-          };
-          rec.start();
-          tick = setInterval(() => {
-            analyser.getByteTimeDomainData(buf);
-            let sum = 0;
-            for (const v of buf) sum += ((v - 128) / 128) ** 2;
-            const rms = Math.sqrt(sum / buf.length);
-            const now = Date.now();
-            if (now - t0 < 400) {
-              floor = (floor * samples + rms) / (samples + 1);
-              samples += 1;
-              return;
-            }
-            const base = Math.max(0.015, floor * 3);
-            const loud = rms > (speechAt ? base * 0.6 : base); // easier to stay "speaking" than to start
-            if (loud) {
-              if (!speechAt) speechAt = now;
-              lastLoud = now;
-            }
-            const silentFor = now - lastLoud;
-            const done =
-              (speechAt && silentFor > END_OF_SPEECH_MS) || (speechAt && now - speechAt > 20000) || (!speechAt && now - t0 > timeoutMs);
-            if (done && rec.state !== "inactive") {
-              clearInterval(tick);
-              rec.stop();
-            }
-          }, 50);
-        })();
-      });
-      return {
-        result,
-        abort: () => {
-          stopped = true;
-          cleanup();
-        },
-        finishNow: () => forceStop(),
-      };
+    listen(timeoutMs, onIssue, onRecording) {
+      return listenToMicrophone(timeoutMs, getContext, onIssue, onRecording);
     },
 
     cancel() {
       audio?.pause();
       audio = null;
+      if (context) {
+        void context.close().catch(() => undefined);
+        context = null;
+      }
       fallback.cancel();
     },
   };

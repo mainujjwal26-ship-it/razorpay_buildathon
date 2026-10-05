@@ -19,12 +19,14 @@ export function useCall(voice: VoiceAdapter) {
   const [seconds, setSeconds] = useState(0);
 
   const active = useRef(false);
+  const generation = useRef(0);
   const customerId = useRef("");
   const history = useRef<HistoryItem[]>([]);
   const typed = useRef<((t: string) => void) | null>(null);
   const listener = useRef<Listener | null>(null);
   const nextId = useRef(1);
   const [micOn, setMicOn] = useState(true);
+  const [recording, setRecording] = useState(false);
   const micOnRef = useRef(true);
   const muteSignal = useRef<(() => void) | null>(null);
   const unmuteSignal = useRef<(() => void) | null>(null);
@@ -42,8 +44,13 @@ export function useCall(voice: VoiceAdapter) {
 
   const finish = useCallback(() => {
     active.current = false;
+    generation.current += 1;
+    typed.current?.("");
+    muteSignal.current?.();
+    unmuteSignal.current?.();
     voice.cancel();
     listener.current?.abort();
+    setRecording(false);
     setPhase("ended");
   }, [voice]);
 
@@ -64,6 +71,7 @@ export function useCall(voice: VoiceAdapter) {
 
   steps.current = {
     async agentTurn({ say, speak, raw, endCall, note, handoff }) {
+      const session = generation.current;
       history.current.push({ role: "agent", text: say, ...(raw ? { raw } : {}) });
       addLine("agent", say);
       if (note) {
@@ -76,18 +84,20 @@ export function useCall(voice: VoiceAdapter) {
       }
       setPhase("speaking");
       await voice.speak(speak);
-      if (!active.current) return;
+      if (!active.current || generation.current !== session) return;
       if (endCall) return finish();
       await steps.current?.listenTurn();
     },
 
     async listenTurn() {
+      const session = generation.current;
       setPhase("listening");
+      setRecording(false);
       const typedP = new Promise<string>((res) => {
         typed.current = res;
       });
       let text: string | null = null;
-      while (active.current) {
+      while (active.current && generation.current === session) {
         if (!micOnRef.current) {
           // Muted: wait until the mic is switched back on, or a typed reply arrives.
           const r = await Promise.race([
@@ -103,7 +113,12 @@ export function useCall(voice: VoiceAdapter) {
           }
           continue;
         }
-        const l = voice.listen(LISTEN_TIMEOUT_MS, setMicIssue);
+        setMicIssue(null);
+        const l = voice.listen(
+          LISTEN_TIMEOUT_MS,
+          (issue) => { if (active.current && generation.current === session) setMicIssue(issue); },
+          (value) => { if (active.current && generation.current === session) setRecording(value); },
+        );
         listener.current = l;
         const r = await Promise.race([
           l.result.then((v) => ({ kind: "heard" as const, v })),
@@ -120,7 +135,7 @@ export function useCall(voice: VoiceAdapter) {
         break;
       }
       typed.current = null;
-      if (!active.current) return;
+      if (!active.current || generation.current !== session) return;
       const t = text && text.trim() ? text.trim() : null;
       if (t) {
         history.current.push({ role: "borrower", text: t });
@@ -133,10 +148,11 @@ export function useCall(voice: VoiceAdapter) {
     },
 
     async requestTurn() {
+      const session = generation.current;
       setPhase("thinking");
       try {
         const r = await sendTurn(customerId.current, history.current);
-        if (!active.current) return;
+        if (!active.current || generation.current !== session) return;
         await steps.current?.agentTurn({
           say: r.say,
           speak: r.speak,
@@ -146,7 +162,7 @@ export function useCall(voice: VoiceAdapter) {
           handoff: r.action === "handoff",
         });
       } catch (e) {
-        fail(e);
+        if (active.current && generation.current === session) fail(e);
       }
     },
   };
@@ -154,6 +170,7 @@ export function useCall(voice: VoiceAdapter) {
   const start = useCallback(
     async (id: string) => {
       voice.cancel();
+      const session = ++generation.current;
       customerId.current = id;
       history.current = [];
       nextId.current = 1;
@@ -161,17 +178,24 @@ export function useCall(voice: VoiceAdapter) {
       setError(null);
       setMicIssue(null);
       setSeconds(0);
+      setRecording(false);
       micOnRef.current = true;
       setMicOn(true);
       active.current = true;
       setPhase("connecting");
       try {
+        try {
+          await voice.prepare?.();
+        } catch (error) {
+          if (active.current && generation.current === session) setMicIssue(error instanceof Error ? error.message : "Audio input could not start. You can type your reply instead.");
+        }
+        if (!active.current || generation.current !== session) return;
         const r = await startCall(id);
         await new Promise((res) => setTimeout(res, 1200)); // ringing
-        if (!active.current) return;
+        if (!active.current || generation.current !== session) return;
         await steps.current?.agentTurn({ say: r.say, speak: r.speak, endCall: false });
       } catch (e) {
-        fail(e);
+        if (active.current && generation.current === session) fail(e);
       }
     },
     [voice, fail],
@@ -186,17 +210,26 @@ export function useCall(voice: VoiceAdapter) {
     const next = !micOnRef.current;
     micOnRef.current = next;
     setMicOn(next);
-    if (next) unmuteSignal.current?.();
+    if (next) {
+      setMicIssue(null);
+      void voice.prepare?.().catch((error: unknown) => {
+        if (active.current) setMicIssue(error instanceof Error ? error.message : "Audio input could not start.");
+      });
+      unmuteSignal.current?.();
+    }
     else muteSignal.current?.();
-  }, []);
+  }, [voice]);
+
+  const finishVoiceReply = useCallback(() => listener.current?.finishNow(), []);
 
   const submitTyped = useCallback((text: string) => typed.current?.(text), []);
 
   useEffect(() => () => {
     active.current = false;
+    generation.current += 1;
     voice.cancel();
     listener.current?.abort();
   }, [voice]);
 
-  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn };
+  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn, recording, finishVoiceReply };
 }
