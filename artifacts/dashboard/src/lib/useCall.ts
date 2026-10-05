@@ -147,6 +147,8 @@ export function useCall(voice: VoiceAdapter) {
     finish();
   }, [finish]);
 
+  const stopListening = useCallback(() => listener.current?.finishNow(), []);
+
   const submitTyped = useCallback((text: string) => typed.current?.(text), []);
 
   useEffect(() => () => {
@@ -155,5 +157,5 @@ export function useCall(voice: VoiceAdapter) {
     listener.current?.abort();
   }, [voice]);
 
-  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped };
+  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, stopListening };
 }

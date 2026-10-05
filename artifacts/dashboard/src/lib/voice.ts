@@ -7,6 +7,8 @@ import { speakText, transcribeAudio } from "./api";
 export interface Listener {
   result: Promise<string | null>;
   abort(): void;
+  /** Stop recording now and use what was said so far. */
+  finishNow(): void;
 }
 
 export interface VoiceAdapter {
@@ -29,6 +31,7 @@ interface Recognition {
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
   start(): void;
+  stop(): void;
   abort(): void;
 }
 type RecognitionCtor = new () => Recognition;
@@ -62,7 +65,7 @@ export function createBrowserVoice(): VoiceAdapter {
       return new Promise<void>((resolve) => {
         const u = new SpeechSynthesisUtterance(text);
         u.lang = "hi-IN";
-        u.rate = 0.92;
+        u.rate = 1.05;
         const v = pickHindiVoice();
         if (v) u.voice = v;
         const guard = setTimeout(resolve, text.length * 130 + 4000);
@@ -78,7 +81,7 @@ export function createBrowserVoice(): VoiceAdapter {
     },
 
     listen(timeoutMs, onIssue) {
-      if (!Ctor) return { result: new Promise<string | null>(() => undefined), abort: () => undefined };
+      if (!Ctor) return { result: new Promise<string | null>(() => undefined), abort: () => undefined, finishNow: () => undefined };
       const rec = new Ctor();
       rec.lang = "hi-IN";
       rec.interimResults = false;
@@ -131,6 +134,13 @@ export function createBrowserVoice(): VoiceAdapter {
             /* already stopped */
           }
         },
+        finishNow: () => {
+          try {
+            rec.stop();
+          } catch {
+            /* already stopped */
+          }
+        },
       };
     },
 
@@ -173,9 +183,11 @@ export function createSarvamVoice(): VoiceAdapter {
     },
 
     listen(timeoutMs, onIssue) {
-      if (!canListen) return { result: new Promise<string | null>(() => undefined), abort: () => undefined };
+      if (!canListen) return { result: new Promise<string | null>(() => undefined), abort: () => undefined, finishNow: () => undefined };
       let stopped = false;
       let cleanup: () => void = () => undefined;
+      let forceStop: () => void = () => undefined;
+      let forced = false;
       const result = new Promise<string | null>((resolve) => {
         let settled = false;
         const finish = (v: string | null) => {
@@ -227,7 +239,7 @@ export function createSarvamVoice(): VoiceAdapter {
           rec.onstop = async () => {
             release();
             if (stopped || ended) return;
-            if (!speechAt) return finish(null);
+            if (!speechAt && !forced) return finish(null);
             try {
               const text = await transcribeAudio(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
               finish(text || null);
@@ -236,6 +248,11 @@ export function createSarvamVoice(): VoiceAdapter {
             }
           };
 
+          forceStop = () => {
+            forced = true;
+            if (rec.state !== "inactive") rec.stop();
+            if (tick) clearInterval(tick);
+          };
           rec.start();
           tick = setInterval(() => {
             analyser.getByteTimeDomainData(buf);
@@ -255,7 +272,7 @@ export function createSarvamVoice(): VoiceAdapter {
             }
             const silentFor = now - lastLoud;
             const done =
-              (speechAt && silentFor > 1300) || (speechAt && now - speechAt > 20000) || (!speechAt && now - t0 > timeoutMs);
+              (speechAt && silentFor > 1600) || (speechAt && now - speechAt > 20000) || (!speechAt && now - t0 > timeoutMs);
             if (done && rec.state !== "inactive") {
               clearInterval(tick);
               rec.stop();
@@ -269,6 +286,7 @@ export function createSarvamVoice(): VoiceAdapter {
           stopped = true;
           cleanup();
         },
+        finishNow: () => forceStop(),
       };
     },
 

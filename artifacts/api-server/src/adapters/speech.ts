@@ -47,7 +47,7 @@ export async function synthesize(text: string): Promise<string> {
       language_code: "hi-IN",
       speaker: process.env["SARVAM_SPEAKER"] ?? "priya",
       model: process.env["SARVAM_TTS_MODEL"] ?? "bulbul:v3",
-      pace: Number(process.env["SARVAM_PACE"] ?? "0.95"),
+      pace: Number(process.env["SARVAM_PACE"] ?? "1.2"),
     }),
   });
   const body = (await res.json().catch(() => ({}))) as { audios?: string[]; error?: unknown; message?: string };

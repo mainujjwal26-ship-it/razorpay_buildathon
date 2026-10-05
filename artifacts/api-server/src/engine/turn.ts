@@ -58,8 +58,19 @@ export function parseReply(raw: string): AgentReply {
       /* fall through to plain-text fallback */
     }
   }
-  const text = raw.trim();
-  return { say: text, speak: text, action: "none", amount: null, reason: null, endCall: false };
+  // The model's JSON was cut off or malformed: salvage the "say" text, never show raw JSON.
+  const m = raw.match(/"say"\s*:\s*"((?:[^"\\]|\\.)*)/);
+  let say = "";
+  if (m?.[1]) {
+    try {
+      say = (JSON.parse(`"${m[1]}"`) as string).trim();
+    } catch {
+      say = m[1].replace(/\\"/g, '"').trim();
+    }
+  }
+  if (!say && !raw.trim().startsWith("{")) say = raw.trim();
+  if (!say) say = "Maaf kijiye, mujhe theek se sunai nahi diya. Kya aap dobara bata sakte hain?";
+  return { say, speak: say, action: "none", amount: null, reason: null, endCall: false };
 }
 
 export async function runTurn(customer: Customer, history: HistoryItem[]): Promise<{ reply: AgentReply; raw: string }> {

@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { Line, Phase } from "../lib/useCall";
 
 const STATUS: Record<Phase, string> = {
@@ -38,15 +38,17 @@ export function Phone(props: {
   onStart: () => void;
   onEnd: () => void;
   onSubmit: (text: string) => void;
+  onMic: () => void;
 }) {
-  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit } = props;
+  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, onMic } = props;
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
 
   const live = phase !== "idle" && phase !== "ended";
-  const lastAgent = [...lines].reverse().find((l) => l.who === "agent");
-  const lastBorrower = [...lines].reverse().find((l) => l.who === "borrower" || (l.who === "system" && l.text === "(no reply)"));
-  const note = [...lines].reverse().find((l) => l.who === "system" && l.text !== "(no reply)");
+  const scroller = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
+  }, [lines, phase]);
   const showTyped = typing || Boolean(micIssue);
 
   const send = (e: FormEvent) => {
@@ -105,14 +107,17 @@ export function Phone(props: {
                 <i key={i} style={{ animationDelay: `${i * 0.09}s` }} />
               ))}
             </div>
-            <div className="body">
-              {lastAgent ? (
-                <div className="bub ag">{highlight(lastAgent.text)}</div>
-              ) : (
-                <p className="muted center">Connecting…</p>
+            <div className="body" ref={scroller}>
+              {lines.length === 0 && <p className="muted center">Connecting…</p>}
+              {lines.map((l) =>
+                l.who === "system" ? (
+                  <div key={l.id} className="card sys">{l.text}</div>
+                ) : l.who === "agent" ? (
+                  <div key={l.id} className="bub ag">{highlight(l.text)}</div>
+                ) : (
+                  <div key={l.id} className="bub bw">{l.text}</div>
+                ),
               )}
-              {lastBorrower && <div className="bub bw">{lastBorrower.text}</div>}
-              {note && <div className="card sys">{note.text}</div>}
               {phase === "thinking" && <div className="think">Meera is thinking…</div>}
               {micIssue && <p className="note bad">{micIssue}</p>}
             </div>
@@ -133,12 +138,18 @@ export function Phone(props: {
             )}
             <div className="bar">
               <span className="timer">{mmss(seconds)}</span>
-              <div className={`mic ${phase === "listening" ? "on" : ""}`} aria-hidden="true">
+              <button
+                type="button"
+                className={`mic ${phase === "listening" ? "on" : "off"}`}
+                onClick={onMic}
+                disabled={phase !== "listening"}
+                aria-label={phase === "listening" ? "Mic is on. Tap when you have finished speaking" : "Mic is off"}
+              >
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="9" y="3" width="6" height="11" rx="3" />
                   <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
                 </svg>
-              </div>
+              </button>
               <div className="bar-right">
                 <button type="button" className="kb" onClick={() => setTyping((t) => !t)} aria-label="Type a reply instead" aria-pressed={showTyped}>
                   ⌨
