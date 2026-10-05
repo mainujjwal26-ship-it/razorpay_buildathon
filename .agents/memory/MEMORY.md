@@ -1,0 +1,1 @@
+- [GitHub authorization boundaries](github-authorization.md) — Agent API access and Git CLI authentication are separate.
