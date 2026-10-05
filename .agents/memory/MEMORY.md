@@ -1,1 +1,2 @@
 - [GitHub authorization boundaries](github-authorization.md) — Agent API access and Git CLI authentication are separate.
+- [Imported artifact registration](imported-artifacts.md) — Pulled artifact manifests may need validation before previews and workflows appear.
