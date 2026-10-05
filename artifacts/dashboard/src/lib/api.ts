@@ -17,6 +17,7 @@ export interface CallConfig {
   withinCallingHours: boolean;
   localTime: string;
   llmConfigured: boolean;
+  speechConfigured: boolean;
   customers: Customer[];
 }
 
@@ -53,3 +54,15 @@ export const startCall = (customerId: string) =>
   request<{ callId: string; say: string; speak: string }>("/call/start", { customerId });
 export const sendTurn = (customerId: string, history: HistoryItem[]) =>
   request<TurnReply>("/call/turn", { customerId, history });
+
+export async function transcribeAudio(blob: Blob): Promise<string> {
+  const res = await fetch(`${base}/api/call/transcribe`, {
+    method: "POST",
+    headers: { "content-type": blob.type || "audio/webm" },
+    body: blob,
+  });
+  const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? `Transcription failed (${res.status})`);
+  return data.text ?? "";
+}
+export const speakText = (text: string) => request<{ audio: string }>("/call/speak", { text });

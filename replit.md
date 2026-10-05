@@ -10,7 +10,7 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
-- Required env for the call section: `ANTHROPIC_API_KEY` (Replit Secrets). Optional: `LLM_MODEL`, `LLM_FAST_MODEL`, `CONTENT_DIR`
+- Required env for the call section: `ANTHROPIC_API_KEY` (Replit Secrets). Optional: `SARVAM_API_KEY` (Sarvam voice; without it the browser voice is used), `SARVAM_SPEAKER`, `SARVAM_STT_MODEL`, `SARVAM_STT_MODE`, `LLM_MODEL`, `LLM_FAST_MODEL`, `CONTENT_DIR`
 - Dashboard (call section): `pnpm --filter @workspace/dashboard run dev`
 
 ## Stack
