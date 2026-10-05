@@ -49,7 +49,8 @@ export function CallPage() {
       onStart={() => customer && call.start(customer.id)}
       onEnd={call.end}
       onSubmit={call.submitTyped}
-      onMic={call.stopListening}
+      micOn={call.micOn}
+      onMic={call.toggleMic}
     />
   );
 }

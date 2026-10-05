@@ -38,9 +38,10 @@ export function Phone(props: {
   onStart: () => void;
   onEnd: () => void;
   onSubmit: (text: string) => void;
+  micOn: boolean;
   onMic: () => void;
 }) {
-  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, onMic } = props;
+  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, onMic } = props;
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -140,14 +141,15 @@ export function Phone(props: {
               <span className="timer">{mmss(seconds)}</span>
               <button
                 type="button"
-                className={`mic ${phase === "listening" ? "on" : "off"}`}
+                className={`mic ${micOn ? "on" : "off"} ${micOn && phase === "listening" ? "live" : ""}`}
                 onClick={onMic}
-                disabled={phase !== "listening"}
-                aria-label={phase === "listening" ? "Mic is on. Tap when you have finished speaking" : "Mic is off"}
+                aria-pressed={micOn}
+                aria-label={micOn ? "Mic is on. Tap to mute" : "Mic is muted. Tap to unmute"}
               >
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="9" y="3" width="6" height="11" rx="3" />
                   <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                  {!micOn && <path d="M4 4l16 16" />}
                 </svg>
               </button>
               <div className="bar-right">

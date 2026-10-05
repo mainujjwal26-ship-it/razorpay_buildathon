@@ -9,7 +9,7 @@ export interface Line {
   text: string;
 }
 
-const LISTEN_TIMEOUT_MS = 9000;
+const LISTEN_TIMEOUT_MS = 15000; // how long to wait for the borrower to start speaking
 
 export function useCall(voice: VoiceAdapter) {
   const [phase, setPhase] = useState<Phase>("idle");
@@ -24,6 +24,10 @@ export function useCall(voice: VoiceAdapter) {
   const typed = useRef<((t: string) => void) | null>(null);
   const listener = useRef<Listener | null>(null);
   const nextId = useRef(1);
+  const [micOn, setMicOn] = useState(true);
+  const micOnRef = useRef(true);
+  const muteSignal = useRef<(() => void) | null>(null);
+  const unmuteSignal = useRef<(() => void) | null>(null);
 
   const running = phase !== "idle" && phase !== "ended";
   useEffect(() => {
@@ -79,13 +83,42 @@ export function useCall(voice: VoiceAdapter) {
 
     async listenTurn() {
       setPhase("listening");
-      const l = voice.listen(LISTEN_TIMEOUT_MS, setMicIssue);
-      listener.current = l;
       const typedP = new Promise<string>((res) => {
         typed.current = res;
       });
-      const text = await Promise.race([l.result, typedP]);
-      l.abort();
+      let text: string | null = null;
+      while (active.current) {
+        if (!micOnRef.current) {
+          // Muted: wait until the mic is switched back on, or a typed reply arrives.
+          const r = await Promise.race([
+            typedP.then((t) => ({ t })),
+            new Promise<{ t: null }>((res) => {
+              unmuteSignal.current = () => res({ t: null });
+            }),
+          ]);
+          unmuteSignal.current = null;
+          if (r.t !== null) {
+            text = r.t;
+            break;
+          }
+          continue;
+        }
+        const l = voice.listen(LISTEN_TIMEOUT_MS, setMicIssue);
+        listener.current = l;
+        const r = await Promise.race([
+          l.result.then((v) => ({ kind: "heard" as const, v })),
+          typedP.then((v) => ({ kind: "typed" as const, v })),
+          new Promise<{ kind: "muted" }>((res) => {
+            muteSignal.current = () => res({ kind: "muted" });
+          }),
+        ]);
+        l.abort();
+        listener.current = null;
+        muteSignal.current = null;
+        if (r.kind === "muted") continue;
+        text = r.v;
+        break;
+      }
       typed.current = null;
       if (!active.current) return;
       const t = text && text.trim() ? text.trim() : null;
@@ -128,6 +161,8 @@ export function useCall(voice: VoiceAdapter) {
       setError(null);
       setMicIssue(null);
       setSeconds(0);
+      micOnRef.current = true;
+      setMicOn(true);
       active.current = true;
       setPhase("connecting");
       try {
@@ -147,7 +182,13 @@ export function useCall(voice: VoiceAdapter) {
     finish();
   }, [finish]);
 
-  const stopListening = useCallback(() => listener.current?.finishNow(), []);
+  const toggleMic = useCallback(() => {
+    const next = !micOnRef.current;
+    micOnRef.current = next;
+    setMicOn(next);
+    if (next) unmuteSignal.current?.();
+    else muteSignal.current?.();
+  }, []);
 
   const submitTyped = useCallback((text: string) => typed.current?.(text), []);
 
@@ -157,5 +198,5 @@ export function useCall(voice: VoiceAdapter) {
     listener.current?.abort();
   }, [voice]);
 
-  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, stopListening };
+  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn };
 }

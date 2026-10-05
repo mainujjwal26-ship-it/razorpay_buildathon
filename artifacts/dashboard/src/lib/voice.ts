@@ -23,6 +23,7 @@ export interface VoiceAdapter {
 interface RecognitionResultEvent {
   results: ArrayLike<ArrayLike<{ transcript: string }>>;
 }
+const END_OF_SPEECH_MS = 2200; // how long a pause counts as "finished speaking"
 interface Recognition {
   lang: string;
   interimResults: boolean;
@@ -84,39 +85,62 @@ export function createBrowserVoice(): VoiceAdapter {
       if (!Ctor) return { result: new Promise<string | null>(() => undefined), abort: () => undefined, finishNow: () => undefined };
       const rec = new Ctor();
       rec.lang = "hi-IN";
-      rec.interimResults = false;
-      rec.continuous = false;
+      rec.interimResults = true;
+      rec.continuous = true; // keep listening through short pauses; we decide when the borrower is done
       let settled = false;
-      let timer: ReturnType<typeof setTimeout> | undefined;
+      let heard = "";
+      let noSpeechTimer: ReturnType<typeof setTimeout> | undefined;
+      let endTimer: ReturnType<typeof setTimeout> | undefined;
+      let errTimer: ReturnType<typeof setTimeout> | undefined;
+      const clearAll = () => {
+        if (noSpeechTimer) clearTimeout(noSpeechTimer);
+        if (endTimer) clearTimeout(endTimer);
+        if (errTimer) clearTimeout(errTimer);
+      };
       const result = new Promise<string | null>((resolve) => {
         const finish = (v: string | null) => {
           if (settled) return;
           settled = true;
-          if (timer) clearTimeout(timer);
+          clearAll();
+          try {
+            rec.abort();
+          } catch {
+            /* already stopped */
+          }
           resolve(v);
         };
-        rec.onresult = (e) => finish(e.results[0]?.[0]?.transcript ?? null);
+        rec.onresult = (e) => {
+          let text = "";
+          for (let i = 0; i < e.results.length; i++) text += (e.results[i]?.[0]?.transcript ?? "") + " ";
+          heard = text.trim();
+          if (noSpeechTimer) clearTimeout(noSpeechTimer);
+          if (endTimer) clearTimeout(endTimer);
+          endTimer = setTimeout(() => finish(heard || null), END_OF_SPEECH_MS);
+        };
         let errored = false;
         rec.onerror = (e) => {
-          if (e.error === "no-speech") return finish(null);
+          if (e.error === "no-speech") return; // keep waiting until our own timeout
           if (e.error === "aborted") return;
-          // A real problem (mic blocked, no network): stay open for typed replies instead of racing through silent turns.
           errored = true;
           onIssue?.(
             e.error === "not-allowed" || e.error === "service-not-allowed"
               ? "Microphone is blocked. Allow it for this site, or open the app in its own browser tab. You can type your reply instead."
               : `Speech recognition is not working (${e.error}). You can type your reply instead.`,
           );
-          if (timer) clearTimeout(timer);
-          timer = setTimeout(() => finish(null), 45000);
+          clearAll();
+          errTimer = setTimeout(() => finish(null), 45000);
         };
         rec.onend = () => {
-          if (!errored) finish(null);
+          if (errored || settled) return;
+          // The browser stopped by itself (it does after a long quiet spell). Use what we have or restart.
+          if (heard) return finish(heard);
+          try {
+            rec.start();
+          } catch {
+            finish(null);
+          }
         };
-        timer = setTimeout(() => {
-          rec.abort();
-          finish(null);
-        }, timeoutMs);
+        noSpeechTimer = setTimeout(() => finish(null), timeoutMs);
         try {
           rec.start();
         } catch {
@@ -127,7 +151,7 @@ export function createBrowserVoice(): VoiceAdapter {
         result,
         abort: () => {
           settled = true;
-          if (timer) clearTimeout(timer);
+          clearAll();
           try {
             rec.abort();
           } catch {
@@ -265,14 +289,15 @@ export function createSarvamVoice(): VoiceAdapter {
               samples += 1;
               return;
             }
-            const loud = rms > Math.max(0.02, floor * 3);
+            const base = Math.max(0.015, floor * 3);
+            const loud = rms > (speechAt ? base * 0.6 : base); // easier to stay "speaking" than to start
             if (loud) {
               if (!speechAt) speechAt = now;
               lastLoud = now;
             }
             const silentFor = now - lastLoud;
             const done =
-              (speechAt && silentFor > 1600) || (speechAt && now - speechAt > 20000) || (!speechAt && now - t0 > timeoutMs);
+              (speechAt && silentFor > END_OF_SPEECH_MS) || (speechAt && now - speechAt > 20000) || (!speechAt && now - t0 > timeoutMs);
             if (done && rec.state !== "inactive") {
               clearInterval(tick);
               rec.stop();
