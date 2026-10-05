@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
 import { llmConfigured, LlmNotConfiguredError } from "../adapters/llm";
+import express from "express";
+import { speechConfigured, synthesize, transcribe } from "../adapters/speech";
 import { getCustomer, loadCustomers, loadPolicy } from "../lib/content";
 import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
@@ -18,6 +20,7 @@ router.get("/call/config", (_req, res) => {
     withinCallingHours: hours.ok,
     localTime: hours.localTime,
     llmConfigured: llmConfigured(),
+    speechConfigured: speechConfigured(),
     customers: loadCustomers(),
   });
 });
@@ -69,6 +72,27 @@ router.post("/call/turn", async (req, res) => {
   } catch (err) {
     const status = err instanceof LlmNotConfiguredError ? 503 : 500;
     res.status(status).json({ error: err instanceof Error ? err.message : "Turn failed" });
+  }
+});
+
+router.post("/call/transcribe", express.raw({ type: () => true, limit: "10mb" }), async (req, res) => {
+  try {
+    const audio = req.body as Buffer;
+    if (!Buffer.isBuffer(audio) || audio.length === 0) return void res.status(400).json({ error: "No audio received" });
+    const text = await transcribe(audio, String(req.headers["content-type"] ?? "audio/webm"));
+    res.json({ text });
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : "Transcription failed" });
+  }
+});
+
+router.post("/call/speak", async (req, res) => {
+  try {
+    const text = String(req.body?.text ?? "").trim();
+    if (!text) return void res.status(400).json({ error: "text is required" });
+    res.json({ audio: await synthesize(text) });
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : "Speech failed" });
   }
 });
 

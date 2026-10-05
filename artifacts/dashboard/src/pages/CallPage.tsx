@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getCallConfig, type CallConfig } from "../lib/api";
 import { useCall } from "../lib/useCall";
 import { Phone } from "../components/Phone";
+import { createBrowserVoice, createSarvamVoice } from "../lib/voice";
 
 export function CallPage() {
   const [config, setConfig] = useState<CallConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const call = useCall();
+  const useSarvam = config?.speechConfigured ?? false;
+  const voice = useMemo(() => (useSarvam ? createSarvamVoice() : createBrowserVoice()), [useSarvam]);
+  const call = useCall(voice);
 
   useEffect(() => {
     getCallConfig()

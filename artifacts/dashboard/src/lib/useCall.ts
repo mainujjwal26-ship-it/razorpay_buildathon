@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { sendTurn, startCall, type HistoryItem } from "./api";
-import { createBrowserVoice, type Listener } from "./voice";
+import type { Listener, VoiceAdapter } from "./voice";
 
 export type Phase = "idle" | "connecting" | "speaking" | "listening" | "thinking" | "ended";
 export interface Line {
@@ -11,8 +11,7 @@ export interface Line {
 
 const LISTEN_TIMEOUT_MS = 9000;
 
-export function useCall() {
-  const voice = useMemo(() => createBrowserVoice(), []);
+export function useCall(voice: VoiceAdapter) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [lines, setLines] = useState<Line[]>([]);
   const [error, setError] = useState<string | null>(null);

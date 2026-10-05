@@ -2,6 +2,8 @@
  * Voice adapter (browser). The call screen only uses this interface, so the browser's
  * built-in speech can later be replaced by ElevenLabs or Sarvam in this one file.
  */
+import { speakText, transcribeAudio } from "./api";
+
 export interface Listener {
   result: Promise<string | null>;
   abort(): void;
@@ -134,6 +136,146 @@ export function createBrowserVoice(): VoiceAdapter {
 
     cancel() {
       if (canSpeak) window.speechSynthesis.cancel();
+    },
+  };
+}
+
+/**
+ * Sarvam voice: the browser records the borrower, the server turns audio into text, and Meera's
+ * lines come back as audio. Falls back to the browser voice for a line if the server call fails.
+ */
+export function createSarvamVoice(): VoiceAdapter {
+  const fallback = createBrowserVoice();
+  const canListen =
+    typeof window !== "undefined" && typeof MediaRecorder !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia);
+  let audio: HTMLAudioElement | null = null;
+
+  return {
+    canSpeak: true,
+    canListen,
+    hasHindiVoice: () => true,
+
+    async speak(text) {
+      try {
+        const { audio: b64 } = await speakText(text);
+        const el = new Audio(`data:audio/wav;base64,${b64}`);
+        audio = el;
+        await new Promise<void>((resolve, reject) => {
+          el.onended = () => resolve();
+          el.onerror = () => reject(new Error("audio"));
+          el.play().catch(reject);
+        });
+      } catch {
+        await fallback.speak(text);
+      } finally {
+        audio = null;
+      }
+    },
+
+    listen(timeoutMs, onIssue) {
+      if (!canListen) return { result: new Promise<string | null>(() => undefined), abort: () => undefined };
+      let stopped = false;
+      let cleanup: () => void = () => undefined;
+      const result = new Promise<string | null>((resolve) => {
+        let settled = false;
+        const finish = (v: string | null) => {
+          if (settled) return;
+          settled = true;
+          resolve(v);
+        };
+        const issue = (msg: string) => {
+          onIssue?.(msg);
+          setTimeout(() => finish(null), 45000);
+        };
+        (async () => {
+          let stream: MediaStream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+          } catch {
+            return issue("Microphone is blocked. Allow it for this site, or open the app in its own browser tab. You can type your reply instead.");
+          }
+          if (stopped) return stream.getTracks().forEach((t) => t.stop());
+
+          const ctx = new AudioContext();
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 1024;
+          ctx.createMediaStreamSource(stream).connect(analyser);
+          const buf = new Uint8Array(analyser.fftSize);
+          const chunks: Blob[] = [];
+          const rec = new MediaRecorder(stream);
+          rec.ondataavailable = (e) => e.data.size > 0 && chunks.push(e.data);
+
+          const t0 = Date.now();
+          let speechAt = 0;
+          let lastLoud = 0;
+          let floor = 0;
+          let samples = 0;
+          let tick: ReturnType<typeof setInterval> | undefined;
+          let ended = false;
+
+          const release = () => {
+            if (tick) clearInterval(tick);
+            stream.getTracks().forEach((t) => t.stop());
+            void ctx.close().catch(() => undefined);
+          };
+          cleanup = () => {
+            ended = true;
+            release();
+            if (rec.state !== "inactive") rec.stop();
+          };
+
+          rec.onstop = async () => {
+            release();
+            if (stopped || ended) return;
+            if (!speechAt) return finish(null);
+            try {
+              const text = await transcribeAudio(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
+              finish(text || null);
+            } catch (e) {
+              issue(`Speech recognition is not working (${e instanceof Error ? e.message : "error"}). You can type your reply instead.`);
+            }
+          };
+
+          rec.start();
+          tick = setInterval(() => {
+            analyser.getByteTimeDomainData(buf);
+            let sum = 0;
+            for (const v of buf) sum += ((v - 128) / 128) ** 2;
+            const rms = Math.sqrt(sum / buf.length);
+            const now = Date.now();
+            if (now - t0 < 400) {
+              floor = (floor * samples + rms) / (samples + 1);
+              samples += 1;
+              return;
+            }
+            const loud = rms > Math.max(0.02, floor * 3);
+            if (loud) {
+              if (!speechAt) speechAt = now;
+              lastLoud = now;
+            }
+            const silentFor = now - lastLoud;
+            const done =
+              (speechAt && silentFor > 1300) || (speechAt && now - speechAt > 20000) || (!speechAt && now - t0 > timeoutMs);
+            if (done && rec.state !== "inactive") {
+              clearInterval(tick);
+              rec.stop();
+            }
+          }, 50);
+        })();
+      });
+      return {
+        result,
+        abort: () => {
+          stopped = true;
+          cleanup();
+        },
+      };
+    },
+
+    cancel() {
+      audio?.pause();
+      audio = null;
+      fallback.cancel();
     },
   };
 }
