@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "language": "Hindi / Hinglish only",
+  "speakingPace": "slightly slower than normal; slower still for amounts and dates",
+  "waitAfterQuestionSeconds": 4,
+  "promptsIntoSilenceBeforeClosing": 2,
+  "readEveryAmountAndDateBack": true,
+  "asksAfterClearNo": 2,
+  "creditRecordMention": "once per call, as information",
+  "changesOfDirectionBeforeSummarising": 3,
+  "maxSentencesPerTurn": 2,
+  "maxWordsPerSentence": 20
+}

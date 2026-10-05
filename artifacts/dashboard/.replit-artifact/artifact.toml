@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Collections Dashboard"
+version = "1.0.0"
+id = "k7Qm2XvPzR4tLw9bNc1Ds"
+
+[[services]]
+localPort = 5173
+name = "Dashboard"
+paths = ["/"]
+
+[services.env]
+PORT = "5173"
+BASE_PATH = "/"
+
+[services.development]
+run = "pnpm --filter @workspace/dashboard run dev"
+
+[services.production]
+publicDir = "artifacts/dashboard/dist/public"
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/dashboard", "run", "build"]
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
