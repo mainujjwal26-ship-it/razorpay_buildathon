@@ -10,8 +10,9 @@ export type HistoryItem =
 export interface AgentReply {
   say: string;
   speak: string;
-  action: "none" | "send_link" | "handoff";
+  action: "none" | "send_link" | "raise_ticket" | "handoff";
   amount: number | null;
+  reason: string | null;
   endCall: boolean;
 }
 
@@ -28,7 +29,7 @@ export function toMessages(history: HistoryItem[]): LlmMessage[] {
       push(
         "assistant",
         h.raw ??
-          JSON.stringify({ say: h.text, speak: h.text, action: "none", amount: null, endCall: false }),
+          JSON.stringify({ say: h.text, speak: h.text, action: "none", amount: null, reason: null, endCall: false }),
       );
     } else if (h.role === "borrower") push("user", h.text);
     else push("user", `[system] ${h.text}`);
@@ -47,8 +48,9 @@ export function parseReply(raw: string): AgentReply {
         return {
           say: j.say.trim(),
           speak: (typeof j.speak === "string" && j.speak.trim()) || j.say.trim(),
-          action: j.action === "send_link" || j.action === "handoff" ? j.action : "none",
+          action: j.action === "send_link" || j.action === "raise_ticket" || j.action === "handoff" ? j.action : "none",
           amount: typeof j.amount === "number" ? j.amount : null,
+          reason: typeof j.reason === "string" && j.reason.trim() ? j.reason.trim() : null,
           endCall: j.endCall === true,
         };
       }
@@ -57,7 +59,7 @@ export function parseReply(raw: string): AgentReply {
     }
   }
   const text = raw.trim();
-  return { say: text, speak: text, action: "none", amount: null, endCall: false };
+  return { say: text, speak: text, action: "none", amount: null, reason: null, endCall: false };
 }
 
 export async function runTurn(customer: Customer, history: HistoryItem[]): Promise<{ reply: AgentReply; raw: string }> {

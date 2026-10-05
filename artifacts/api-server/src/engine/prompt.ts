@@ -2,6 +2,7 @@ import {
   loadAgentTemplate,
   loadGuardrails,
   loadPolicy,
+  loadPolicyNotes,
   loadScript,
   loadTalking,
   type Customer,
@@ -14,9 +15,8 @@ function renderCustomer(c: Customer): string {
     `- EMI amount: ₹${c.emiAmount.toLocaleString("en-IN")}`,
     `- EMI due date: ${c.emiDueDate}; the auto-debit bounced`,
     `- Days past due: ${c.daysPastDue}`,
-    `- This is call number ${c.callNumberThisWeek} this week`,
-    `- Last call: ${c.lastCall}`,
-    `- Earlier promise: ${c.brokenPromise}`,
+    `- EMIs paid so far: ${c.emisPaid}`,
+    `- Last payment: ${c.lastPayment}`,
     `- Language: ${c.language}`,
   ].join("\n");
 }
@@ -25,11 +25,8 @@ function renderPolicy(): string {
   const p = loadPolicy();
   return [
     `- Lender: ${p.lenderName}`,
-    `- Minimum paid now when splitting: ${p.minUpfrontPercent}% of the EMI`,
-    `- The balance must be paid before ${p.balanceDueBeforeDpd} days past due`,
-    `- A charge waiver is offered only against full payment${p.waiverOnlyOnFullPayment ? "" : " (not enforced)"}`,
-    `- At most ${p.maxOfferRounds} offer rounds per call`,
-    `- At most ${p.maxCallsPerWeek} calls per week; calling hours ${p.callingHours.start} to ${p.callingHours.end}`,
+    `- Minimum part payment: ${p.minPartPaymentPercent}% of the EMI. No other offers.`,
+    `- A charge waiver is not offered (an open point).`,
   ].join("\n");
 }
 
@@ -59,6 +56,7 @@ export function buildSystemPrompt(customer: Customer): string {
     lenderName: policy.lenderName,
     customer: renderCustomer(customer),
     policy: renderPolicy(),
+    policyNotes: loadPolicyNotes(),
     guardrails: renderGuardrails(),
     talking: renderTalking(),
     script: cleanScriptText(loadScript()),

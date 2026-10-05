@@ -43,7 +43,7 @@
     "items": [
       {
         "id": "2.1",
-        "text": "Confirm it’s the borrower before saying anything about the loan, amount or bounce",
+        "text": "Confirm it's the borrower before saying anything about the loan, amount or bounce. Confirmation happens when they say their full name",
         "type": "Hard",
         "source": "RBI: no disclosure to others; WeRize bug: no identity check"
       },
@@ -52,12 +52,6 @@
         "text": "To family, friends, guarantors or colleagues: only ask when the borrower is free; never mention the loan, amount or bounce",
         "type": "Hard",
         "source": "RBI; WeRize bug: family branch disclosed amount"
-      },
-      {
-        "id": "2.3",
-        "text": "Never contact an employer, neighbour or reference to pressure the borrower",
-        "type": "Hard",
-        "source": "RBI recovery rules"
       },
       {
         "id": "2.4",
@@ -73,7 +67,7 @@
       },
       {
         "id": "2.6",
-        "text": "If identity answers are unclear, don’t guess; end politely",
+        "text": "If the identity answer is unclear, don't guess. Ask again, for example \"Maaf kijiye, mujhe theek se sunai nahi diya. Kya aap apna poora naam dobara bata sakte hain?\" Do this up to two times. If it is still unclear, apologise politely and end the call",
         "type": "Judgement",
         "source": "Wrong disclosure is costly"
       }
@@ -85,28 +79,10 @@
     "note": null,
     "items": [
       {
-        "id": "3.1",
-        "text": "Contact only between 8 AM and 7 PM, including WhatsApp messages and reminders",
-        "type": "Hard",
-        "source": "RBI recovery rules (all channels)"
-      },
-      {
-        "id": "3.2",
-        "text": "No more than the lender’s weekly call limit per borrower (example: 3)",
-        "type": "Hard",
-        "source": "RBI: no harassment through repeated calls"
-      },
-      {
         "id": "3.3",
-        "text": "\"Call mat karo\" or \"stop\" ends the call; the case is reviewed before any further contact",
+        "text": "\"Call mat karo\" or \"stop\" does not end the call by itself, because it may only be a way to avoid the call. First make sure the reason for non-payment has been asked about. Then try to get a suitable time to call back, with three attempts in total. Only after that, end the call politely",
         "type": "Hard",
         "source": "RBI; respect"
-      },
-      {
-        "id": "3.4",
-        "text": "Callbacks only at the time the borrower chose, inside allowed hours",
-        "type": "Hard",
-        "source": "WeRize kit"
       },
       {
         "id": "3.5",
@@ -147,7 +123,7 @@
       },
       {
         "id": "4.5",
-        "text": "At most two pushes after a clear \"no\"; then accept and close",
+        "text": "At most two pushes after a clear \"no\" to paying; then accept and close. A \"don't call\" request follows 3.3 instead",
         "type": "Hard",
         "source": "WeRize blueprint"
       },
@@ -221,27 +197,21 @@
     "items": [
       {
         "id": "6.1",
-        "text": "Offer only what’s inside the lender’s policy box: minimum part-payment, latest date, waiver conditions",
+        "text": "Offer only full payment, or a part payment of at least 50 percent of the EMI. No other offers for now",
         "type": "Hard",
         "source": "Agent must stay controllable"
       },
       {
         "id": "6.2",
-        "text": "Check every offer against the policy box before saying it",
+        "text": "Check every offer against this before saying it",
         "type": "Hard",
         "source": "Prevents invented deals"
       },
       {
         "id": "6.3",
-        "text": "Never promise a waiver, restructuring or extension outside policy; say it will be checked and when",
+        "text": "Never promise a waiver, restructuring or extension; say it will be checked and when. When a waiver may be offered is an open point",
         "type": "Hard",
         "source": "Lender authority"
-      },
-      {
-        "id": "6.4",
-        "text": "At most the lender’s maximum offer rounds per call (example: 2)",
-        "type": "Hard",
-        "source": "Avoids haggling loops"
       },
       {
         "id": "6.5",
@@ -276,7 +246,7 @@
       },
       {
         "id": "7.2",
-        "text": "Payment only through the lender’s official link or app; never to an agent, partner or personal UPI ID",
+        "text": "Payment only through the payment link sent on WhatsApp to the borrower's number; never to an agent, partner or personal UPI ID",
         "type": "Hard",
         "source": "WeRize kit: \"paid the partner\" cases"
       },
@@ -325,7 +295,7 @@
       },
       {
         "id": "8.2",
-        "text": "A promise counts only with a specific amount and date, repeated back",
+        "text": "A promise counts only with a specific date of payment, repeated back. An amount is not required",
         "type": "Hard",
         "source": "Promise quality"
       },
@@ -362,7 +332,7 @@
     "items": [
       {
         "id": "9.1",
-        "text": "A disputed amount is not collected on the call; the dispute is logged and the official channel shared",
+        "text": "Meera answers questions only from the customer data and policy notes. For anything beyond them, such as a disputed charge or a payment she cannot see, she says she can raise a ticket and raises it. The call carries on; it does not end",
         "type": "Hard",
         "source": "Fairness; complaint risk"
       },
@@ -374,13 +344,13 @@
       },
       {
         "id": "9.3",
-        "text": "Loan denial or fraud claims: no payment ask in the same turn; verification follows",
+        "text": "Loan denial or fraud claims: no payment ask in the same turn; offer to raise a ticket",
         "type": "Hard",
         "source": "WeRize bug: asked for payment after denial"
       },
       {
         "id": "9.4",
-        "text": "Complaints about past agents: apologise, log, don’t defend",
+        "text": "Complaints about past agents: apologise, raise a ticket, don't defend",
         "type": "Hard",
         "source": "Respect"
       }
@@ -424,7 +394,7 @@
       },
       {
         "id": "11.2",
-        "text": "Log every call, offer, promise, link sent and handoff, with time",
+        "text": "Log every call, offer, promise, link sent and handoff, with time (not active in this build: nothing is stored, so do not mention logging)",
         "type": "Hard",
         "source": "RBI: lender accountable for agent conduct"
       },

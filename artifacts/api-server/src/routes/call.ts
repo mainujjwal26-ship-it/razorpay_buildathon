@@ -61,7 +61,9 @@ router.post("/call/turn", async (req, res) => {
     const systemNote =
       reply.action === "send_link"
         ? `Payment link for ₹${reply.amount ?? "?"} created and sent (test build, Razorpay not connected). Payment status: pending, not confirmed.`
-        : null;
+        : reply.action === "raise_ticket"
+          ? `Ticket raised: ${reply.reason ?? "question beyond the customer data"}`
+          : null;
 
     res.json({ ...reply, raw, systemNote });
   } catch (err) {

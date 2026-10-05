@@ -32,11 +32,7 @@ export interface Policy {
   version: number;
   lenderName: string;
   agentName: string;
-  minUpfrontPercent: number;
-  balanceDueBeforeDpd: number;
-  waiverOnlyOnFullPayment: boolean;
-  maxOfferRounds: number;
-  maxCallsPerWeek: number;
+  minPartPaymentPercent: number;
   callingHours: { start: string; end: string; timezone: string };
   testMode: boolean;
 }
@@ -49,6 +45,8 @@ export interface Customer {
   emiDueDate: string;
   bounced: boolean;
   daysPastDue: number;
+  emisPaid: number;
+  lastPayment: string;
   callNumberThisWeek: number;
   lastCall: string;
   brokenPromise: string;
@@ -68,6 +66,7 @@ export const loadCustomers = () => readContentJson<Customer[]>("customers/custom
 export const loadGuardrails = () => readContentJson<GuardrailGroup[]>("guardrails.json");
 export const loadTalking = () => readContentJson<Record<string, unknown>>("talking.json");
 export const loadScript = () => readContentText("script.md");
+export const loadPolicyNotes = () => readContentText("policies.md");
 export const loadAgentTemplate = () => readContentText("prompts/agent.md");
 
 export function getCustomer(id: string): Customer | undefined {

@@ -28,7 +28,7 @@ export type HistoryItem =
 export interface TurnReply {
   say: string;
   speak: string;
-  action: "none" | "send_link" | "handoff";
+  action: "none" | "send_link" | "raise_ticket" | "handoff";
   amount: number | null;
   endCall: boolean;
   raw: string;
