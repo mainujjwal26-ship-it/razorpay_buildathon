@@ -66,7 +66,7 @@ export async function runTurn(customer: Customer, history: HistoryItem[]): Promi
   const raw = await complete({
     system: buildSystemPrompt(customer),
     messages: toMessages(history),
-    maxTokens: 500,
+    maxTokens: 8192,
   });
   return { reply: parseReply(raw), raw };
 }
@@ -76,7 +76,7 @@ export async function toSpeechVersion(line: string): Promise<string> {
   try {
     const out = await complete({
       model: fastModel(),
-      maxTokens: 300,
+      maxTokens: 8192,
       system:
         "You rewrite Hinglish phone-call lines for a Hindi text-to-speech voice. Keep the wording exactly the same. Write Hindi words in Devanagari. Keep English loanwords (EMI, link, UPI, app, payment) in Latin letters. Output only the rewritten line.",
       messages: [{ role: "user", content: line }],
