@@ -127,6 +127,21 @@ test("speech beginning during calibration is not mistaken for background noise",
   assert.equal(fixture.uploads.length, 1);
 });
 
+test("a reply is sent automatically after you stop speaking, with ordinary room noise in the background", async () => {
+  const fixture = setup();
+  await flush();
+  fixture.sample(1050, 1); // room noise
+  fixture.sample(1450, 1);
+  fixture.sample(1500, 8); // speaking
+  fixture.sample(2500, 8);
+  fixture.sample(2600, 1); // back to room noise
+  fixture.sample(3500, 1); // a 1s pause does not end the turn
+  assert.equal(fixture.uploads.length, 0);
+  fixture.sample(5000, 1); // 2.5s of quiet does
+  assert.equal(await fixture.listener.result, "Haan, bolo");
+  assert.equal(fixture.uploads.length, 1);
+});
+
 test("the no-speech timeout still submits recorded audio instead of discarding quiet speech", async () => {
   const fixture = setup();
   await flush();

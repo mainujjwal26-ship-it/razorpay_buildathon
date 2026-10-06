@@ -76,7 +76,7 @@ export function listenToMicrophone(
       }
       if (typeof MediaRecorder === "undefined") throw new Error("This browser does not support audio recording");
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false }, // AGC would amplify room noise and stop silence being detected
       });
       if (aborted) return release();
       const context = getContext();
@@ -109,8 +109,7 @@ export function listenToMicrophone(
       const startedAt = Date.now();
       let speechAt = 0;
       let lastLoud = 0;
-      let floor = 0;
-      let count = 0;
+      let floor = Number.POSITIVE_INFINITY;
       recorder.start();
       onRecording?.(true);
       tick = setInterval(() => {
@@ -120,12 +119,12 @@ export function listenToMicrophone(
         for (const value of samples) sum += ((value - 128) / 128) ** 2;
         const rms = Math.sqrt(sum / samples.length);
         const now = Date.now();
-        // Don't treat someone speaking immediately as the room's noise floor.
-        if (now - startedAt < 400) {
-          floor = (floor * count + rms) / (++count);
-        }
-        const threshold = Math.max(0.006, Math.min(floor, 0.004) * 2);
-        if (rms > (speechAt ? threshold * 0.6 : threshold)) {
+        // Room noise = the quietest moment in the first 0.4s (someone speaking at once still leaves gaps).
+        if (now - startedAt < 400) floor = Math.min(floor, rms);
+        const noise = Math.min(Number.isFinite(floor) ? floor : 0, 0.01);
+        const startThreshold = Math.max(0.018, noise * 3);
+        const holdThreshold = Math.max(0.012, noise * 2); // easier to stay "speaking" than to start
+        if (rms > (speechAt ? holdThreshold : startThreshold)) {
           speechAt ||= now;
           lastLoud = now;
         }
