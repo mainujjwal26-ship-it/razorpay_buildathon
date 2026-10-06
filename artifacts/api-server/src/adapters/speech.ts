@@ -45,7 +45,7 @@ export async function synthesize(text: string): Promise<string> {
       text: text.slice(0, 2400),
       target_language_code: "hi-IN",
       language_code: "hi-IN",
-      speaker: process.env["SARVAM_SPEAKER"] ?? "priya",
+      speaker: process.env["SARVAM_SPEAKER"] ?? "ritu",
       model: process.env["SARVAM_TTS_MODEL"] ?? "bulbul:v3",
       pace: Number(process.env["SARVAM_PACE"] ?? "1.2"),
     }),
