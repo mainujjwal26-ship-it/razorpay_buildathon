@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { Line, Phase } from "../lib/useCall";
+import { callLogUrl } from "../lib/api";
 
 const STATUS: Record<Phase, string> = {
   idle: "Ready",
@@ -39,10 +40,11 @@ export function Phone(props: {
   onEnd: () => void;
   onSubmit: (text: string) => void;
   micOn: boolean;
+  logCallId?: string;
   recording: boolean;
   onMic: () => void;
 }) {
-  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onMic } = props;
+  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onMic, logCallId } = props;
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -177,13 +179,20 @@ export function Phone(props: {
               {mmss(seconds)}
             </p>
             {error && <p className="note bad">{error}</p>}
+            {logCallId && (
+              <p className="note">
+                Call log (test build):{" "}
+                <a href={callLogUrl(logCallId, "text")} target="_blank" rel="noreferrer">read</a> ·{" "}
+                <a href={callLogUrl(logCallId)} download>download</a>
+              </p>
+            )}
             <button type="button" className="btn pri" onClick={onStart} disabled={!canStart}>
               Start another call
             </button>
           </div>
         )}
 
-        <div className="testline">Test build · the payment link is a dummy and nothing is saved</div>
+        <div className="testline">Test build · the payment link is a dummy · calls are logged for testing</div>
       </div>
     </div>
   );

@@ -45,3 +45,7 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+
+## Call logs (test build)
+
+Every call writes a time-stamped JSON-lines file to `call-logs/` (what Meera said, what was heard, model time, speech-to-text and text-to-speech time, mic taps, silences, errors). After a call, the phone shows "read | download" links. Also: `GET /api/call/logs` lists calls, `GET /api/call/logs/<id>?format=text` gives a readable report. Set `CALL_LOGGING=off` to stop logging, `CALL_LOG_DIR` to change the folder. Logs hold test conversations only; commit them so they can be analysed.

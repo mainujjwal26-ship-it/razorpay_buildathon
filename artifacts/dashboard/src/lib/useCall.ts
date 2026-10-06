@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { sendTurn, startCall, type HistoryItem } from "./api";
+import { logClientEvent, sendTurn, setCurrentCallId, startCall, type HistoryItem } from "./api";
 import type { Listener, VoiceAdapter } from "./voice";
 
 export type Phase = "idle" | "connecting" | "speaking" | "listening" | "thinking" | "ended";
@@ -21,6 +21,9 @@ export function useCall(voice: VoiceAdapter) {
   const active = useRef(false);
   const generation = useRef(0);
   const customerId = useRef("");
+  const callId = useRef<string | undefined>(undefined);
+  const [loggedCallId, setLoggedCallId] = useState<string | undefined>(undefined);
+  const log = useCallback((type: string, data: Record<string, unknown> = {}) => logClientEvent(callId.current, type, data), []);
   const history = useRef<HistoryItem[]>([]);
   const typed = useRef<((t: string) => void) | null>(null);
   const listener = useRef<Listener | null>(null);
@@ -43,6 +46,7 @@ export function useCall(voice: VoiceAdapter) {
   }, []);
 
   const finish = useCallback(() => {
+    if (active.current) log("call_end");
     active.current = false;
     generation.current += 1;
     typed.current?.("");
@@ -52,14 +56,15 @@ export function useCall(voice: VoiceAdapter) {
     listener.current?.abort();
     setRecording(false);
     setPhase("ended");
-  }, [voice]);
+  }, [voice, log]);
 
   const fail = useCallback(
     (e: unknown) => {
       setError(e instanceof Error ? e.message : "Something went wrong");
+      log("error", { message: e instanceof Error ? e.message : String(e) });
       finish();
     },
-    [finish],
+    [finish, log],
   );
 
   // The three steps below call each other, so they live in one ref-held object.
@@ -83,7 +88,9 @@ export function useCall(voice: VoiceAdapter) {
         addLine("system", "Handed to a person (not live in this build)");
       }
       setPhase("speaking");
+      log("speak_start", { chars: speak.length });
       await voice.speak(speak);
+      log("speak_end");
       if (!active.current || generation.current !== session) return;
       if (endCall) return finish();
       await steps.current?.listenTurn();
@@ -92,11 +99,13 @@ export function useCall(voice: VoiceAdapter) {
     async listenTurn() {
       const session = generation.current;
       setPhase("listening");
+      log("listen_start", { micOn: micOnRef.current });
       setRecording(false);
       const typedP = new Promise<string>((res) => {
         typed.current = res;
       });
       let text: string | null = null;
+      let source: "typed" | "voice" = "voice";
       while (active.current && generation.current === session) {
         if (!micOnRef.current) {
           // Muted: wait until the mic is switched back on, or a typed reply arrives.
@@ -109,6 +118,7 @@ export function useCall(voice: VoiceAdapter) {
           unmuteSignal.current = null;
           if (r.t !== null) {
             text = r.t;
+            source = "typed";
             break;
           }
           continue;
@@ -132,6 +142,7 @@ export function useCall(voice: VoiceAdapter) {
         muteSignal.current = null;
         if (r.kind === "muted") continue;
         text = r.v;
+        source = r.kind === "typed" ? "typed" : "voice";
         break;
       }
       typed.current = null;
@@ -140,7 +151,9 @@ export function useCall(voice: VoiceAdapter) {
       if (t) {
         history.current.push({ role: "borrower", text: t });
         addLine("borrower", t);
+        log("borrower_reply", { text: t, source });
       } else {
+        log("silence_timeout", { micOn: micOnRef.current });
         history.current.push({ role: "borrower", text: "(silence)" });
         addLine("system", "(no reply)");
       }
@@ -151,7 +164,7 @@ export function useCall(voice: VoiceAdapter) {
       const session = generation.current;
       setPhase("thinking");
       try {
-        const r = await sendTurn(customerId.current, history.current);
+        const r = await sendTurn(customerId.current, history.current, callId.current);
         if (!active.current || generation.current !== session) return;
         await steps.current?.agentTurn({
           say: r.say,
@@ -172,6 +185,9 @@ export function useCall(voice: VoiceAdapter) {
       voice.cancel();
       const session = ++generation.current;
       customerId.current = id;
+      callId.current = undefined;
+      setCurrentCallId(undefined);
+      setLoggedCallId(undefined);
       history.current = [];
       nextId.current = 1;
       setLines([]);
@@ -186,6 +202,9 @@ export function useCall(voice: VoiceAdapter) {
       try {
         if (!active.current || generation.current !== session) return;
         const r = await startCall(id);
+        callId.current = r.callId;
+        setCurrentCallId(r.callId);
+        setLoggedCallId(r.callId);
         await new Promise((res) => setTimeout(res, 1200)); // ringing
         if (!active.current || generation.current !== session) return;
         await steps.current?.agentTurn({ say: r.say, speak: r.speak, endCall: false });
@@ -203,6 +222,7 @@ export function useCall(voice: VoiceAdapter) {
 
   const toggleMic = useCallback(() => {
     const next = !micOnRef.current;
+    log(next ? "mic_on" : "mic_off");
     micOnRef.current = next;
     setMicOn(next);
     if (next) {
@@ -213,7 +233,7 @@ export function useCall(voice: VoiceAdapter) {
       unmuteSignal.current?.();
     }
     else muteSignal.current?.();
-  }, [voice]);
+  }, [voice, log]);
 
   const finishVoiceReply = useCallback(() => listener.current?.finishNow(), []);
 
@@ -226,5 +246,5 @@ export function useCall(voice: VoiceAdapter) {
     listener.current?.abort();
   }, [voice]);
 
-  return { voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn, recording, finishVoiceReply };
+  return { callId: loggedCallId, voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn, recording, finishVoiceReply };
 }

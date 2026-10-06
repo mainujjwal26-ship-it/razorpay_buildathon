@@ -51,6 +51,7 @@ export function CallPage() {
       onSubmit={call.submitTyped}
       micOn={call.micOn}
       recording={call.recording}
+      logCallId={config.callLogging ? call.callId : undefined}
       onMic={call.toggleMic}
     />
   );

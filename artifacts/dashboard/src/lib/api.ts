@@ -18,6 +18,7 @@ export interface CallConfig {
   localTime: string;
   llmConfigured: boolean;
   speechConfigured: boolean;
+  callLogging?: boolean;
   customers: Customer[];
 }
 
@@ -52,17 +53,35 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 export const getCallConfig = () => request<CallConfig>("/call/config");
 export const startCall = (customerId: string) =>
   request<{ callId: string; say: string; speak: string }>("/call/start", { customerId });
-export const sendTurn = (customerId: string, history: HistoryItem[]) =>
-  request<TurnReply>("/call/turn", { customerId, history });
+export const sendTurn = (customerId: string, history: HistoryItem[], callId?: string) =>
+  request<TurnReply>("/call/turn", { customerId, history, callId });
 
-export async function transcribeAudio(blob: Blob): Promise<string> {
+/** Test-build call log: fire and forget, never blocks or breaks the call. */
+export function logClientEvent(callId: string | undefined, type: string, data: Record<string, unknown> = {}): void {
+  if (!callId) return;
+  void fetch(`${base}/api/call/log`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ callId, events: [{ type, ts: new Date().toISOString(), ...data }] }),
+    keepalive: true,
+  }).catch(() => undefined);
+}
+export const callLogUrl = (callId: string, format?: "text") => `${base}/api/call/logs/${callId}${format ? `?format=${format}` : ""}`;
+
+// The call in progress, so speech requests can be tagged in the test log without threading the id through every adapter.
+let currentCallId: string | undefined;
+export const setCurrentCallId = (id: string | undefined) => {
+  currentCallId = id;
+};
+
+export async function transcribeAudio(blob: Blob, callId: string | undefined = currentCallId): Promise<string> {
   const res = await fetch(`${base}/api/call/transcribe`, {
     method: "POST",
-    headers: { "content-type": blob.type || "audio/webm" },
+    headers: { "content-type": blob.type || "audio/webm", ...(callId ? { "x-call-id": callId } : {}) },
     body: blob,
   });
   const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
   if (!res.ok) throw new Error(data.error ?? `Transcription failed (${res.status})`);
   return data.text ?? "";
 }
-export const speakText = (text: string) => request<{ audio: string }>("/call/speak", { text });
+export const speakText = (text: string, callId: string | undefined = currentCallId) => request<{ audio: string }>("/call/speak", { text, callId });
