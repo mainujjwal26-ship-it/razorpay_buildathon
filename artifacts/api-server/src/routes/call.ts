@@ -7,6 +7,7 @@ import { getCustomer, loadCustomers, loadPolicy } from "../lib/content";
 import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
 import { runTurn, toSpeechVersion, type HistoryItem } from "../engine/turn";
+import { sinkConfigured } from "../adapters/logSink";
 import { listCalls, logEvent, loggingOn, readCall, renderReport } from "../lib/callLog";
 
 const router: IRouter = Router();
@@ -148,7 +149,7 @@ router.post("/call/log", (req, res) => {
 });
 
 // Test-build log access: list calls, download one as JSON lines (default) or as a readable report (?format=text).
-router.get("/call/logs", (_req, res) => res.json({ logging: loggingOn(), calls: listCalls() }));
+router.get("/call/logs", (_req, res) => res.json({ logging: loggingOn(), pushingToGithub: sinkConfigured(), calls: listCalls() }));
 router.get("/call/logs/:id", (req, res) => {
   const call = readCall(req.params["id"]);
   if (!call) return void res.status(404).json({ error: "No log for this call" });

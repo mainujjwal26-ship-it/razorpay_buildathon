@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pushLogFile, sinkConfigured } from "../adapters/logSink";
 
 /**
  * Test-build call log. One JSON-lines file per call in /call-logs, every event stamped with an ISO time.
@@ -29,12 +30,40 @@ function fileFor(callId: string): string {
   return path.join(dir, `${stamp}_${callId}.jsonl`);
 }
 
+// Push the call's file to GitHub after key events. One push at a time per call; a burst of events becomes one more push.
+const syncing = new Map<string, { again: boolean }>();
+function syncToGithub(callId: string): void {
+  if (!sinkConfigured()) return;
+  const running = syncing.get(callId);
+  if (running) {
+    running.again = true;
+    return;
+  }
+  const state = { again: false };
+  syncing.set(callId, state);
+  void (async () => {
+    try {
+      do {
+        state.again = false;
+        const file = fileFor(callId);
+        await pushLogFile(path.basename(file), fs.readFileSync(file, "utf8"));
+      } while (state.again);
+    } catch (err) {
+      logEvent(callId, "sink_error", { message: err instanceof Error ? err.message : "failed" });
+    } finally {
+      syncing.delete(callId);
+    }
+  })();
+}
+const SYNC_ON = new Set(["agent_line", "call_end", "llm_error", "error", "silence_timeout"]);
+
 export function logEvent(callIdRaw: unknown, type: string, data: Record<string, unknown> = {}): void {
   try {
     const callId = safeId(callIdRaw);
     if (!loggingOn() || !callId) return;
     const line = JSON.stringify({ ts: new Date().toISOString(), callId, type, ...data });
     fs.appendFileSync(fileFor(callId), line + "\n");
+    if (SYNC_ON.has(type)) syncToGithub(callId);
   } catch {
     /* logging must never break a call */
   }
