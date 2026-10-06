@@ -9,3 +9,8 @@
 {"ts":"2026-10-06T11:03:31.875Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"borrower_reply","text":"जी मैं उज्जवल बात कर रहा हूँ बताइए।","source":"voice","clientTs":"2026-10-06T11:03:31.747Z"}
 {"ts":"2026-10-06T11:03:36.947Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"llm_turn","turn":1,"llmMs":5117,"rawLength":257,"parsedOk":true}
 {"ts":"2026-10-06T11:03:36.947Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"agent_line","say":"Maaf kijiye, mujhe theek se sunai nahi diya. Kya aap apna poora naam dobara bata sakte hain?","speak":"माफ़ कीजिये, मुझे ठीक से सुनाई नहीं दिया। क्या आप अपना पूरा नाम दोबारा बता सकते हैं?","action":"none","amount":null,"reason":null,"endCall":false,"raw":"{\"say\":\"Maaf kijiye, mujhe theek se sunai nahi diya. Kya aap apna poora naam dobara bata sakte hain?\",\"speak\":\"माफ़ कीजिये, मुझे ठीक से सुनाई नहीं दिया। क्या आप अपना पूरा नाम दोबारा बता सकते हैं?\",\"action\":\"none\",\"amount\":null,\"reason\":null,\"endCall\":false}"}
+{"ts":"2026-10-06T11:03:36.978Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"speak_start","chars":84,"clientTs":"2026-10-06T11:03:36.897Z"}
+{"ts":"2026-10-06T11:03:38.243Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"tts","ms":1262,"chars":84}
+{"ts":"2026-10-06T11:03:42.529Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"listen_start","micOn":true,"clientTs":"2026-10-06T11:03:42.445Z"}
+{"ts":"2026-10-06T11:03:42.530Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"speak_end","clientTs":"2026-10-06T11:03:42.444Z"}
+{"ts":"2026-10-06T11:03:43.371Z","callId":"9c527846-ec00-4613-b42f-71d7d7eb3e8b","type":"call_end","clientTs":"2026-10-06T11:03:43.289Z"}
