@@ -25,9 +25,9 @@ export function useCall(voice: VoiceAdapter) {
   const typed = useRef<((t: string) => void) | null>(null);
   const listener = useRef<Listener | null>(null);
   const nextId = useRef(1);
-  const [micOn, setMicOn] = useState(true);
+  const [micOn, setMicOn] = useState(false);
   const [recording, setRecording] = useState(false);
-  const micOnRef = useRef(true);
+  const micOnRef = useRef(false);
   const muteSignal = useRef<(() => void) | null>(null);
   const unmuteSignal = useRef<(() => void) | null>(null);
 
@@ -179,16 +179,11 @@ export function useCall(voice: VoiceAdapter) {
       setMicIssue(null);
       setSeconds(0);
       setRecording(false);
-      micOnRef.current = true;
-      setMicOn(true);
+      micOnRef.current = false;
+      setMicOn(false);
       active.current = true;
       setPhase("connecting");
       try {
-        try {
-          await voice.prepare?.();
-        } catch (error) {
-          if (active.current && generation.current === session) setMicIssue(error instanceof Error ? error.message : "Audio input could not start. You can type your reply instead.");
-        }
         if (!active.current || generation.current !== session) return;
         const r = await startCall(id);
         await new Promise((res) => setTimeout(res, 1200)); // ringing
