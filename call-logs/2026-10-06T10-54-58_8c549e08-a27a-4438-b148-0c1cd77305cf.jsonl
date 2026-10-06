@@ -1,0 +1,7 @@
+{"ts":"2026-10-06T10:54:58.245Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"call_start","customerId":"c-ujjwal","speechMode":"sarvam","speaker":"ritu","pace":"1.2"}
+{"ts":"2026-10-06T10:54:58.245Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"agent_line","say":"Namaste, main Goel Small Finance Bank se Meera bol rahi hoon. Kya meri baat Ujjwal Goel ji se ho rahi hai?","speak":"नमस्ते, मैं Goel Small Finance Bank से मीरा बोल रही हूँ। क्या मेरी बात उज्ज्वल गोएल जी से हो रही है?","action":"none","fixedLine":"F1"}
+{"ts":"2026-10-06T10:54:59.462Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"speak_start","chars":100,"clientTs":"2026-10-06T10:54:59.453Z"}
+{"ts":"2026-10-06T10:55:00.964Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"tts","ms":1498,"chars":100}
+{"ts":"2026-10-06T10:55:06.371Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"listen_start","micOn":false,"clientTs":"2026-10-06T10:55:06.363Z"}
+{"ts":"2026-10-06T10:55:06.374Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"speak_end","clientTs":"2026-10-06T10:55:06.362Z"}
+{"ts":"2026-10-06T10:55:23.854Z","callId":"8c549e08-a27a-4438-b148-0c1cd77305cf","type":"call_end","clientTs":"2026-10-06T10:55:23.844Z"}
