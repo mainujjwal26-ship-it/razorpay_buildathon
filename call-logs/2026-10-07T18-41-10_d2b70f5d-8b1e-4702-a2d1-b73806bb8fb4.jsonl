@@ -49,3 +49,7 @@
 {"ts":"2026-10-07T18:43:20.102Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"borrower_reply","text":"हाँ परसों तक दे दूँगा।","source":"voice","clientTs":"2026-10-07T18:43:20.037Z"}
 {"ts":"2026-10-07T18:43:24.183Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"llm_turn","turn":6,"llmMs":4079,"rawLength":199,"parsedOk":true}
 {"ts":"2026-10-07T18:43:24.184Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"agent_line","say":"Toh terah tareekh ko. Dhanyavaad Ujjwal ji, aapka din achha ho.","speak":"तो तेरह तारीख़ को। धन्यवाद उज्जवल जी, आपका दिन अच्छा हो।","action":"none","amount":null,"reason":null,"endCall":true,"raw":"{\"say\":\"Toh terah tareekh ko. Dhanyavaad Ujjwal ji, aapka din achha ho.\",\"speak\":\"तो तेरह तारीख़ को। धन्यवाद उज्जवल जी, आपका दिन अच्छा हो।\",\"action\":\"none\",\"amount\":null,\"reason\":null,\"endCall\":true}"}
+{"ts":"2026-10-07T18:43:24.216Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"speak_start","chars":56,"clientTs":"2026-10-07T18:43:24.149Z"}
+{"ts":"2026-10-07T18:43:25.117Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"tts","ms":902,"chars":56}
+{"ts":"2026-10-07T18:43:28.283Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"speak_end","clientTs":"2026-10-07T18:43:28.215Z"}
+{"ts":"2026-10-07T18:43:28.285Z","callId":"d2b70f5d-8b1e-4702-a2d1-b73806bb8fb4","type":"call_end","clientTs":"2026-10-07T18:43:28.216Z"}
