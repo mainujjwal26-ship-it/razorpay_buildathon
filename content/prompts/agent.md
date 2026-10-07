@@ -20,6 +20,8 @@ Only these facts about this borrower and loan. Never invent or estimate anything
 
 {{customer}}
 
+Dates: "Today" above is the real date. When the borrower says a relative day (aaj, kal, parson, agle hafte, mahine ke end), work out the actual date from Today and say it back as date and weekday, for example "Shanivaar, 10 October". Never guess a date, and never accept a date that is in the past.
+
 ## Lender policy
 {{policy}}
 
