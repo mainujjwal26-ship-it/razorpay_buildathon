@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getPerformance, type Performance } from "../lib/api";
 import { Section, Tile } from "../components/Ui";
 import { LineChart } from "../components/LineChart";
-import { day, inr, mmss, OUTCOME_LABEL, pct, secs } from "../lib/format";
+import { day, inr, mmss, OUTCOME_LABEL, pct, ROOT_CAUSE_LABEL, secs } from "../lib/format";
 
 const ORDER = ["promise_to_pay", "part_payment", "link_sent", "no_commitment", "escalated", "refused", "wrong_person", "incomplete"];
 
@@ -41,6 +41,10 @@ export function PerformancePage() {
   const k = p.kpis;
   const outcomeRows = ORDER.filter((o) => p.outcomes[o]).map((o) => ({ label: OUTCOME_LABEL[o] ?? o, value: p.outcomes[o] ?? 0 }));
   const outMax = Math.max(1, ...outcomeRows.map((r) => r.value));
+  const causeRows = Object.entries(p.rootCauses ?? {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => ({ label: ROOT_CAUSE_LABEL[k] ?? k, value: v }));
+  const causeMax = Math.max(1, ...causeRows.map((r) => r.value));
   const reviewed = p.totals.reviewed > 0;
 
   return (
@@ -74,6 +78,9 @@ export function PerformancePage() {
         <div className="two">
           <Section title="How calls ended">
             <Bars rows={outcomeRows} max={outMax} format={(n) => String(n)} />
+          </Section>
+          <Section title="Why borrowers miss payments">
+            {causeRows.length ? <Bars rows={causeRows} max={causeMax} format={(n) => String(n)} /> : <p className="muted">No reasons captured yet.</p>}
           </Section>
           <Section title="Reply time, by day">
             <LineChart title="Average reply time" better="lower" yMin={0} format={(n) => secs(n)} points={p.trend.map((t) => ({ label: day(t.date), y: t.replyGapMs }))} />

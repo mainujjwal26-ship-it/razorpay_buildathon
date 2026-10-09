@@ -1,5 +1,5 @@
 import { complete } from "../adapters/llm";
-import { loadPolicy, readContentJson, type Customer } from "../lib/content";
+import { amountDue, loadPolicy, readContentJson, type Customer } from "../lib/content";
 import { todayInIndia } from "./prompt";
 import type { CodeFlag } from "./codeChecks";
 
@@ -12,6 +12,15 @@ export type Outcome =
   | "wrong_person"
   | "escalated"
   | "incomplete";
+export type RootCause =
+  | "timing"
+  | "one_off_expense"
+  | "hardship"
+  | "forgot_or_autodebit"
+  | "how_to_pay"
+  | "dispute"
+  | "declined_to_say"
+  | "unclear";
 export type Sentiment = "calm" | "worried" | "irritated" | "hostile";
 
 export type CheckedBy = "code" | "AI" | "code+AI";
@@ -38,6 +47,8 @@ export interface CallReview {
   summary: string;
   outcome: Outcome;
   reason: string | null;
+  /** The root cause behind the missed EMI, as the borrower described it. null when the call never got that far. */
+  rootCause: RootCause | null;
   promiseDate: string | null;
   promiseAmount: number | null;
   sentiment: Sentiment;
@@ -53,6 +64,7 @@ export interface CallReview {
 export const loadChecks = () => readContentJson<ReviewCheckDef[]>("review-checks.json");
 
 const OUTCOMES: Outcome[] = ["promise_to_pay", "part_payment", "link_sent", "no_commitment", "refused", "wrong_person", "escalated", "incomplete"];
+const ROOT_CAUSES: RootCause[] = ["timing", "one_off_expense", "hardship", "forgot_or_autodebit", "how_to_pay", "dispute", "declined_to_say", "unclear"];
 const SENTIMENTS: Sentiment[] = ["calm", "worried", "irritated", "hostile"];
 
 /** Adds the exact checks to the reviewer's result. A check fails if the code or the AI flagged it. */
@@ -77,6 +89,7 @@ export function incompleteReview(): CallReview {
     summary: "The borrower did not speak, so there was no conversation to review.",
     outcome: "incomplete",
     reason: null,
+    rootCause: null,
     promiseDate: null,
     promiseAmount: null,
     sentiment: "calm",
@@ -103,6 +116,7 @@ export function parseReview(raw: string, defs: ReviewCheckDef[], model: string):
     summary: str(j["summary"]) ?? "No summary could be produced.",
     outcome: OUTCOMES.includes(j["outcome"] as Outcome) ? (j["outcome"] as Outcome) : "no_commitment",
     reason: str(j["reason"]),
+    rootCause: ROOT_CAUSES.includes(j["rootCause"] as RootCause) ? (j["rootCause"] as RootCause) : null,
     promiseDate: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null,
     promiseAmount: typeof j["promiseAmount"] === "number" ? (j["promiseAmount"] as number) : null,
     sentiment: SENTIMENTS.includes(j["sentiment"] as Sentiment) ? (j["sentiment"] as Sentiment) : "calm",
@@ -130,14 +144,14 @@ export interface TranscriptLine {
 export async function reviewCall(customer: Customer, transcript: TranscriptLine[]): Promise<CallReview> {
   const policy = loadPolicy();
   const defs = loadChecks();
-  const minPart = Math.ceil((customer.emiAmount * policy.minPartPaymentPercent) / 100);
+  const minPart = Math.ceil((amountDue(customer) * policy.minPartPaymentPercent) / 100);
   const system = [
     `You review a finished collections phone call made by ${policy.agentName}, an AI agent for ${policy.lenderName}. The call was in Hindi/Hinglish.`,
     `Read the transcript and return ONE JSON object, nothing else, with these keys:`,
-    `summary (2 to 3 plain English sentences for a collections manager), outcome (one of ${OUTCOMES.join(", ")}), reason (the borrower's reason the EMI bounced, in a few words, or null), promiseDate (YYYY-MM-DD if the borrower gave a specific date, else null), promiseAmount (number in rupees or null), sentiment (one of ${SENTIMENTS.join(", ")}), identityConfirmed (true or false), ticketReasons (list of strings), nextStep (one short line for the team), checks (a list with one entry per check below: {id, pass, note, quote}; on a fail, note is one short sentence explaining it and quote is the exact line from the transcript that proves it, copied word for word; on a pass both are null).`,
+    `summary (2 to 3 plain English sentences for a collections manager), outcome (one of ${OUTCOMES.join(", ")}), reason (the borrower's reason the EMI bounced, in a few words, or null), rootCause (one of ${ROOT_CAUSES.join(", ")}, or null if the borrower never gave a reason: timing = salary or income arrives after the EMI date; one_off_expense = a single unexpected cost such as medical, family or travel; hardship = lasting loss of income such as job loss or serious illness; forgot_or_autodebit = forgot, or the auto-debit failed for a bank or account reason; how_to_pay = did not know how to pay; dispute = disputes the loan or a charge; declined_to_say = chose not to share; unclear = the agent asked but the reason stayed unclear), promiseDate (YYYY-MM-DD if the borrower gave a specific date, else null), promiseAmount (number in rupees or null), sentiment (one of ${SENTIMENTS.join(", ")}), identityConfirmed (true or false), ticketReasons (list of strings), nextStep (one short line for the team), checks (a list with one entry per check below: {id, pass, note, quote}; on a fail, note is one short sentence explaining it and quote is the exact line from the transcript that proves it, copied word for word; on a pass both are null).`,
     `Outcome guide: promise_to_pay = specific date promised for the full EMI; part_payment = agreed to pay part; link_sent = a payment link was sent; escalated = handed to a person or ticket raised with no payment plan; incomplete = the borrower never spoke. If the borrower replied even once, do not use incomplete: a short call with no finalized agreement is no_commitment.`,
     `Be strict and fair: mark a check as failed only when the transcript clearly shows it. Judge the agent (Meera), not the borrower.`,
-    `Facts: today is ${todayInIndia()} (India). EMI is ₹${customer.emiAmount}; the minimum part payment is ₹${minPart} (${policy.minPartPaymentPercent}%). Borrower facts the agent may state: ${customer.emisPaid} EMIs paid, last payment "${customer.lastPayment}", ${customer.daysPastDue} days past due. Payment confirmation is not connected, so the agent must never say a payment has arrived.`,
+    `Facts: today is ${todayInIndia()} (India). EMI is ₹${customer.emiAmount}${typeof customer.bounceCharge === "number" ? `, bounce charge ₹${customer.bounceCharge}, total due ₹${amountDue(customer)}` : ""}; the minimum part payment is ₹${minPart} (${policy.minPartPaymentPercent}%). Borrower facts the agent may state: ${customer.emisPaid} EMIs paid, last payment "${customer.lastPayment}", ${customer.daysPastDue} days past due. Payment confirmation is not connected, so the agent must never say a payment has arrived.`,
     `Checks:\n${defs.filter((d) => d.by !== "code").map((d) => `- ${d.id}: ${d.label}`).join("\n")}`,
   ].join("\n\n");
   const text = transcript

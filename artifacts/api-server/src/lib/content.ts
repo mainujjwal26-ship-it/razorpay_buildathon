@@ -43,6 +43,8 @@ export interface Customer {
   name: string;
   displayName: string;
   emiAmount: number;
+  /** Charge added after the bounce, in rupees. Optional: when missing, Meera only says a charge applies. */
+  bounceCharge?: number;
   emiDueDate: string;
   bounced: boolean;
   daysPastDue: number;
@@ -69,6 +71,9 @@ export const loadTalking = () => readContentJson<Record<string, unknown>>("talki
 export const loadScript = () => readContentText("script.md");
 export const loadPolicyNotes = () => readContentText("policies.md");
 export const loadAgentTemplate = () => readContentText("prompts/agent.md");
+
+/** What the borrower owes now: the EMI plus the bounce charge (lender decision, see content/lender-decisions.md). */
+export const amountDue = (c: Pick<Customer, "emiAmount" | "bounceCharge">) => c.emiAmount + (c.bounceCharge ?? 0);
 
 export function getCustomer(id: string): Customer | undefined {
   return loadCustomers().find((c) => c.id === id);

@@ -10,7 +10,7 @@ const mod = { exports: {} };
 vm.runInNewContext(js, { module: mod, exports: mod.exports });
 const { runCodeChecks } = mod.exports;
 
-const opts = { emiAmount: 4200, minPartPercent: 50, identityConfirmed: true };
+const opts = { dueAmount: 4700, minPartPercent: 50, identityConfirmed: true };
 const meera = (text, extra = {}) => ({ who: "meera", text, ...extra });
 const ids = (lines, o = opts) => Array.from(runCodeChecks(lines, o), (f) => f.id);
 
@@ -26,7 +26,9 @@ test("a clean call has no flags", () => {
 
 test("link below the minimum part payment fails offer_min, at the minimum passes", () => {
   assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 1000 })]), ["offer_min"]);
-  assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 2100 })]), []);
+  assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 2350 })]), []);
+  // 50% of EMI + charge (4,200 + 500 = 4,700) is 2,350: 2,100 would have passed on the EMI alone but is below it now
+  assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 2100 })]), ["offer_min"]);
 });
 
 test("two links fail one_link", () => {

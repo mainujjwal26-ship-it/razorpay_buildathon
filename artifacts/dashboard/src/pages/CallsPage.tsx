@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { finishCall, getCallDetail, getCalls, sendVerdict, type CallDetail, type CallRow } from "../lib/api";
 import { By, Chip, Pass, Section, Tile } from "../components/Ui";
-import { dateOnly, inr, mmss, SENTIMENT_LABEL, secs, when } from "../lib/format";
+import { dateOnly, inr, mmss, ROOT_CAUSE_LABEL, SENTIMENT_LABEL, secs, when } from "../lib/format";
 
 export function CallsPage() {
   const [rows, setRows] = useState<CallRow[] | null>(null);
@@ -128,6 +128,7 @@ export function CallDetailPage({ id }: { id: string }) {
             <Section title="Key data points">
               <dl className="kv wide">
                 <div><dt>Reason for bounce</dt><dd>{r.reason ?? "Not stated"}</dd></div>
+                <div><dt>Root cause</dt><dd>{r.rootCause ? (ROOT_CAUSE_LABEL[r.rootCause] ?? r.rootCause) : "Not identified"}</dd></div>
                 <div><dt>Promise</dt><dd>{r.promiseAmount ? `${inr(r.promiseAmount)} · ${dateOnly(r.promiseDate)}` : "None"}</dd></div>
                 <div><dt>Borrower mood</dt><dd>{SENTIMENT_LABEL[r.sentiment]}</dd></div>
                 <div><dt>Identity confirmed</dt><dd>{r.identityConfirmed ? "Yes" : "No"}</dd></div>

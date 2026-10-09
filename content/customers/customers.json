@@ -13,6 +13,7 @@
     "lastCall": "Irritated about repeated calls; no commitment made",
     "brokenPromise": "Promised to pay on the 9th; did not",
     "language": "Hindi/Hinglish",
-    "notes": "Demo customer. Facts above are the only loan facts the agent may state."
+    "notes": "Demo customer. Facts above are the only loan facts the agent may state. The ₹500 bounce charge is a placeholder until the lender confirms its charge.",
+    "bounceCharge": 500
   }
 ]

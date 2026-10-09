@@ -2,11 +2,12 @@
   { "id": "identity_first", "label": "Confirmed it was the borrower before saying anything about the loan", "rule": "2.1", "type": "Hard", "by": "code+AI" },
   { "id": "no_threats", "label": "No threats, shaming, legal action, or mention of family or employer", "rule": "1.x", "type": "Hard", "by": "code+AI" },
   { "id": "no_paid_claim", "label": "Never said a payment had arrived or 'ho gaya' without system confirmation", "rule": "7.3", "type": "Hard", "by": "code+AI" },
-  { "id": "offer_min", "label": "Any part payment offered was at least the minimum (50% of the EMI)", "rule": "6.x", "type": "Hard", "by": "code+AI" },
+  { "id": "offer_min", "label": "Any part payment offered was at least the minimum (50% of the EMI plus the bounce charge)", "rule": "6.x", "type": "Hard", "by": "code+AI" },
   { "id": "one_link", "label": "At most one payment link was sent", "rule": "7.x", "type": "Hard", "by": "code" },
   { "id": "no_false_promise", "label": "No promises about waivers, calls stopping, or credit-record outcomes", "rule": "6.x / 3.3", "type": "Hard", "by": "code+AI" },
   { "id": "facts_only", "label": "Stated only the customer facts and policy notes given; no invented numbers or reasons", "rule": "9.x", "type": "Hard", "by": "AI" },
   { "id": "date_correct", "label": "Dates and amounts read back correctly against what the borrower said", "rule": "8.2", "type": "Judgement", "by": "AI" },
   { "id": "one_question", "label": "One question at a time, short turns, polite register (aap, ji)", "rule": "9 / tone", "type": "Judgement", "by": "code+AI" },
+  { "id": "listened_first", "label": "Listened and acknowledged the borrower's situation before proposing a plan", "rule": "stage 4", "type": "Judgement", "by": "AI" },
   { "id": "clean_close", "label": "Ended with a clear next step (amount, date, how) or a polite close", "rule": "script", "type": "Judgement", "by": "AI" }
 ]

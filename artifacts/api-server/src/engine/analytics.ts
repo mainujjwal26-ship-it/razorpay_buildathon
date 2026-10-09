@@ -1,6 +1,6 @@
 import { listCalls, readCall } from "../lib/callLog";
 import { readContentJson, loadCustomers } from "../lib/content";
-import type { CallReview, Outcome, Sentiment, TranscriptLine } from "./review";
+import type { CallReview, Outcome, RootCause, Sentiment, TranscriptLine } from "./review";
 
 type Ev = Record<string, unknown>;
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -98,6 +98,7 @@ export interface CallRecord {
   replyGapMs: number | null;
   outcome: Outcome | "unreviewed";
   sentiment: Sentiment | null;
+  rootCause?: RootCause | null;
   identityConfirmed: boolean | null;
   promiseDate: string | null;
   promiseAmount: number | null;
@@ -128,6 +129,7 @@ export async function liveRecords(): Promise<CallRecord[]> {
       replyGapMs: m.replyGapMs,
       outcome: r?.outcome ?? "unreviewed",
       sentiment: r?.sentiment ?? null,
+      rootCause: r?.rootCause ?? null,
       identityConfirmed: r ? r.identityConfirmed : null,
       promiseDate: r?.promiseDate ?? null,
       promiseAmount: r?.promiseAmount ?? null,
@@ -201,6 +203,7 @@ export function aggregate(records: CallRecord[]) {
       promisedAmount: talked.reduce((s, r) => s + (r.promiseAmount ?? 0), 0),
     },
     outcomes,
+    rootCauses: talked.reduce<Record<string, number>>((m, r) => (r.rootCause ? ((m[r.rootCause] = (m[r.rootCause] ?? 0) + 1), m) : m), {}),
     sentiments: talked.reduce<Record<string, number>>((m, r) => ((m[r.sentiment ?? "calm"] = (m[r.sentiment ?? "calm"] ?? 0) + 1), m), {}),
     weakestChecks: [...failById.values()].filter((r) => r.fails > 0).sort((a, b) => b.fails / b.total - a.fails / a.total),
     trend,

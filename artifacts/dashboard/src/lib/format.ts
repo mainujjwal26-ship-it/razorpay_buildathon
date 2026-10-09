@@ -19,6 +19,16 @@ export const OUTCOME_LABEL: Record<string, string> = {
   incomplete: "No conversation",
   unreviewed: "Review pending",
 };
+export const ROOT_CAUSE_LABEL: Record<string, string> = {
+  timing: "Salary or income arrives after the EMI date",
+  one_off_expense: "One-off expense (medical, family, travel)",
+  forgot_or_autodebit: "Forgot, or auto-debit failed",
+  hardship: "Lasting hardship (job loss, illness)",
+  how_to_pay: "Did not know how to pay",
+  dispute: "Disputes the loan or a charge",
+  declined_to_say: "Preferred not to say",
+  unclear: "Reason stayed unclear",
+};
 export const OUTCOME_TONE: Record<string, "good" | "warn" | "bad" | "neutral"> = {
   promise_to_pay: "good",
   part_payment: "good",
