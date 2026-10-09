@@ -3,6 +3,7 @@ import { getCallConfig, type CallConfig } from "./lib/api";
 import { CallPage } from "./pages/CallPage";
 import { CallsPage, CallDetailPage } from "./pages/CallsPage";
 import { PerformancePage } from "./pages/PerformancePage";
+import { QualityPage } from "./pages/QualityPage";
 
 function useRoute(): string {
   const [hash, setHash] = useState(() => window.location.hash.replace(/^#/, "") || "/call");
@@ -24,7 +25,7 @@ export function App() {
       .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : "Could not reach the server"));
   }, []);
 
-  const tab = route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
+  const tab = route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
   const detailId = route.startsWith("/calls/") ? route.slice("/calls/".length) : null;
 
   return (
@@ -38,6 +39,7 @@ export function App() {
           <a href="#/call" aria-current={tab === "call" ? "page" : undefined}>Call</a>
           <a href="#/calls" aria-current={tab === "calls" ? "page" : undefined}>Calls</a>
           <a href="#/performance" aria-current={tab === "performance" ? "page" : undefined}>Performance</a>
+          <a href="#/quality" aria-current={tab === "quality" ? "page" : undefined}>Quality</a>
         </nav>
         {config?.testMode && <span className="testbadge">Test build</span>}
       </header>
@@ -52,6 +54,7 @@ export function App() {
             <div hidden={tab !== "call"}><CallPage config={config} /></div>
             {tab === "calls" && (detailId ? <CallDetailPage id={detailId} /> : <CallsPage />)}
             {tab === "performance" && <PerformancePage />}
+            {tab === "quality" && <QualityPage />}
           </>
         )}
       </main>

@@ -3,13 +3,14 @@ import { randomUUID } from "node:crypto";
 import { llmConfigured, LlmNotConfiguredError } from "../adapters/llm";
 import express from "express";
 import { speechConfigured, synthesize, transcribe } from "../adapters/speech";
-import { getCustomer, loadCustomers, loadPolicy } from "../lib/content";
+import { contentVersion, getCustomer, loadCustomers, loadPolicy } from "../lib/content";
 import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
 import { runTurn, toSpeechVersion, type HistoryItem } from "../engine/turn";
 import { sinkConfigured } from "../adapters/logSink";
-import { aggregate, liveRecords, metricsOf, reviewOf, sampleRecords, transcriptOf } from "../engine/analytics";
-import { incompleteReview, loadChecks, reviewCall } from "../engine/review";
+import { aggregate, liveRecords, metricsOf, qualityReport, reviewOf, sampleRecords, transcriptOf, verdictsOf } from "../engine/analytics";
+import { runCodeChecks } from "../engine/codeChecks";
+import { incompleteReview, loadChecks, mergeCodeFlags, reviewCall } from "../engine/review";
 import { listCalls, logEvent, loggingOn, readCall, renderReport } from "../lib/callLog";
 
 const router: IRouter = Router();
@@ -54,6 +55,7 @@ router.post("/call/start", async (req, res) => {
       speechMode: speechConfigured() ? "sarvam" : "browser",
       speaker: process.env["SARVAM_SPEAKER"] ?? "ritu",
       pace: process.env["SARVAM_PACE"] ?? "1.2",
+      version: contentVersion(),
     });
     logEvent(callId, "agent_line", { say, speak, action: "none", fixedLine: "F1" });
     res.json({ callId, say, speak });
@@ -174,7 +176,12 @@ router.post("/call/finish", async (req, res) => {
       const customer = getCustomer(String(start?.["customerId"] ?? ""));
       const transcript = transcriptOf(call.events);
       const talked = transcript.some((l) => l.who === "borrower");
-      const review = !customer || !talked ? incompleteReview() : await reviewCall(customer, transcript);
+      let review = !customer || !talked ? incompleteReview() : await reviewCall(customer, transcript);
+      if (customer && talked) {
+        const flags = runCodeChecks(transcript, { emiAmount: customer.emiAmount, minPartPercent: loadPolicy().minPartPaymentPercent, identityConfirmed: review.identityConfirmed });
+        review = mergeCodeFlags(review, flags);
+      }
+      review.version = typeof start?.["version"] === "string" ? start["version"] : undefined;
       logEvent(callId, "call_review", { review });
     }
     res.json({ ok: true });
@@ -198,7 +205,24 @@ router.get("/calls/:id", (req, res) => {
     transcript: transcriptOf(call.events),
     metrics: metricsOf(call.events),
     review: reviewOf(call.events),
+    verdicts: verdictsOf(call.events),
+    version: start?.["version"] ?? null,
   });
+});
+
+// A person marks a rule-check result right (agree) or wrong (disagree). Used to measure how far the AI reviewer can be trusted.
+router.post("/call/verdict", (req, res) => {
+  const { callId, checkId, agree } = (req.body ?? {}) as { callId?: unknown; checkId?: unknown; agree?: unknown };
+  const call = readCall(callId);
+  const known = loadChecks().some((c) => c.id === checkId);
+  if (!call || !known || typeof agree !== "boolean") return void res.status(400).json({ error: "callId, checkId and agree are required" });
+  logEvent(callId, "human_verdict", { checkId, agree });
+  res.json({ ok: true });
+});
+
+router.get("/quality", (req, res) => {
+  const records = req.query["sample"] === "1" ? [...sampleRecords(), ...liveRecords()] : liveRecords();
+  res.json({ includesSample: req.query["sample"] === "1", checks: loadChecks(), ...qualityReport(records) });
 });
 
 router.get("/performance", (req, res) => {

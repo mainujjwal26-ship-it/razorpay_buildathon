@@ -95,7 +95,8 @@ export const speakText = (text: string, callId: string | undefined = currentCall
 
 // ----- Review, call list, performance -----
 export type Outcome = "promise_to_pay" | "part_payment" | "link_sent" | "no_commitment" | "refused" | "wrong_person" | "escalated" | "incomplete" | "unreviewed";
-export interface CheckResult { id: string; label: string; type: "Hard" | "Judgement"; pass: boolean; note: string | null }
+export type CheckedBy = "code" | "AI" | "code+AI";
+export interface CheckResult { id: string; label: string; type: "Hard" | "Judgement"; by: CheckedBy; pass: boolean; note: string | null; quote: string | null; flaggedBy: ("code" | "AI")[] }
 export interface CallReview {
   summary: string;
   outcome: Exclude<Outcome, "unreviewed">;
@@ -145,6 +146,8 @@ export interface CallDetail {
   transcript: { who: "meera" | "borrower" | "system"; text: string; ts: string }[];
   metrics: CallMetrics;
   review: CallReview | null;
+  verdicts: Record<string, boolean>;
+  version: string | null;
 }
 export interface Performance {
   includesSample: boolean;
@@ -169,3 +172,25 @@ export const finishCall = (callId: string) => request<{ ok: boolean }>("/call/fi
 export const getCalls = () => request<{ calls: CallRow[] }>("/calls");
 export const getCallDetail = (id: string) => request<CallDetail>(`/calls/${id}`);
 export const getPerformance = (sample: boolean) => request<Performance>(`/performance?sample=${sample ? 1 : 0}`);
+
+export const sendVerdict = (callId: string, checkId: string, agree: boolean) => request<{ ok: boolean }>("/call/verdict", { callId, checkId, agree });
+
+export interface Quality {
+  includesSample: boolean;
+  checks: { id: string; label: string; rule: string; type: string; by: CheckedBy }[];
+  totals: { calls: number; scored: number; liveCalls: number; sampleCalls: number };
+  core: {
+    hardBreachPct: number | null;
+    hardBreachCalls: number;
+    wrongDisclosurePct: number | null;
+    withinFactsPct: number | null;
+    judgementPassPct: number | null;
+    replyMedianMs: number | null;
+    replySlowest10Ms: number | null;
+  };
+  reviewer: { labelledChecks: number; labelledCalls: number; agreementPct: number | null; falsePass: number; falseAlarm: number };
+  rules: { id: string; type: string; by: string; total: number; fails: number; labelled: number; agree: number }[];
+  byVersion: { version: string; calls: number; firstSeen: string; hardBreachPct: number | null; judgementPassPct: number | null }[];
+  trend: { date: string; calls: number; hardFailPct: number | null }[];
+}
+export const getQuality = (sample: boolean) => request<Quality>(`/quality?sample=${sample ? 1 : 0}`);

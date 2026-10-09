@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 /**
  * Everything the agent says or believes lives in /content (and /evals), not in code.
@@ -71,4 +72,18 @@ export const loadAgentTemplate = () => readContentText("prompts/agent.md");
 
 export function getCustomer(id: string): Customer | undefined {
   return loadCustomers().find((c) => c.id === id);
+}
+
+/** Short fingerprint of everything that shapes the agent's behaviour. Stamped on every call so before and after can be compared. */
+export function contentVersion(): string {
+  const files = ["prompts/agent.md", "guardrails.json", "script.md", "policies.md", "policy.json", "talking.json"];
+  const h = createHash("sha1");
+  for (const f of files) {
+    try {
+      h.update(readContentText(f));
+    } catch {
+      /* a missing file just changes the fingerprint */
+    }
+  }
+  return h.digest("hex").slice(0, 7);
 }

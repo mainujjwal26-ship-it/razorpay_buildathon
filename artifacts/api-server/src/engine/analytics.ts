@@ -26,7 +26,9 @@ export function transcriptOf(events: Ev[]): TranscriptLine[] {
   const out: TranscriptLine[] = [];
   for (const e of events) {
     const ts = String(e["ts"] ?? "");
-    if (e["type"] === "agent_line" && typeof e["say"] === "string") out.push({ who: "meera", text: e["say"], ts });
+    if (e["type"] === "agent_line" && typeof e["say"] === "string") {
+      out.push({ who: "meera", text: e["say"], ts, action: typeof e["action"] === "string" ? e["action"] : null, amount: num(e["amount"]) });
+    }
     else if (e["type"] === "borrower_reply" && typeof e["text"] === "string") out.push({ who: "borrower", text: e["text"], ts });
     else if (e["type"] === "agent_line" || e["type"] === "borrower_reply") continue;
   }
@@ -68,6 +70,13 @@ export function metricsOf(events: Ev[]): CallMetrics {
   };
 }
 
+/** The reviewer's checks that a person has marked right or wrong. Latest verdict per check wins. true = the person agrees with the check result. */
+export function verdictsOf(events: Ev[]): Record<string, boolean> {
+  const out: Record<string, boolean> = {};
+  for (const e of events) if (e["type"] === "human_verdict" && typeof e["checkId"] === "string") out[e["checkId"]] = e["agree"] === true;
+  return out;
+}
+
 export const reviewOf = (events: Ev[]): CallReview | null => {
   const r = [...events].reverse().find((e) => e["type"] === "call_review");
   return r ? (r["review"] as CallReview) : null;
@@ -88,7 +97,10 @@ export interface CallRecord {
   promiseDate: string | null;
   promiseAmount: number | null;
   tickets: number;
-  checks: { id: string; type: "Hard" | "Judgement"; pass: boolean }[];
+  version: string | null;
+  checks: { id: string; type: "Hard" | "Judgement"; by?: string; pass: boolean }[];
+  /** Person's verdicts on the checks: true = agrees with the result. Live calls only. */
+  verdicts?: Record<string, boolean>;
 }
 
 export function liveRecords(): CallRecord[] {
@@ -115,7 +127,9 @@ export function liveRecords(): CallRecord[] {
       promiseDate: r?.promiseDate ?? null,
       promiseAmount: r?.promiseAmount ?? null,
       tickets: m.actions.raiseTicket,
-      checks: (r?.checks ?? []).map((k) => ({ id: k.id, type: k.type, pass: k.pass })),
+      version: typeof start["version"] === "string" ? start["version"] : null,
+      checks: (r?.checks ?? []).map((k) => ({ id: k.id, type: k.type, by: k.by, pass: k.pass })),
+      verdicts: verdictsOf(call.events),
     });
   }
   return out;
@@ -185,5 +199,91 @@ export function aggregate(records: CallRecord[]) {
     sentiments: talked.reduce<Record<string, number>>((m, r) => ((m[r.sentiment ?? "calm"] = (m[r.sentiment ?? "calm"] ?? 0) + 1), m), {}),
     weakestChecks: [...failById.values()].filter((r) => r.fails > 0).sort((a, b) => b.fails / b.total - a.fails / a.total),
     trend,
+  };
+}
+
+// ----- Quality: can the agent be trusted and controlled? -----
+
+const median = (xs: number[]) => {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return Math.round(s.length % 2 ? s[m]! : (s[m - 1]! + s[m]!) / 2);
+};
+const p90 = (xs: number[]) => {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  return Math.round(s[Math.min(s.length - 1, Math.ceil(s.length * 0.9) - 1)]!);
+};
+const rate = (a: number, b: number) => (b ? Math.round((a / b) * 1000) / 10 : null);
+
+export function qualityReport(records: CallRecord[]) {
+  const talked = records.filter((r) => r.outcome !== "unreviewed" && r.outcome !== "incomplete" && r.checks.length > 0);
+  const allChecks = talked.flatMap((r) => r.checks.map((c) => ({ ...c, call: r })));
+  const hardFailCalls = talked.filter((r) => r.checks.some((c) => c.type === "Hard" && !c.pass));
+  const of = (id: string) => allChecks.filter((c) => c.id === id);
+  const judgement = allChecks.filter((c) => c.type === "Judgement");
+  const gaps = records.map((r) => r.replyGapMs).filter((x): x is number => x !== null);
+
+  // How far the AI reviewer agrees with a person (live calls only: samples have no verdicts).
+  let labelled = 0, agree = 0, falsePass = 0, falseAlarm = 0;
+  const labelledCalls = new Set<string>();
+  const byCheck = new Map<string, { id: string; type: string; by: string; total: number; fails: number; labelled: number; agree: number }>();
+  for (const c of allChecks) {
+    const row = byCheck.get(c.id) ?? { id: c.id, type: c.type, by: c.by ?? "AI", total: 0, fails: 0, labelled: 0, agree: 0 };
+    row.total += 1;
+    if (!c.pass) row.fails += 1;
+    const v = c.call.verdicts?.[c.id];
+    if (typeof v === "boolean") {
+      row.labelled += 1;
+      labelled += 1;
+      labelledCalls.add(c.call.id);
+      if (v) {
+        row.agree += 1;
+        agree += 1;
+      } else if (c.pass) falsePass += 1;
+      else falseAlarm += 1;
+    }
+    byCheck.set(c.id, row);
+  }
+
+  const versions = new Map<string, CallRecord[]>();
+  for (const r of talked) if (r.version) versions.set(r.version, [...(versions.get(r.version) ?? []), r]);
+  const byVersion = [...versions.entries()]
+    .map(([version, rs]) => ({
+      version,
+      calls: rs.length,
+      firstSeen: rs.map((r) => r.startedAt).sort()[0] ?? "",
+      hardBreachPct: rate(rs.filter((r) => r.checks.some((c) => c.type === "Hard" && !c.pass)).length, rs.length),
+      judgementPassPct: rate(rs.flatMap((r) => r.checks).filter((c) => c.type === "Judgement" && c.pass).length, rs.flatMap((r) => r.checks).filter((c) => c.type === "Judgement").length),
+    }))
+    .sort((a, b) => a.firstSeen.localeCompare(b.firstSeen));
+
+  return {
+    totals: {
+      calls: records.length,
+      scored: talked.length,
+      liveCalls: records.filter((r) => r.source === "live").length,
+      sampleCalls: records.filter((r) => r.source === "sample").length,
+    },
+    core: {
+      hardBreachPct: rate(hardFailCalls.length, talked.length),
+      hardBreachCalls: hardFailCalls.length,
+      wrongDisclosurePct: rate(of("identity_first").filter((c) => !c.pass).length, talked.length),
+      withinFactsPct: rate(of("facts_only").filter((c) => c.pass).length, of("facts_only").length),
+      judgementPassPct: rate(judgement.filter((c) => c.pass).length, judgement.length),
+      replyMedianMs: median(gaps),
+      replySlowest10Ms: p90(gaps),
+    },
+    reviewer: {
+      labelledChecks: labelled,
+      labelledCalls: labelledCalls.size,
+      agreementPct: rate(agree, labelled),
+      falsePass,
+      falseAlarm,
+    },
+    rules: [...byCheck.values()].sort((a, b) => b.fails / b.total - a.fails / a.total),
+    byVersion,
+    trend: aggregate(records).trend.map((t) => ({ date: t.date, calls: t.calls, hardFailPct: t.hardFailPct })),
   };
 }

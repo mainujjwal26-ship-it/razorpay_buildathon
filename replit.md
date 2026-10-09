@@ -55,3 +55,7 @@ To have logs reach GitHub without committing, add Replit Secrets `GITHUB_LOG_TOK
 ## Merchant console (Call, Calls, Performance)
 
 The app has three tabs. **Call**: the phone plus a customer card. **Calls**: every call with an AI review (summary, key data points, rule checks, metrics, transcript). **Performance**: team metrics and charts, with an "Include sample data" switch (44 synthetic calls in `content/demo/calls.json`, clearly labelled). At the end of a call the browser asks the server to review it (`POST /api/call/finish`); the review is stored in the call's log file. The rule checks are listed in `content/review-checks.json`. Env: `LLM_REVIEW_MODEL` to pick the reviewer model.
+
+### Quality tab and trust layer
+
+Tabs are now Call, Calls, Performance (collections metrics) and Quality (trust and evals). Each rule check is done by exact code (`engine/codeChecks.ts`), by the AI reviewer, or both; a flag from either fails the call, and every fail shows the exact quoted line. On each call you can mark a result right or wrong (`POST /api/call/verdict`); the Quality tab shows how often the reviewer agrees with you and counts missed breaches separately. Every call is stamped with a content version (a hash of the prompt, script, guardrails and policy files) so Quality can show results by version. Rules and their "checked by" tag live in `content/review-checks.json`. Tests: `node --test scripts/tests/*.test.mjs`.

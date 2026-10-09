@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { finishCall, getCallDetail, getCalls, type CallDetail, type CallRow } from "../lib/api";
-import { Chip, Pass, Section, Tile } from "../components/Ui";
+import { finishCall, getCallDetail, getCalls, sendVerdict, type CallDetail, type CallRow } from "../lib/api";
+import { By, Chip, Pass, Section, Tile } from "../components/Ui";
 import { dateOnly, inr, mmss, SENTIMENT_LABEL, secs, when } from "../lib/format";
 
 export function CallsPage() {
@@ -51,6 +51,14 @@ export function CallDetailPage({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [waited, setWaited] = useState(0);
   const asked = useRef(false);
+  const [verdicts, setVerdicts] = useState<Record<string, boolean>>({});
+  const mark = (checkId: string, agree: boolean) => {
+    setVerdicts((v) => ({ ...v, [checkId]: agree }));
+    void sendVerdict(id, checkId, agree).catch(() => setVerdicts((v) => { const n = { ...v }; delete n[checkId]; return n; }));
+  };
+  useEffect(() => {
+    if (d) setVerdicts((v) => ({ ...d.verdicts, ...v }));
+  }, [d?.verdicts]);
 
   useEffect(() => {
     let stop = false;
@@ -123,14 +131,20 @@ export function CallDetailPage({ id }: { id: string }) {
                 {r.checks.map((c) => (
                   <li key={c.id}>
                     <Pass pass={c.pass} />
-                    <div>
-                      <div>{c.label} <span className="tag">{c.type}</span></div>
-                      {c.note && <div className="muted small">{c.note}</div>}
+                    <div className="ck">
+                      <div>{c.label} <span className="tag">{c.type}</span> <By by={c.by} /></div>
+                      {!c.pass && c.note && <div className="muted small">{c.note}</div>}
+                      {!c.pass && c.quote && <blockquote className="quote">{c.quote}</blockquote>}
+                      <div className="verdict" role="group" aria-label={`Is this result right? ${c.label}`}>
+                        <span className="muted small">Is this result right?</span>
+                        <button type="button" aria-pressed={verdicts[c.id] === true} className={verdicts[c.id] === true ? "on" : ""} onClick={() => mark(c.id, true)}>✓ Yes</button>
+                        <button type="button" aria-pressed={verdicts[c.id] === false} className={verdicts[c.id] === false ? "on bad" : ""} onClick={() => mark(c.id, false)}>✕ No</button>
+                      </div>
                     </div>
                   </li>
                 ))}
               </ul>
-              <p className="note">Checked by an AI reviewer reading the transcript. It can be wrong; the transcript below is the evidence.</p>
+              <p className="note">Each rule is checked by exact code, by an AI reviewer, or both (a flag from either counts). Either can be wrong, so mark each result. The transcript is the evidence.{d.version && <> Content version <code>{d.version}</code>.</>}</p>
             </Section>
           )}
         </div>

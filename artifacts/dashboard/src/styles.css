@@ -110,3 +110,13 @@ body{background:var(--bg)}
 @media (max-width:640px){.main{padding:14px}.topbar{padding:10px 14px}.topbar nav{margin-left:0}.tr li{grid-template-columns:36px 70px 1fr}.bars li{grid-template-columns:1fr 1fr 70px}}
 .panel>.note{margin-bottom:12px}.panel .note:last-child{margin-bottom:0}.chart figcaption{font-weight:400;font-size:12.5px;color:var(--muted)}
 .more{background:transparent}.more>summary{cursor:pointer;color:#9db6ff;font-weight:600;padding:6px 2px;margin-bottom:12px}.more .stack{margin-top:4px}
+.tag.by{background:#eef1fb;border-color:#d5dcf3;color:#2a3d8f}
+.ck{min-width:0;flex:1}
+.quote{margin:6px 0 4px;padding:6px 10px;border-left:3px solid var(--warn);background:#fbefee;font-size:13.5px;border-radius:0 6px 6px 0}
+.verdict{display:flex;align-items:center;gap:6px;margin-top:6px}
+.verdict button{border:1px solid var(--rule);background:#fff;border-radius:6px;padding:2px 9px;font:500 12px "IBM Plex Sans",sans-serif;cursor:pointer;color:var(--ink)}
+.verdict button.on{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.verdict button.on.bad{background:#fbe5e3;border-color:var(--warn);color:var(--warn)}
+.verdict button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.bad-t{color:var(--warn);font-weight:600}
+.how{margin:0;padding-left:20px;display:grid;gap:8px;font-size:14px}

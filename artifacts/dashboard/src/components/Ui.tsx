@@ -28,3 +28,9 @@ export const Pass = ({ pass }: { pass: boolean }) => (
     {pass ? "✓ Pass" : "✕ Fail"}
   </span>
 );
+
+export const By = ({ by }: { by: string }) => (
+  <span className="tag by" title={by === "AI" ? "Judged by an AI reviewer" : by === "code" ? "Checked by exact rules in code" : "Checked by code and by an AI reviewer; a flag from either counts"}>
+    {by === "code" ? "Code" : by === "AI" ? "AI" : "Code + AI"}
+  </span>
+);
