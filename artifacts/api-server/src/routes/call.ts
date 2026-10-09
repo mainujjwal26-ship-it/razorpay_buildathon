@@ -11,7 +11,7 @@ import { sinkConfigured } from "../adapters/logSink";
 import { aggregate, liveRecords, metricsOf, qualityReport, reviewOf, sampleRecords, transcriptOf, verdictsOf } from "../engine/analytics";
 import { runCodeChecks } from "../engine/codeChecks";
 import { incompleteReview, loadChecks, mergeCodeFlags, reviewCall } from "../engine/review";
-import { listCalls, logEvent, loggingOn, readCall, renderReport } from "../lib/callLog";
+import { listCalls, logEvent, loggingOn, readCall, renderReport, safeId, withReviewLock } from "../lib/callLog";
 
 const router: IRouter = Router();
 
@@ -50,14 +50,14 @@ router.post("/call/start", async (req, res) => {
     const speak = llmConfigured() ? await toSpeechVersion(say) : say;
 
     const callId = randomUUID();
-    logEvent(callId, "call_start", {
+    await logEvent(callId, "call_start", {
       customerId: customer.id,
       speechMode: speechConfigured() ? "sarvam" : "browser",
       speaker: process.env["SARVAM_SPEAKER"] ?? "ritu",
       pace: process.env["SARVAM_PACE"] ?? "1.2",
       version: contentVersion(),
     });
-    logEvent(callId, "agent_line", { say, speak, action: "none", fixedLine: "F1" });
+    await logEvent(callId, "agent_line", { say, speak, action: "none", fixedLine: "F1" });
     res.json({ callId, say, speak });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Could not start the call" });
@@ -77,8 +77,8 @@ router.post("/call/turn", async (req, res) => {
     const started = Date.now();
     const { reply, raw } = await runTurn(customer, history);
     const parsedOk = raw.trim().startsWith("{") && raw.includes('"say"') && raw.trim().endsWith("}");
-    logEvent(callId, "llm_turn", { turn: history.filter((h) => h.role === "agent").length, llmMs: Date.now() - started, rawLength: raw.length, parsedOk });
-    logEvent(callId, "agent_line", {
+    await logEvent(callId, "llm_turn", { turn: history.filter((h) => h.role === "agent").length, llmMs: Date.now() - started, rawLength: raw.length, parsedOk });
+    await logEvent(callId, "agent_line", {
       say: reply.say,
       speak: reply.speak,
       action: reply.action,
@@ -98,7 +98,7 @@ router.post("/call/turn", async (req, res) => {
 
     res.json({ ...reply, raw, systemNote });
   } catch (err) {
-    logEvent(req.body?.callId, "llm_error", { message: err instanceof Error ? err.message : "Turn failed" });
+    await logEvent(req.body?.callId, "llm_error", { message: err instanceof Error ? err.message : "Turn failed" }).catch(() => undefined);
     const status = err instanceof LlmNotConfiguredError ? 503 : 500;
     res.status(status).json({ error: err instanceof Error ? err.message : "Turn failed" });
   }
@@ -112,10 +112,10 @@ router.post("/call/transcribe", express.raw({ type: () => true, limit: "10mb" })
     const started = Date.now();
     try {
       const text = await transcribe(audio, String(req.headers["content-type"] ?? "audio/webm"));
-      logEvent(callId, "stt", { ms: Date.now() - started, bytes: audio.length, text });
+      await logEvent(callId, "stt", { ms: Date.now() - started, bytes: audio.length, text });
       res.json({ text });
     } catch (err) {
-      logEvent(callId, "stt", { ms: Date.now() - started, bytes: audio.length, error: err instanceof Error ? err.message : "failed" });
+      await logEvent(callId, "stt", { ms: Date.now() - started, bytes: audio.length, error: err instanceof Error ? err.message : "failed" }).catch(() => undefined);
       throw err;
     }
   } catch (err) {
@@ -131,10 +131,10 @@ router.post("/call/speak", async (req, res) => {
     const started = Date.now();
     try {
       const audio = await synthesize(text);
-      logEvent(callId, "tts", { ms: Date.now() - started, chars: text.length });
+      await logEvent(callId, "tts", { ms: Date.now() - started, chars: text.length });
       res.json({ audio });
     } catch (err) {
-      logEvent(callId, "tts", { ms: Date.now() - started, chars: text.length, error: err instanceof Error ? err.message : "failed" });
+      await logEvent(callId, "tts", { ms: Date.now() - started, chars: text.length, error: err instanceof Error ? err.message : "failed" }).catch(() => undefined);
       throw err;
     }
   } catch (err) {
@@ -142,20 +142,21 @@ router.post("/call/speak", async (req, res) => {
   }
 });
 
-// Browser-side events (mic, speech timing, what was heard). Fire and forget.
-router.post("/call/log", (req, res) => {
+// Browser-side events are acknowledged only after durable storage.
+router.post("/call/log", async (req, res) => {
   const events = Array.isArray(req.body?.events) ? (req.body.events as Record<string, unknown>[]) : [];
   for (const e of events.slice(0, 50)) {
-    const { type, ts, ...rest } = e;
-    if (typeof type === "string") logEvent(req.body?.callId, type, { ...rest, clientTs: ts });
+    const { type, ts, eventId, ...rest } = e;
+    const id = typeof eventId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId) ? eventId : undefined;
+    if (typeof type === "string" && !["call_start", "call_review", "human_verdict"].includes(type)) await logEvent(req.body?.callId, type, { ...rest, clientTs: ts }, id);
   }
   res.json({ ok: true });
 });
 
 // Test-build log access: list calls, download one as JSON lines (default) or as a readable report (?format=text).
-router.get("/call/logs", (_req, res) => res.json({ logging: loggingOn(), pushingToGithub: sinkConfigured(), calls: listCalls() }));
-router.get("/call/logs/:id", (req, res) => {
-  const call = readCall(req.params["id"]);
+router.get("/call/logs", async (_req, res) => res.json({ logging: loggingOn(), pushingToGithub: sinkConfigured(), calls: await listCalls() }));
+router.get("/call/logs/:id", async (req, res) => {
+  const call = await readCall(req.params["id"]);
   if (!call) return void res.status(404).json({ error: "No log for this call" });
   if (req.query["format"] === "text") {
     res.type("text/plain").send(renderReport(call.events));
@@ -168,13 +169,16 @@ router.get("/call/logs/:id", (req, res) => {
 
 router.post("/call/finish", async (req, res) => {
   try {
-    const callId = req.body?.callId;
-    const call = readCall(callId);
+    const callId = safeId(req.body?.callId);
+    const call = await readCall(callId);
     if (!call) return void res.status(404).json({ error: "No log for this call" });
-    if (!reviewOf(call.events)) {
-      const start = call.events.find((e) => e["type"] === "call_start");
+    await logEvent(callId, "call_end");
+    const completed = await withReviewLock(callId, async () => {
+      const fresh = await readCall(callId);
+      if (!fresh || reviewOf(fresh.events)) return;
+      const start = fresh.events.find((e) => e["type"] === "call_start");
       const customer = getCustomer(String(start?.["customerId"] ?? ""));
-      const transcript = transcriptOf(call.events);
+      const transcript = transcriptOf(fresh.events);
       const talked = transcript.some((l) => l.who === "borrower");
       let review = !customer || !talked ? incompleteReview() : await reviewCall(customer, transcript);
       if (customer && talked) {
@@ -182,19 +186,19 @@ router.post("/call/finish", async (req, res) => {
         review = mergeCodeFlags(review, flags);
       }
       review.version = typeof start?.["version"] === "string" ? start["version"] : undefined;
-      logEvent(callId, "call_review", { review });
-    }
-    res.json({ ok: true });
+      await logEvent(callId, "call_review", { review });
+    });
+    res.json({ ok: true, pending: !completed });
   } catch (err) {
-    logEvent(req.body?.callId, "review_error", { message: err instanceof Error ? err.message : "failed" });
+    await logEvent(req.body?.callId, "review_error", { message: err instanceof Error ? err.message : "failed" }).catch(() => undefined);
     res.status(500).json({ error: err instanceof Error ? err.message : "Review failed" });
   }
 });
 
-router.get("/calls", (_req, res) => res.json({ calls: liveRecords() }));
+router.get("/calls", async (_req, res) => res.json({ calls: await liveRecords() }));
 
-router.get("/calls/:id", (req, res) => {
-  const call = readCall(req.params["id"]);
+router.get("/calls/:id", async (req, res) => {
+  const call = await readCall(req.params["id"]);
   if (!call) return void res.status(404).json({ error: "No such call" });
   const start = call.events.find((e) => e["type"] === "call_start");
   const customer = getCustomer(String(start?.["customerId"] ?? ""));
@@ -205,28 +209,31 @@ router.get("/calls/:id", (req, res) => {
     transcript: transcriptOf(call.events),
     metrics: metricsOf(call.events),
     review: reviewOf(call.events),
+    ended: call.events.some((e) => e["type"] === "call_end"),
+    reviewError: reviewOf(call.events) ? null : [...call.events].reverse().find((e) => e["type"] === "review_error")?.["message"] ?? null,
     verdicts: verdictsOf(call.events),
     version: start?.["version"] ?? null,
   });
 });
 
 // A person marks a rule-check result right (agree) or wrong (disagree). Used to measure how far the AI reviewer can be trusted.
-router.post("/call/verdict", (req, res) => {
+router.post("/call/verdict", async (req, res) => {
   const { callId, checkId, agree } = (req.body ?? {}) as { callId?: unknown; checkId?: unknown; agree?: unknown };
-  const call = readCall(callId);
+  const call = await readCall(callId);
   const known = loadChecks().some((c) => c.id === checkId);
   if (!call || !known || typeof agree !== "boolean") return void res.status(400).json({ error: "callId, checkId and agree are required" });
-  logEvent(callId, "human_verdict", { checkId, agree });
+  await logEvent(callId, "human_verdict", { checkId, agree });
   res.json({ ok: true });
 });
 
-router.get("/quality", (req, res) => {
-  const records = req.query["sample"] === "1" ? [...sampleRecords(), ...liveRecords()] : liveRecords();
+router.get("/quality", async (req, res) => {
+  const live = await liveRecords();
+  const records = req.query["sample"] === "1" ? [...sampleRecords(), ...live] : live;
   res.json({ includesSample: req.query["sample"] === "1", checks: loadChecks(), ...qualityReport(records) });
 });
 
-router.get("/performance", (req, res) => {
-  const live = liveRecords();
+router.get("/performance", async (req, res) => {
+  const live = await liveRecords();
   const withSample = req.query["sample"] === "1";
   const records = withSample ? [...sampleRecords(), ...live] : live;
   res.json({ includesSample: withSample, checks: loadChecks(), ...aggregate(records) });

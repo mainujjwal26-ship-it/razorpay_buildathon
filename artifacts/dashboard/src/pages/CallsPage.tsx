@@ -50,6 +50,7 @@ export function CallDetailPage({ id }: { id: string }) {
   const [d, setD] = useState<CallDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [waited, setWaited] = useState(0);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const asked = useRef(false);
   const [verdicts, setVerdicts] = useState<Record<string, boolean>>({});
   const mark = (checkId: string, agree: boolean) => {
@@ -67,10 +68,11 @@ export function CallDetailPage({ id }: { id: string }) {
         .then((x) => {
           if (stop) return;
           setD(x);
-          if (!x.review) {
+          if (x.review) setReviewError(null);
+          if (!x.review && x.ended) {
             if (!asked.current) {
               asked.current = true;
-              void finishCall(id).catch(() => undefined);
+              void finishCall(id).catch((e: unknown) => !stop && setReviewError(e instanceof Error ? e.message : "Review failed"));
             }
             setWaited((w) => w + 1);
           }
@@ -102,7 +104,16 @@ export function CallDetailPage({ id }: { id: string }) {
       <div className="crumbs"><a href="#/calls">← All calls</a></div>
       <Section title={`${d.customer?.name ?? "Call"} · ${when(d.startedAt)}`} right={r ? <Chip outcome={r.outcome} /> : <span className="chip neutral">Review pending</span>}>
         {!r ? (
-          <p className="muted">Reviewing this call{waited > 12 ? " (taking longer than usual; check the model key and try again)" : "…"}</p>
+          <div>
+            <p className={reviewError || d.reviewError ? "note bad" : "muted"}>
+              {reviewError || d.reviewError || (!d.ended ? "This call is still in progress." : waited > 12 ? "The review is taking longer than usual." : "Reviewing this call…")}
+            </p>
+            {d.ended && (reviewError || d.reviewError || waited > 12) && <button onClick={() => {
+              setReviewError(null);
+              setWaited(0);
+              void finishCall(id).catch((e: unknown) => setReviewError(e instanceof Error ? e.message : "Review failed"));
+            }}>Retry review</button>}
+          </div>
         ) : (
           <>
             <p className="lead">{r.summary}</p>

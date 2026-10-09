@@ -1,33 +1,15 @@
-import fs from "node:fs";
-import path from "node:path";
+import { db, pool, callEventsTable } from "@workspace/db";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { pushLogFile, sinkConfigured } from "../adapters/logSink";
+import { logger } from "./logger";
 
-/**
- * Test-build call log. One JSON-lines file per call in /call-logs, every event stamped with an ISO time.
- * Used to see where a call went wrong. Turn off with CALL_LOGGING=off. Logging never breaks a call.
- */
-function logDir(): string {
-  if (process.env["CALL_LOG_DIR"]) return path.resolve(process.env["CALL_LOG_DIR"]);
-  let dir = process.cwd();
-  for (let i = 0; i < 6; i++) {
-    if (fs.existsSync(path.join(dir, "content", "policy.json"))) return path.join(dir, "call-logs");
-    const parent = path.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return path.join(process.cwd(), "call-logs");
-}
-
-export const loggingOn = () => (process.env["CALL_LOGGING"] ?? "on").toLowerCase() !== "off";
+// Persistence is required for summaries/analytics. GitHub remains an optional backup,
+// never the source of truth. Database failures must reach the caller.
+export const loggingOn = () => true;
 export const safeId = (id: unknown): string => String(id ?? "").replace(/[^a-zA-Z0-9-]/g, "").slice(0, 64);
 
-function fileFor(callId: string): string {
-  const dir = logDir();
-  fs.mkdirSync(dir, { recursive: true });
-  const existing = fs.readdirSync(dir).find((f) => f.endsWith(`_${callId}.jsonl`));
-  if (existing) return path.join(dir, existing);
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  return path.join(dir, `${stamp}_${callId}.jsonl`);
+function fileName(callId: string, ts: string): string {
+  return `${ts.replace(/[:.]/g, "-").slice(0, 19)}_${callId}.jsonl`;
 }
 
 // Push the call's file to GitHub after key events. One push at a time per call; a burst of events becomes one more push.
@@ -45,63 +27,63 @@ function syncToGithub(callId: string): void {
     try {
       do {
         state.again = false;
-        const file = fileFor(callId);
-        await pushLogFile(path.basename(file), fs.readFileSync(file, "utf8"));
+        const call = await readCall(callId);
+        if (call) await pushLogFile(call.file, call.events.map((e) => JSON.stringify(e)).join("\n") + "\n");
       } while (state.again);
     } catch (err) {
-      logEvent(callId, "sink_error", { message: err instanceof Error ? err.message : "failed" });
+      logger.warn({ callId }, "Optional GitHub call-log backup failed");
     } finally {
       syncing.delete(callId);
     }
   })();
 }
-const SYNC_ON = new Set(["agent_line", "call_end", "llm_error", "error", "silence_timeout"]);
+const SYNC_ON = new Set(["agent_line", "call_end", "call_review", "human_verdict", "llm_error", "error", "silence_timeout"]);
 
-export function logEvent(callIdRaw: unknown, type: string, data: Record<string, unknown> = {}): void {
-  try {
-    const callId = safeId(callIdRaw);
-    if (!loggingOn() || !callId) return;
-    const line = JSON.stringify({ ts: new Date().toISOString(), callId, type, ...data });
-    fs.appendFileSync(fileFor(callId), line + "\n");
-    if (SYNC_ON.has(type)) syncToGithub(callId);
-  } catch {
-    /* logging must never break a call */
-  }
+export async function logEvent(callIdRaw: unknown, type: string, data: Record<string, unknown> = {}, eventId?: string): Promise<void> {
+  const callId = safeId(callIdRaw);
+  if (!callId) return;
+  const ts = new Date();
+  const event = { ...data, ts: ts.toISOString(), callId, type };
+  await db.insert(callEventsTable).values({ callId, type, occurredAt: ts, event, eventId }).onConflictDoNothing();
+  if (SYNC_ON.has(type)) syncToGithub(callId);
 }
 
-export function listCalls(): { id: string; file: string; startedAt: string; bytes: number }[] {
-  const dir = logDir();
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".jsonl"))
-    .sort()
-    .reverse()
-    .map((file) => ({
-      id: file.replace(/\.jsonl$/, "").split("_").slice(1).join("_"),
-      file,
-      startedAt: file.split("_")[0] ?? "",
-      bytes: fs.statSync(path.join(dir, file)).size,
-    }));
+export async function listCalls(): Promise<{ id: string; file: string; startedAt: string; bytes: number }[]> {
+  const rows = await db.select({
+    id: callEventsTable.callId,
+    startedAt: sql<string>`min(${callEventsTable.occurredAt})`,
+    bytes: sql<number>`sum(octet_length(${callEventsTable.event}::text))::integer`,
+  }).from(callEventsTable).groupBy(callEventsTable.callId)
+    .orderBy(desc(sql`min(${callEventsTable.occurredAt})`));
+  return rows.map((r) => ({ ...r, startedAt: new Date(r.startedAt).toISOString(), file: fileName(r.id, new Date(r.startedAt).toISOString()) }));
 }
 
-export function readCall(callIdRaw: unknown): { file: string; events: Record<string, unknown>[] } | null {
+export async function readCall(callIdRaw: unknown): Promise<{ file: string; events: Record<string, unknown>[] } | null> {
   const id = safeId(callIdRaw);
   if (!id) return null;
-  const hit = listCalls().find((c) => c.id === id);
-  if (!hit) return null;
-  const text = fs.readFileSync(path.join(logDir(), hit.file), "utf8");
-  const events = text
-    .split("\n")
-    .filter(Boolean)
-    .map((l) => {
-      try {
-        return JSON.parse(l) as Record<string, unknown>;
-      } catch {
-        return { type: "unreadable", line: l };
-      }
-    });
-  return { file: hit.file, events };
+  const rows = await db.select().from(callEventsTable).where(eq(callEventsTable.callId, id))
+    .orderBy(asc(callEventsTable.occurredAt), asc(callEventsTable.sequence));
+  if (!rows.length) return null;
+  return { file: fileName(id, rows[0]!.occurredAt.toISOString()), events: rows.map((r) => r.event) };
+}
+
+// Non-blocking, cross-instance lock; a crashed process releases it automatically.
+export async function withReviewLock(callId: string, work: () => Promise<void>): Promise<boolean> {
+  const client = await pool.connect();
+  let locked = false;
+  try {
+    const result = await client.query("SELECT pg_try_advisory_lock(hashtextextended($1, 0)) AS locked", [`review:${callId}`]);
+    locked = result.rows[0].locked;
+    if (!locked) return false;
+    await work();
+    return true;
+  } finally {
+    try {
+      if (locked) await client.query("SELECT pg_advisory_unlock(hashtextextended($1, 0))", [`review:${callId}`]);
+    } finally {
+      client.release();
+    }
+  }
 }
 
 const clock = (ts: string) => ts.slice(11, 23);

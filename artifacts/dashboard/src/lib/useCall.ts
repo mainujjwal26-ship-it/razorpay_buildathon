@@ -49,7 +49,9 @@ export function useCall(voice: VoiceAdapter) {
     if (active.current) {
       log("call_end");
       const id = callId.current;
-      if (id) setTimeout(() => void finishCall(id).catch(() => undefined), 400);
+      if (id) void finishCall(id).catch((e: unknown) => {
+        setError(e instanceof Error ? `Call ended, but the review could not be saved: ${e.message}` : "Call ended, but the review could not be saved. Open the call details to retry.");
+      });
     }
     active.current = false;
     generation.current += 1;

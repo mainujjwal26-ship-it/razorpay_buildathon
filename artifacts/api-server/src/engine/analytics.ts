@@ -79,7 +79,12 @@ export function verdictsOf(events: Ev[]): Record<string, boolean> {
 
 export const reviewOf = (events: Ev[]): CallReview | null => {
   const r = [...events].reverse().find((e) => e["type"] === "call_review");
-  return r ? (r["review"] as CallReview) : null;
+  if (!r) return null;
+  const review = r["review"] as CallReview;
+  // "No conversation" is an objective fact, not an AI judgement. A short
+  // answered call must not lose its rule checks from the analytics.
+  const answered = events.some((e) => e["type"] === "borrower_reply" && typeof e["text"] === "string" && e["text"].trim() && e["text"] !== "(silence)");
+  return review.outcome === "incomplete" && answered ? { ...review, outcome: "no_commitment" } : review;
 };
 
 /** One flat row per call, from a live log or from the sample file. This is what the lists and charts use. */
@@ -103,11 +108,11 @@ export interface CallRecord {
   verdicts?: Record<string, boolean>;
 }
 
-export function liveRecords(): CallRecord[] {
+export async function liveRecords(): Promise<CallRecord[]> {
   const name = (id: string) => loadCustomers().find((c) => c.id === id)?.name ?? "Customer";
   const out: CallRecord[] = [];
-  for (const c of listCalls()) {
-    const call = readCall(c.id);
+  for (const c of await listCalls()) {
+    const call = await readCall(c.id);
     if (!call) continue;
     const start = call.events.find((e) => e["type"] === "call_start");
     if (!start) continue;
@@ -218,7 +223,7 @@ const p90 = (xs: number[]) => {
 const rate = (a: number, b: number) => (b ? Math.round((a / b) * 1000) / 10 : null);
 
 export function qualityReport(records: CallRecord[]) {
-  const talked = records.filter((r) => r.outcome !== "unreviewed" && r.outcome !== "incomplete" && r.checks.length > 0);
+  const talked = records.filter((r) => r.outcome !== "unreviewed" && r.checks.length > 0);
   const allChecks = talked.flatMap((r) => r.checks.map((c) => ({ ...c, call: r })));
   const hardFailCalls = talked.filter((r) => r.checks.some((c) => c.type === "Hard" && !c.pass));
   const of = (id: string) => allChecks.filter((c) => c.id === id);

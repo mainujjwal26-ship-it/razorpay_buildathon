@@ -31,4 +31,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error({ err }, "API request failed");
+  res.status(500).json({ error: "Unable to save or load call data. Please try again." });
+});
+
 export default app;

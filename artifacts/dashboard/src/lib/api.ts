@@ -60,18 +60,27 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 export const getCallConfig = () => request<CallConfig>("/call/config");
 export const startCall = (customerId: string) =>
   request<{ callId: string; say: string; speak: string }>("/call/start", { customerId });
-export const sendTurn = (customerId: string, history: HistoryItem[], callId?: string) =>
-  request<TurnReply>("/call/turn", { customerId, history, callId });
+export const sendTurn = async (customerId: string, history: HistoryItem[], callId?: string) => {
+  if (callId) await flushCallEvents(callId);
+  return request<TurnReply>("/call/turn", { customerId, history, callId });
+};
 
-/** Test-build call log: fire and forget, never blocks or breaks the call. */
+const eventQueues = new Map<string, { tail: Promise<void>; error?: unknown }>();
+async function flushCallEvents(callId: string): Promise<void> {
+  const queue = eventQueues.get(callId);
+  if (!queue) return;
+  await queue.tail;
+  if (queue.error) throw new Error("Some call data could not be saved. Please check your connection before reviewing this call.");
+}
+
+/** Keep per-call event ordering, retry safely, and flush before a turn/review. */
 export function logClientEvent(callId: string | undefined, type: string, data: Record<string, unknown> = {}): void {
   if (!callId) return;
-  void fetch(`${base}/api/call/log`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ callId, events: [{ type, ts: new Date().toISOString(), ...data }] }),
-    keepalive: true,
-  }).catch(() => undefined);
+  const queue = eventQueues.get(callId) ?? { tail: Promise.resolve(), error: undefined };
+  const event = { ...data, type, ts: new Date().toISOString(), eventId: crypto.randomUUID() };
+  const save = () => request<{ ok: boolean }>("/call/log", { callId, events: [event] }).then(() => undefined);
+  queue.tail = queue.tail.then(() => save().catch(() => save())).catch((error: unknown) => { queue.error = error; });
+  eventQueues.set(callId, queue);
 }
 export const callLogUrl = (callId: string, format?: "text") => `${base}/api/call/logs/${callId}${format ? `?format=${format}` : ""}`;
 
@@ -146,6 +155,8 @@ export interface CallDetail {
   transcript: { who: "meera" | "borrower" | "system"; text: string; ts: string }[];
   metrics: CallMetrics;
   review: CallReview | null;
+  ended: boolean;
+  reviewError: string | null;
   verdicts: Record<string, boolean>;
   version: string | null;
 }
@@ -168,7 +179,10 @@ export interface Performance {
   weakestChecks: { id: string; fails: number; total: number; type: string }[];
   trend: { date: string; calls: number; hardFailPct: number | null; guardrailPassPct: number | null; replyGapMs: number | null }[];
 }
-export const finishCall = (callId: string) => request<{ ok: boolean }>("/call/finish", { callId });
+export const finishCall = async (callId: string) => {
+  await flushCallEvents(callId);
+  return request<{ ok: boolean; pending: boolean }>("/call/finish", { callId });
+};
 export const getCalls = () => request<{ calls: CallRow[] }>("/calls");
 export const getCallDetail = (id: string) => request<CallDetail>(`/calls/${id}`);
 export const getPerformance = (sample: boolean) => request<Performance>(`/performance?sample=${sample ? 1 : 0}`);
