@@ -25,7 +25,7 @@ published calls are stored in the production database and contribute to its
 Calls, Performance, and Quality screens.
 
 The build remains in test mode; payment links are dummy links. Ritu/Bulbul v3
-and the red, initially muted microphone are unchanged.
+is unchanged. Calls start with a green, unmuted microphone; browser microphone permission is required.
 
 Call results are shared among visitors, not private per reviewer. Restrict
 access in the publishing settings before sharing customer details/transcripts.

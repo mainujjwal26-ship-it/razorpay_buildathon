@@ -28,9 +28,9 @@ export function useCall(voice: VoiceAdapter) {
   const typed = useRef<((t: string) => void) | null>(null);
   const listener = useRef<Listener | null>(null);
   const nextId = useRef(1);
-  const [micOn, setMicOn] = useState(false);
+  const [micOn, setMicOn] = useState(true);
   const [recording, setRecording] = useState(false);
-  const micOnRef = useRef(false);
+  const micOnRef = useRef(true);
   const muteSignal = useRef<(() => void) | null>(null);
   const unmuteSignal = useRef<(() => void) | null>(null);
 
@@ -201,10 +201,16 @@ export function useCall(voice: VoiceAdapter) {
       setMicIssue(null);
       setSeconds(0);
       setRecording(false);
-      micOnRef.current = false;
-      setMicOn(false);
+      micOnRef.current = true;
+      setMicOn(true);
       active.current = true;
       setPhase("connecting");
+      // Resume audio input within the Start call gesture, before awaiting the API.
+      void voice.prepare?.().catch((error: unknown) => {
+        if (active.current && generation.current === session) {
+          setMicIssue(error instanceof Error ? error.message : "Audio input could not start.");
+        }
+      });
       try {
         if (!active.current || generation.current !== session) return;
         const r = await startCall(id);

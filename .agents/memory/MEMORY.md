@@ -1,6 +1,6 @@
 - [GitHub authorization boundaries](github-authorization.md) — Agent API access and Git CLI authentication are separate.
 - [Imported artifact registration](imported-artifacts.md) — Pulled artifact manifests may need validation before previews and workflows appear.
-- [Default microphone behavior](microphone-default.md) — Each call starts red and muted; the user clicks to enable voice input.
+- [Default microphone behavior](microphone-default.md) — Each call starts green and unmuted; the user can click to mute voice input.
 - [Sarvam voice preference](sarvam-voice.md) — The user wants Ritu under Bulbul for the collections agent.
 - [Preview port readiness](preview-port-readiness.md) — A restart can leave an older Vite process on the preview port; fallback-port readiness is not recovery.
 - [Reviewer persistence](reviewer-persistence.md) — Published reviews need shared storage; short answered calls must retain their quality scores.
