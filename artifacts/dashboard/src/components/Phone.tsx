@@ -186,6 +186,11 @@ export function Phone(props: {
                 <a href={callLogUrl(logCallId)} download>download</a>
               </p>
             )}
+            {logCallId && (
+              <a className="btn pri linkbtn" href={`#/calls/${logCallId}`}>
+                View call review
+              </a>
+            )}
             <button type="button" className="btn pri" onClick={onStart} disabled={!canStart}>
               Start another call
             </button>

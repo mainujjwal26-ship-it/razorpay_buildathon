@@ -9,8 +9,16 @@ import {
 } from "../lib/content";
 import { cleanScriptText } from "./script";
 
+/** Today's date in India, e.g. "Thursday, 8 October 2026". Lets the agent turn "kal" or "parson" into a real date. */
+export function todayInIndia(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    .format(now)
+    .replace(/^(\w+),? /, "$1, ");
+}
+
 function renderCustomer(c: Customer): string {
   return [
+    `- Today: ${todayInIndia()} (India time)`,
     `- Name: ${c.name} (address as "${c.displayName} ji")`,
     `- EMI amount: ₹${c.emiAmount.toLocaleString("en-IN")}`,
     `- EMI due date: ${c.emiDueDate}; the auto-debit bounced`,

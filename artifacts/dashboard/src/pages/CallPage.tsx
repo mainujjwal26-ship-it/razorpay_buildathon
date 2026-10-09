@@ -1,40 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import { getCallConfig, type CallConfig } from "../lib/api";
+import { useMemo } from "react";
+import type { CallConfig } from "../lib/api";
 import { useCall } from "../lib/useCall";
 import { Phone } from "../components/Phone";
+import { CustomerCard } from "../components/CustomerCard";
 import { createBrowserVoice, createSarvamVoice } from "../lib/voice";
 
-export function CallPage() {
-  const [config, setConfig] = useState<CallConfig | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const useSarvam = config?.speechConfigured ?? false;
+export function CallPage({ config }: { config: CallConfig }) {
+  const useSarvam = config.speechConfigured;
   const voice = useMemo(() => (useSarvam ? createSarvamVoice() : createBrowserVoice()), [useSarvam]);
   const call = useCall(voice);
-
-  useEffect(() => {
-    getCallConfig()
-      .then(setConfig)
-      .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : "Could not reach the server"));
-  }, []);
-
-  if (loadError) {
-    return (
-      <div className="phone">
-        <div className="screen">
-          <div className="start">
-            <p className="who-called"><b>Can't reach the server</b></p>
-            <p className="note bad">{loadError}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  if (!config) return <p className="muted">Loading…</p>;
 
   const customer = config.customers[0] ?? null;
   const live = call.phase !== "idle" && call.phase !== "ended";
 
   return (
+    <div className="callrow">
     <Phone
       agentName={config.agentName}
       lenderName={config.lenderName}
@@ -54,5 +34,7 @@ export function CallPage() {
       logCallId={config.callLogging ? call.callId : undefined}
       onMic={call.toggleMic}
     />
+    {customer && <CustomerCard customer={customer} lender={config.lenderName} />}
+    </div>
   );
 }

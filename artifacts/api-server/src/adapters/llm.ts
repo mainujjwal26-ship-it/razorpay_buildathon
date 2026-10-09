@@ -31,7 +31,7 @@ export async function complete(req: LlmRequest): Promise<string> {
   const key = process.env["ANTHROPIC_API_KEY"];
   if (!key) throw new LlmNotConfiguredError();
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch(`${process.env["ANTHROPIC_API_URL"] ?? "https://api.anthropic.com"}/v1/messages`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
