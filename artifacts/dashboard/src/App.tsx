@@ -47,8 +47,8 @@ export function App() {
     <div className="shell">
       <header className="topbar">
         <div className="brand">
-          <b>{config?.lenderName ?? "Collections"}</b>
-          <span>Post-bounce collections · {config?.agentName ?? "Meera"}</span>
+          <span className="logoplate"><img src={`${import.meta.env.BASE_URL}razorpay-logo.png`} alt="Razorpay" height="20" /></span>
+          <b>Trusted Collections Agent</b>
         </div>
         {config?.testMode && <span className="testwrap">Test mode <span className="sw" aria-hidden="true" /></span>}
       </header>
