@@ -3,6 +3,7 @@ export interface Customer {
   name: string;
   displayName: string;
   emiAmount: number;
+  bounceCharge?: number;
   emiDueDate: string;
   daysPastDue: number;
   callNumberThisWeek: number;
@@ -110,6 +111,7 @@ export interface CallReview {
   summary: string;
   outcome: Exclude<Outcome, "unreviewed">;
   reason: string | null;
+  rootCause?: string | null;
   promiseDate: string | null;
   promiseAmount: number | null;
   sentiment: "calm" | "worried" | "irritated" | "hostile";
@@ -175,6 +177,7 @@ export interface Performance {
     promisedAmount: number;
   };
   outcomes: Record<string, number>;
+  rootCauses: Record<string, number>;
   sentiments: Record<string, number>;
   weakestChecks: { id: string; fails: number; total: number; type: string }[];
   trend: { date: string; calls: number; hardFailPct: number | null; guardrailPassPct: number | null; replyGapMs: number | null }[];

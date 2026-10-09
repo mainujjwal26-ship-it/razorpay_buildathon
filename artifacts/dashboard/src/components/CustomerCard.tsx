@@ -4,6 +4,12 @@ import { inr } from "../lib/format";
 export function CustomerCard({ customer, lender }: { customer: FullCustomer; lender: string }) {
   const rows: [string, string][] = [
     ["EMI amount", inr(customer.emiAmount)],
+    ...(typeof customer.bounceCharge === "number"
+      ? ([
+          ["Bounce charge", inr(customer.bounceCharge)],
+          ["Total due", inr(customer.emiAmount + customer.bounceCharge)],
+        ] as [string, string][])
+      : []),
     ["EMI due", customer.emiDueDate],
     ["Days past due", String(customer.daysPastDue)],
     ["EMIs paid so far", String(customer.emisPaid ?? "–")],

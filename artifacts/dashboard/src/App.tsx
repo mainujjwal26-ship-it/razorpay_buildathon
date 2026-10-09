@@ -5,6 +5,7 @@ import { CallPage } from "./pages/CallPage";
 import { CallsPage, CallDetailPage } from "./pages/CallsPage";
 import { PerformancePage } from "./pages/PerformancePage";
 import { QualityPage } from "./pages/QualityPage";
+import { HowItWorksPage } from "./pages/HowItWorksPage";
 
 function useRoute(): string {
   const [hash, setHash] = useState(() => window.location.hash.replace(/^#/, "") || "/call");
@@ -26,13 +27,14 @@ export function App() {
       .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : "Could not reach the server"));
   }, []);
 
-  const tab = route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
+  const tab = route.startsWith("/how") ? "how" : route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
   const detailId = route.startsWith("/calls/") ? route.slice("/calls/".length) : null;
 
   const titles: Record<string, [string, string]> = {
     call: ["Call", "Place a test call and see the customer's details"],
     calls: [detailId ? "Call review" : "Calls", detailId ? "Summary, data points and rule checks" : "Every call, newest first"],
     performance: ["Performance", "How the collections team is doing"],
+    how: ["How it works", "From a bounced EMI to a reviewed call"],
     quality: ["Quality", "Can we trust the calls? Rule breaches and checks"],
   };
   const [title, sub] = titles[tab];
@@ -59,6 +61,8 @@ export function App() {
           {item("#/calls", "calls", "Calls", ic("M4 6h16M4 12h16M4 18h10"))}
           {item("#/performance", "performance", "Performance", ic("M4 20V10M10 20V4M16 20v-8M22 20H2"))}
           {item("#/quality", "quality", "Quality", ic("M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"))}
+          <div className="sec">About</div>
+          {item("#/how", "how", "How it works", ic("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 8v.5"))}
           <div className="foot">{config?.testMode ? "Test mode: no real borrowers are called." : "Live mode"}</div>
         </nav>
         <main className="main">
@@ -74,6 +78,7 @@ export function App() {
               {tab === "calls" && (detailId ? <CallDetailPage id={detailId} /> : <CallsPage />)}
               {tab === "performance" && <PerformancePage />}
               {tab === "quality" && <QualityPage />}
+              {tab === "how" && <HowItWorksPage />}
             </>
           )}
         </main>

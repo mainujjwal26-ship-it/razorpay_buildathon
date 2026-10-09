@@ -27,6 +27,8 @@ test("a clean call has no flags", () => {
 test("link below the minimum part payment fails offer_min, at the minimum passes", () => {
   assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 1000 })]), ["offer_min"]);
   assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 2100 })]), []);
+  // The minimum is 50% of the EMI alone (2,100); the bounce charge is owed on top and does not raise it
+  assert.deepEqual(ids([meera("Link bhej rahi hoon.", { action: "send_link", amount: 2099 })]), ["offer_min"]);
 });
 
 test("two links fail one_link", () => {

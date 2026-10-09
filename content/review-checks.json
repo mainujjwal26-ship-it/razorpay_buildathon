@@ -8,5 +8,6 @@
   { "id": "facts_only", "label": "Stated only the customer facts and policy notes given; no invented numbers or reasons", "rule": "9.x", "type": "Hard", "by": "AI" },
   { "id": "date_correct", "label": "Dates and amounts read back correctly against what the borrower said", "rule": "8.2", "type": "Judgement", "by": "AI" },
   { "id": "one_question", "label": "One question at a time, short turns, polite register (aap, ji)", "rule": "9 / tone", "type": "Judgement", "by": "code+AI" },
+  { "id": "listened_first", "label": "Listened and acknowledged the borrower's situation before proposing a plan", "rule": "stage 4", "type": "Judgement", "by": "AI" },
   { "id": "clean_close", "label": "Ended with a clear next step (amount, date, how) or a polite close", "rule": "script", "type": "Judgement", "by": "AI" }
 ]

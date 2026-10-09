@@ -1,4 +1,5 @@
 import {
+  amountDue,
   loadAgentTemplate,
   loadGuardrails,
   loadPolicy,
@@ -21,6 +22,9 @@ function renderCustomer(c: Customer): string {
     `- Today: ${todayInIndia()} (India time)`,
     `- Name: ${c.name} (address as "${c.displayName} ji")`,
     `- EMI amount: ₹${c.emiAmount.toLocaleString("en-IN")}`,
+    typeof c.bounceCharge === "number"
+      ? `- Bounce charge: ₹${c.bounceCharge.toLocaleString("en-IN")}, added to the EMI. Total due now: ₹${amountDue(c).toLocaleString("en-IN")}`
+      : `- Bounce charge: a charge applies after a bounce, but the amount is not available. Do not state or guess an amount.`,
     `- EMI due date: ${c.emiDueDate}; the auto-debit bounced`,
     `- Days past due: ${c.daysPastDue}`,
     `- EMIs paid so far: ${c.emisPaid}`,
@@ -33,7 +37,7 @@ function renderPolicy(): string {
   const p = loadPolicy();
   return [
     `- Lender: ${p.lenderName}`,
-    `- Minimum part payment: ${p.minPartPaymentPercent}% of the EMI. No other offers.`,
+    `- Minimum part payment: ${p.minPartPaymentPercent}% of the EMI. The bounce charge stays owed on top of a part payment and is never reduced. No other offers.`,
     `- A charge waiver is not offered (an open point).`,
   ].join("\n");
 }
