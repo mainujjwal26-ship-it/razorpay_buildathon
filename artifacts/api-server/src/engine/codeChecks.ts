@@ -24,10 +24,10 @@ const FALSE_PROMISE = [
   /\b(cibil|credit (score|record))\b[^.?!]{0,40}\b(kharab nahi|theek ho|sudhar|safe)\b/i,
 ];
 
-export function runCodeChecks(lines: Line[], opts: { dueAmount: number; minPartPercent: number; identityConfirmed?: boolean }): CodeFlag[] {
+export function runCodeChecks(lines: Line[], opts: { emiAmount: number; minPartPercent: number; identityConfirmed?: boolean }): CodeFlag[] {
   const flags: CodeFlag[] = [];
   const meera = lines.map((l, i) => ({ l, i })).filter((x) => x.l.who === "meera");
-  const minPart = Math.ceil((opts.dueAmount * opts.minPartPercent) / 100);
+  const minPart = Math.ceil((opts.emiAmount * opts.minPartPercent) / 100);
 
   for (const { l, i } of meera) {
     if (PAID.test(l.text)) flags.push({ id: "no_paid_claim", quote: l.text, note: "Sounds like Meera said a payment had arrived. Payment confirmation is not connected." });

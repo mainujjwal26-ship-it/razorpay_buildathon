@@ -37,7 +37,7 @@ function renderPolicy(): string {
   const p = loadPolicy();
   return [
     `- Lender: ${p.lenderName}`,
-    `- Minimum part payment: ${p.minPartPaymentPercent}% of the total due (EMI plus bounce charge). No other offers.`,
+    `- Minimum part payment: ${p.minPartPaymentPercent}% of the EMI. The bounce charge stays owed on top of a part payment and is never reduced. No other offers.`,
     `- A charge waiver is not offered (an open point).`,
   ].join("\n");
 }

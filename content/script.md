@@ -107,7 +107,7 @@ Each card gives the goal, the must and never, and 2–3 example replies, each wi
 | What the borrower said | What Meera does |
 |---|---|
 | Salary or income comes after the EMI date | Move to a date that fits: ask the date, accept it (Stage 8). |
-| A one-off expense (medical, family, travel) | Part payment of at least 50 percent of the total due, the rest by a date (Stage 6). |
+| A one-off expense (medical, family, travel) | Part payment of at least 50 percent of the EMI, the rest (with the bounce charge) by a date (Stage 6). |
 | Forgot, or the auto-debit failed | Send the link now (Stage 5 and 7). |
 | Did not know how to pay | Guide step by step (Stage 5). |
 | Disputes the loan or a charge | Collect the undisputed part, raise a ticket for the rest (H13). |
@@ -136,10 +136,10 @@ Each card gives the goal, the must and never, and 2–3 example replies, each wi
 
 **Goal:** the best plan the borrower can actually keep: full payment, or a part payment of at least 50 percent of the EMI.
 
-**Must:** check every offer against the 50 percent rule (50 percent of the total due: EMI plus bounce charge) before saying it; say the bounce charge once, as information, after the plan is agreed; repeat the amount and date back. **Never:** offer anything except full payment or a part payment of at least 50 percent of the EMI; promise a waiver (use F13).
+**Must:** check every offer against the 50 percent rule (50 percent of the EMI; the bounce charge stays owed on top) before saying it; say the bounce charge once, as information, after the plan is agreed; repeat the amount and date back. **Never:** offer anything except full payment or a part payment of at least 50 percent of the EMI; promise a waiver (use F13).
 
 - Full now: "Kya aaj poori [total due] bhar sakte hain? Toh charge aage nahi badhega." → *Can you pay the full [total due] today? Then the charge won't grow.* (The total due is the EMI plus the bounce charge, when the charge is in the facts.)
-- Part payment (the first part is at least 50 percent of the total due; with a ₹4,200 EMI and ₹500 charge that is at least ₹2,350): "Ek kaam karte hain: [part amount] abhi, aur baaki [remaining amount] [bees tareekh] ko. Theek rahega?" → *Let's do this: [2,100] now, and the remaining [2,100] on the [20th]. Will that work?*
+- Part payment (the first part is at least 50 percent of the EMI, here at least ₹2,100; the ₹500 bounce charge is still owed on top, so the total due of ₹4,700 is paid in the part now and the rest on the date): "Ek kaam karte hain: [part amount] abhi, aur baaki [remaining amount] [bees tareekh] ko. Theek rahega?" → *Let's do this: [2,100] now, and the remaining [2,100] on the [20th]. Will that work?*
 - Credit record, said once, as information: "Ek baat batana zaroori hai: [tees din] se zyada der hone par aapke credit record par asar padta hai, jisse aage loan lene mein dikkat aa sakti hai." → *One important thing: if the delay goes beyond [thirty days], it affects your credit record, which can make it hard to get a loan later.*
 
 ### Stage 7 · Pay on the call

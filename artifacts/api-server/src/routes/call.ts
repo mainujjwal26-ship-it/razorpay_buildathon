@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { llmConfigured, LlmNotConfiguredError } from "../adapters/llm";
 import express from "express";
 import { speechConfigured, synthesize, transcribe } from "../adapters/speech";
-import { amountDue, contentVersion, getCustomer, loadCustomers, loadPolicy } from "../lib/content";
+import { contentVersion, getCustomer, loadCustomers, loadPolicy } from "../lib/content";
 import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
 import { runTurn, toSpeechVersion, type HistoryItem } from "../engine/turn";
@@ -182,7 +182,7 @@ router.post("/call/finish", async (req, res) => {
       const talked = transcript.some((l) => l.who === "borrower");
       let review = !customer || !talked ? incompleteReview() : await reviewCall(customer, transcript);
       if (customer && talked) {
-        const flags = runCodeChecks(transcript, { dueAmount: amountDue(customer), minPartPercent: loadPolicy().minPartPaymentPercent, identityConfirmed: review.identityConfirmed });
+        const flags = runCodeChecks(transcript, { emiAmount: customer.emiAmount, minPartPercent: loadPolicy().minPartPaymentPercent, identityConfirmed: review.identityConfirmed });
         review = mergeCodeFlags(review, flags);
       }
       review.version = typeof start?.["version"] === "string" ? start["version"] : undefined;
