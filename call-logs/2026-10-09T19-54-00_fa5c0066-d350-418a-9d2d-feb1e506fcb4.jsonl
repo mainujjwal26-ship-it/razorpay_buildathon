@@ -104,3 +104,7 @@
 {"ts":"2026-10-09T19:58:31.317Z","text":"जी मैडम, शाम को कर दूँगा।","type":"borrower_reply","callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4","source":"voice","clientTs":"2026-10-09T19:58:31.220Z"}
 {"ts":"2026-10-09T19:58:35.205Z","turn":13,"type":"llm_turn","llmMs":3846,"callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4","parsedOk":true,"rawLength":224}
 {"ts":"2026-10-09T19:58:35.211Z","raw":"{\"say\":\"Toh aaj, Shanivaar, das October ko. Dhanyavaad Ujjwal ji, aapka din achha ho.\",\"speak\":\"तो आज, शनिवार, दस October को। धन्यवाद उज्जवल जी, आपका दिन अच्छा हो।\",\"action\":\"none\",\"amount\":null,\"reason\":null,\"endCall\":true}","say":"Toh aaj, Shanivaar, das October ko. Dhanyavaad Ujjwal ji, aapka din achha ho.","type":"agent_line","speak":"तो आज, शनिवार, दस October को। धन्यवाद उज्जवल जी, आपका दिन अच्छा हो।","action":"none","amount":null,"callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4","reason":null,"endCall":true}
+{"ts":"2026-10-09T19:58:35.252Z","type":"speak_start","chars":67,"callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4","clientTs":"2026-10-09T19:58:35.151Z"}
+{"ms":1038,"ts":"2026-10-09T19:58:36.289Z","type":"tts","chars":67,"callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4"}
+{"ts":"2026-10-09T19:58:40.478Z","type":"speak_end","callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4","clientTs":"2026-10-09T19:58:40.377Z"}
+{"ts":"2026-10-09T19:58:40.515Z","type":"call_end","callId":"fa5c0066-d350-418a-9d2d-feb1e506fcb4","clientTs":"2026-10-09T19:58:40.377Z"}
