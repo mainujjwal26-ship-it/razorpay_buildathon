@@ -5,3 +5,4 @@
 {"ts":"2026-10-09T14:24:16.747Z","type":"speak_end","callId":"4205bd15-83a5-425a-9ec9-ae513450a06a","clientTs":"2026-10-09T14:24:16.681Z"}
 {"ts":"2026-10-09T14:24:16.784Z","type":"listen_start","micOn":false,"callId":"4205bd15-83a5-425a-9ec9-ae513450a06a","clientTs":"2026-10-09T14:24:16.681Z"}
 {"ts":"2026-10-09T14:24:24.086Z","type":"call_end","callId":"4205bd15-83a5-425a-9ec9-ae513450a06a","clientTs":"2026-10-09T14:24:24.013Z"}
+{"ts":"2026-10-09T14:24:24.152Z","type":"call_review","callId":"4205bd15-83a5-425a-9ec9-ae513450a06a","review":{"model":"none","checks":[],"reason":null,"outcome":"incomplete","summary":"The borrower did not speak, so there was no conversation to review.","version":"0e5f74f","nextStep":"Try again at another time.","sentiment":"calm","promiseDate":null,"promiseAmount":null,"ticketReasons":[],"identityConfirmed":false}}
