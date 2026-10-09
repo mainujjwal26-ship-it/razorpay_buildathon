@@ -138,3 +138,6 @@ code{font-family:"IBM Plex Mono",monospace;font-size:.92em}
 .more>summary{color:var(--accent)}
 .tag.by{background:#eaf1fd;border-color:#cfe0fa;color:#1a4fa8}
 @media (max-width:640px){.tr li{grid-template-columns:36px 70px 1fr}.bars li{grid-template-columns:1fr 1fr 70px}}
+.brand{align-items:center}.brand b{font-size:16px;font-weight:600}
+.logoplate{display:inline-flex;align-items:center;background:#fff;border-radius:6px;padding:6px 10px}
+.logoplate img{display:block;height:20px;width:auto}
