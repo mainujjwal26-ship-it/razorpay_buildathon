@@ -141,3 +141,17 @@ code{font-family:"IBM Plex Mono",monospace;font-size:.92em}
 .brand{align-items:center}.brand b{font-size:16px;font-weight:600}
 .logoplate{display:inline-flex;align-items:center;background:#fff;border-radius:6px;padding:6px 10px}
 .logoplate img{display:block;height:20px;width:auto}
+/* ----- How it works flowchart ----- */
+.fcwrap{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:#fafbfc;padding:8px}
+.fc{display:block;min-width:1000px;width:100%;height:auto;font-family:Inter,system-ui,sans-serif}
+.fc-box{stroke-width:1.5}
+.fc-n1,.fc-node{fill:#fff;stroke:#b9c3d0}.fc-dec{fill:#fff6e0;stroke:#d99a2b}.fc-ok{fill:#e6f4ec;stroke:#2f8f5b}.fc-esc{fill:#eaf1fd;stroke:#1a63d6}.fc-rev{fill:#fff;stroke:#1a63d6}.fc-out{fill:#0d1b2e;stroke:#0d1b2e}
+.fc-t{font-size:13px;font-weight:600;fill:#0d1b2e}.fc-s{font-size:11.5px;fill:#5f6b7a}
+.fc-out~g,.fc-link .fc-t{fill:#0d1b2e}
+.fc-link .fc-out{fill:#fff;stroke:#0d1b2e;stroke-width:1.8}.fc-link{cursor:pointer}.fc-link:hover .fc-out,.fc-link:focus .fc-out{fill:#eaf1fd;stroke:#1a63d6}
+.fc-line path{fill:none;stroke:#6b7788;stroke-width:1.6}
+.fc-line path.fc-arr{marker-end:url(#ar)}
+.fc-lbl{font-size:12px;font-weight:600;fill:#5f6b7a}.fc-lh{font-size:11px;font-weight:700;letter-spacing:.08em;fill:#8a95a5}
+.fc-n{font-size:12px;font-weight:700;fill:#fff}
+.fc-bub{fill:#fff;stroke:#c9d1dc;stroke-dasharray:none}.fc-who{font-size:9.5px;font-weight:700;letter-spacing:.08em;fill:#1a63d6}.fc-q{font-style:italic;fill:#35414f}
+.how-steps{margin:10px 0 0;padding-left:22px;display:grid;gap:8px}.how-steps li{line-height:1.5}
