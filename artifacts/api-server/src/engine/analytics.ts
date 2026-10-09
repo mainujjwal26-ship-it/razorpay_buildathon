@@ -154,9 +154,11 @@ export function aggregate(records: CallRecord[]) {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, rs]) => {
       const checks = rs.flatMap((r) => r.checks);
+      const talkedDay = rs.filter((r) => r.checks.length > 0);
       return {
         date,
         calls: rs.length,
+        hardFailPct: pct(talkedDay.filter((r) => r.checks.some((c) => c.type === "Hard" && !c.pass)).length, talkedDay.length),
         guardrailPassPct: pct(checks.filter((c) => c.pass).length, checks.length),
         replyGapMs: avg(rs.map((r) => r.replyGapMs).filter((x): x is number => x !== null)),
       };

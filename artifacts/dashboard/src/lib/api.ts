@@ -163,7 +163,7 @@ export interface Performance {
   outcomes: Record<string, number>;
   sentiments: Record<string, number>;
   weakestChecks: { id: string; fails: number; total: number; type: string }[];
-  trend: { date: string; calls: number; guardrailPassPct: number | null; replyGapMs: number | null }[];
+  trend: { date: string; calls: number; hardFailPct: number | null; guardrailPassPct: number | null; replyGapMs: number | null }[];
 }
 export const finishCall = (callId: string) => request<{ ok: boolean }>("/call/finish", { callId });
 export const getCalls = () => request<{ calls: CallRow[] }>("/calls");

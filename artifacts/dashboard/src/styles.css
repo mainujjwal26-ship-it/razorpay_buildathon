@@ -109,3 +109,4 @@ body{background:var(--bg)}
 .linkbtn{display:inline-flex;align-items:center;text-decoration:none;color:#fff!important}
 @media (max-width:640px){.main{padding:14px}.topbar{padding:10px 14px}.topbar nav{margin-left:0}.tr li{grid-template-columns:36px 70px 1fr}.bars li{grid-template-columns:1fr 1fr 70px}}
 .panel>.note{margin-bottom:12px}.panel .note:last-child{margin-bottom:0}.chart figcaption{font-weight:400;font-size:12.5px;color:var(--muted)}
+.more{background:transparent}.more>summary{cursor:pointer;color:#9db6ff;font-weight:600;padding:6px 2px;margin-bottom:12px}.more .stack{margin-top:4px}
