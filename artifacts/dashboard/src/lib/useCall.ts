@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { logClientEvent, sendTurn, setCurrentCallId, startCall, type HistoryItem } from "./api";
+import { finishCall, logClientEvent, sendTurn, setCurrentCallId, startCall, type HistoryItem } from "./api";
 import type { Listener, VoiceAdapter } from "./voice";
 
 export type Phase = "idle" | "connecting" | "speaking" | "listening" | "thinking" | "ended";
@@ -46,7 +46,11 @@ export function useCall(voice: VoiceAdapter) {
   }, []);
 
   const finish = useCallback(() => {
-    if (active.current) log("call_end");
+    if (active.current) {
+      log("call_end");
+      const id = callId.current;
+      if (id) setTimeout(() => void finishCall(id).catch(() => undefined), 400);
+    }
     active.current = false;
     generation.current += 1;
     typed.current?.("");

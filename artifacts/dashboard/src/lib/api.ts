@@ -10,6 +10,13 @@ export interface Customer {
   brokenPromise: string;
 }
 
+export interface FullCustomer extends Customer {
+  bounced?: boolean;
+  emisPaid?: number;
+  lastPayment?: string;
+  language?: string;
+}
+
 export interface CallConfig {
   agentName: string;
   lenderName: string;
@@ -19,7 +26,7 @@ export interface CallConfig {
   llmConfigured: boolean;
   speechConfigured: boolean;
   callLogging?: boolean;
-  customers: Customer[];
+  customers: FullCustomer[];
 }
 
 export type HistoryItem =
@@ -85,3 +92,80 @@ export async function transcribeAudio(blob: Blob, callId: string | undefined = c
   return data.text ?? "";
 }
 export const speakText = (text: string, callId: string | undefined = currentCallId) => request<{ audio: string }>("/call/speak", { text, callId });
+
+// ----- Review, call list, performance -----
+export type Outcome = "promise_to_pay" | "part_payment" | "link_sent" | "no_commitment" | "refused" | "wrong_person" | "escalated" | "incomplete" | "unreviewed";
+export interface CheckResult { id: string; label: string; type: "Hard" | "Judgement"; pass: boolean; note: string | null }
+export interface CallReview {
+  summary: string;
+  outcome: Exclude<Outcome, "unreviewed">;
+  reason: string | null;
+  promiseDate: string | null;
+  promiseAmount: number | null;
+  sentiment: "calm" | "worried" | "irritated" | "hostile";
+  identityConfirmed: boolean;
+  ticketReasons: string[];
+  nextStep: string;
+  checks: CheckResult[];
+}
+export interface CallMetrics {
+  durationSec: number;
+  borrowerTurns: number;
+  replyGapMs: number | null;
+  slowestReplyMs: number | null;
+  llmMs: number | null;
+  sttMs: number | null;
+  ttsMs: number | null;
+  silences: number;
+  micToggles: number;
+  errors: number;
+  speechMode: string;
+  actions: { sendLink: number; raiseTicket: number; handoff: number };
+}
+export interface CallRow {
+  id: string;
+  source: "live" | "sample";
+  startedAt: string;
+  customerName: string;
+  durationSec: number;
+  borrowerTurns: number;
+  replyGapMs: number | null;
+  outcome: Outcome;
+  sentiment: string | null;
+  identityConfirmed: boolean | null;
+  promiseDate: string | null;
+  promiseAmount: number | null;
+  tickets: number;
+  checks: { id: string; type: string; pass: boolean }[];
+}
+export interface CallDetail {
+  id: string;
+  startedAt: string | null;
+  customer: FullCustomer | null;
+  transcript: { who: "meera" | "borrower" | "system"; text: string; ts: string }[];
+  metrics: CallMetrics;
+  review: CallReview | null;
+}
+export interface Performance {
+  includesSample: boolean;
+  checks: { id: string; label: string; rule: string; type: string }[];
+  totals: { calls: number; reviewed: number; sampleCalls: number; liveCalls: number };
+  kpis: {
+    identityConfirmedPct: number | null;
+    promiseToPayPct: number | null;
+    guardrailPassPct: number | null;
+    callsWithHardFailPct: number | null;
+    replyGapMs: number | null;
+    avgDurationSec: number | null;
+    ticketsPer100: number | null;
+    promisedAmount: number;
+  };
+  outcomes: Record<string, number>;
+  sentiments: Record<string, number>;
+  weakestChecks: { id: string; fails: number; total: number; type: string }[];
+  trend: { date: string; calls: number; guardrailPassPct: number | null; replyGapMs: number | null }[];
+}
+export const finishCall = (callId: string) => request<{ ok: boolean }>("/call/finish", { callId });
+export const getCalls = () => request<{ calls: CallRow[] }>("/calls");
+export const getCallDetail = (id: string) => request<CallDetail>(`/calls/${id}`);
+export const getPerformance = (sample: boolean) => request<Performance>(`/performance?sample=${sample ? 1 : 0}`);

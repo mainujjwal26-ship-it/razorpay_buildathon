@@ -8,6 +8,8 @@ import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
 import { runTurn, toSpeechVersion, type HistoryItem } from "../engine/turn";
 import { sinkConfigured } from "../adapters/logSink";
+import { aggregate, liveRecords, metricsOf, reviewOf, sampleRecords, transcriptOf } from "../engine/analytics";
+import { incompleteReview, loadChecks, reviewCall } from "../engine/review";
 import { listCalls, logEvent, loggingOn, readCall, renderReport } from "../lib/callLog";
 
 const router: IRouter = Router();
@@ -158,6 +160,52 @@ router.get("/call/logs/:id", (req, res) => {
     return;
   }
   res.type("application/x-ndjson").set("content-disposition", `attachment; filename="${call.file}"`).send(call.events.map((e) => JSON.stringify(e)).join("\n") + "\n");
+});
+
+// ----- After the call: AI review, call list, call detail, team performance -----
+
+router.post("/call/finish", async (req, res) => {
+  try {
+    const callId = req.body?.callId;
+    const call = readCall(callId);
+    if (!call) return void res.status(404).json({ error: "No log for this call" });
+    if (!reviewOf(call.events)) {
+      const start = call.events.find((e) => e["type"] === "call_start");
+      const customer = getCustomer(String(start?.["customerId"] ?? ""));
+      const transcript = transcriptOf(call.events);
+      const talked = transcript.some((l) => l.who === "borrower");
+      const review = !customer || !talked ? incompleteReview() : await reviewCall(customer, transcript);
+      logEvent(callId, "call_review", { review });
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    logEvent(req.body?.callId, "review_error", { message: err instanceof Error ? err.message : "failed" });
+    res.status(500).json({ error: err instanceof Error ? err.message : "Review failed" });
+  }
+});
+
+router.get("/calls", (_req, res) => res.json({ calls: liveRecords() }));
+
+router.get("/calls/:id", (req, res) => {
+  const call = readCall(req.params["id"]);
+  if (!call) return void res.status(404).json({ error: "No such call" });
+  const start = call.events.find((e) => e["type"] === "call_start");
+  const customer = getCustomer(String(start?.["customerId"] ?? ""));
+  res.json({
+    id: req.params["id"],
+    startedAt: start?.["ts"] ?? null,
+    customer: customer ?? null,
+    transcript: transcriptOf(call.events),
+    metrics: metricsOf(call.events),
+    review: reviewOf(call.events),
+  });
+});
+
+router.get("/performance", (req, res) => {
+  const live = liveRecords();
+  const withSample = req.query["sample"] === "1";
+  const records = withSample ? [...sampleRecords(), ...live] : live;
+  res.json({ includesSample: withSample, checks: loadChecks(), ...aggregate(records) });
 });
 
 export default router;

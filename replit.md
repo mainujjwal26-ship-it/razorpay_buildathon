@@ -51,3 +51,7 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 Every call writes a time-stamped JSON-lines file to `call-logs/` (what Meera said, what was heard, model time, speech-to-text and text-to-speech time, mic taps, silences, errors). After a call, the phone shows "read | download" links. Also: `GET /api/call/logs` lists calls, `GET /api/call/logs/<id>?format=text` gives a readable report. Set `CALL_LOGGING=off` to stop logging, `CALL_LOG_DIR` to change the folder. Logs hold test conversations only; commit them so they can be analysed.
 
 To have logs reach GitHub without committing, add Replit Secrets `GITHUB_LOG_TOKEN` (a fine-grained personal access token for this repo with Contents: read and write). Each call is then pushed to the `call-logs` branch as it happens (change with `GITHUB_LOG_REPO`, `GITHUB_LOG_BRANCH`). Works on a published app too.
+
+## Merchant console (Call, Calls, Performance)
+
+The app has three tabs. **Call**: the phone plus a customer card. **Calls**: every call with an AI review (summary, key data points, rule checks, metrics, transcript). **Performance**: team metrics and charts, with an "Include sample data" switch (44 synthetic calls in `content/demo/calls.json`, clearly labelled). At the end of a call the browser asks the server to review it (`POST /api/call/finish`); the review is stored in the call's log file. The rule checks are listed in `content/review-checks.json`. Env: `LLM_REVIEW_MODEL` to pick the reviewer model.

@@ -1,0 +1,2592 @@
+[
+ {
+  "id": "sample-001",
+  "source": "sample",
+  "startedAt": "2026-09-26T17:55:35.000Z",
+  "customerName": "Kavita Joshi",
+  "durationSec": 185,
+  "borrowerTurns": 8,
+  "replyGapMs": 6799,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-002",
+  "source": "sample",
+  "startedAt": "2026-09-26T11:39:00.000Z",
+  "customerName": "Ujjwal Goel",
+  "durationSec": 21,
+  "borrowerTurns": 0,
+  "replyGapMs": 7406,
+  "outcome": "incomplete",
+  "sentiment": "calm",
+  "identityConfirmed": false,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": []
+ },
+ {
+  "id": "sample-003",
+  "source": "sample",
+  "startedAt": "2026-09-27T09:49:29.000Z",
+  "customerName": "Ujjwal Goel",
+  "durationSec": 87,
+  "borrowerTurns": 7,
+  "replyGapMs": 6109,
+  "outcome": "escalated",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-004",
+  "source": "sample",
+  "startedAt": "2026-09-27T10:25:06.000Z",
+  "customerName": "Pooja Nair",
+  "durationSec": 156,
+  "borrowerTurns": 3,
+  "replyGapMs": 6180,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-005",
+  "source": "sample",
+  "startedAt": "2026-09-27T09:26:48.000Z",
+  "customerName": "Ujjwal Goel",
+  "durationSec": 139,
+  "borrowerTurns": 9,
+  "replyGapMs": 5448,
+  "outcome": "no_commitment",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-006",
+  "source": "sample",
+  "startedAt": "2026-09-28T14:56:01.000Z",
+  "customerName": "Vikram Singh",
+  "durationSec": 132,
+  "borrowerTurns": 3,
+  "replyGapMs": 6001,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": false
+   }
+  ]
+ },
+ {
+  "id": "sample-007",
+  "source": "sample",
+  "startedAt": "2026-09-28T15:39:29.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 224,
+  "borrowerTurns": 3,
+  "replyGapMs": 5213,
+  "outcome": "no_commitment",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-008",
+  "source": "sample",
+  "startedAt": "2026-09-28T10:06:02.000Z",
+  "customerName": "Vikram Singh",
+  "durationSec": 227,
+  "borrowerTurns": 3,
+  "replyGapMs": 6403,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-009",
+  "source": "sample",
+  "startedAt": "2026-09-28T12:47:01.000Z",
+  "customerName": "Sunita Rao",
+  "durationSec": 221,
+  "borrowerTurns": 3,
+  "replyGapMs": 5851,
+  "outcome": "wrong_person",
+  "sentiment": "worried",
+  "identityConfirmed": false,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-010",
+  "source": "sample",
+  "startedAt": "2026-09-29T17:58:22.000Z",
+  "customerName": "Amit Das",
+  "durationSec": 160,
+  "borrowerTurns": 3,
+  "replyGapMs": 5760,
+  "outcome": "promise_to_pay",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-03",
+  "promiseAmount": 4200,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-011",
+  "source": "sample",
+  "startedAt": "2026-09-29T10:55:54.000Z",
+  "customerName": "Vikram Singh",
+  "durationSec": 187,
+  "borrowerTurns": 6,
+  "replyGapMs": 5158,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-012",
+  "source": "sample",
+  "startedAt": "2026-09-30T10:33:48.000Z",
+  "customerName": "Amit Das",
+  "durationSec": 183,
+  "borrowerTurns": 6,
+  "replyGapMs": 4883,
+  "outcome": "promise_to_pay",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-04",
+  "promiseAmount": 4200,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-013",
+  "source": "sample",
+  "startedAt": "2026-09-30T15:25:42.000Z",
+  "customerName": "Sunita Rao",
+  "durationSec": 98,
+  "borrowerTurns": 6,
+  "replyGapMs": 5428,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-014",
+  "source": "sample",
+  "startedAt": "2026-09-30T12:53:26.000Z",
+  "customerName": "Vikram Singh",
+  "durationSec": 74,
+  "borrowerTurns": 8,
+  "replyGapMs": 5696,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-015",
+  "source": "sample",
+  "startedAt": "2026-10-01T17:12:01.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 206,
+  "borrowerTurns": 8,
+  "replyGapMs": 5320,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-016",
+  "source": "sample",
+  "startedAt": "2026-10-01T12:17:49.000Z",
+  "customerName": "Ujjwal Goel",
+  "durationSec": 166,
+  "borrowerTurns": 7,
+  "replyGapMs": 4995,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-017",
+  "source": "sample",
+  "startedAt": "2026-10-01T15:29:20.000Z",
+  "customerName": "Amit Das",
+  "durationSec": 199,
+  "borrowerTurns": 3,
+  "replyGapMs": 4424,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-018",
+  "source": "sample",
+  "startedAt": "2026-10-01T15:35:26.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 218,
+  "borrowerTurns": 8,
+  "replyGapMs": 4283,
+  "outcome": "promise_to_pay",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-10",
+  "promiseAmount": 4200,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-019",
+  "source": "sample",
+  "startedAt": "2026-10-02T12:28:33.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 121,
+  "borrowerTurns": 6,
+  "replyGapMs": 3446,
+  "outcome": "no_commitment",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-020",
+  "source": "sample",
+  "startedAt": "2026-10-02T09:38:24.000Z",
+  "customerName": "Kavita Joshi",
+  "durationSec": 138,
+  "borrowerTurns": 4,
+  "replyGapMs": 4633,
+  "outcome": "wrong_person",
+  "sentiment": "hostile",
+  "identityConfirmed": false,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-021",
+  "source": "sample",
+  "startedAt": "2026-10-03T11:21:27.000Z",
+  "customerName": "Imran Sheikh",
+  "durationSec": 228,
+  "borrowerTurns": 6,
+  "replyGapMs": 4960,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-022",
+  "source": "sample",
+  "startedAt": "2026-10-03T10:54:32.000Z",
+  "customerName": "Neha Gupta",
+  "durationSec": 226,
+  "borrowerTurns": 7,
+  "replyGapMs": 4869,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-023",
+  "source": "sample",
+  "startedAt": "2026-10-03T12:58:47.000Z",
+  "customerName": "Imran Sheikh",
+  "durationSec": 173,
+  "borrowerTurns": 8,
+  "replyGapMs": 4780,
+  "outcome": "promise_to_pay",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-07",
+  "promiseAmount": 4200,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-024",
+  "source": "sample",
+  "startedAt": "2026-10-03T09:06:12.000Z",
+  "customerName": "Vikram Singh",
+  "durationSec": 201,
+  "borrowerTurns": 7,
+  "replyGapMs": 4224,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-025",
+  "source": "sample",
+  "startedAt": "2026-10-04T12:11:07.000Z",
+  "customerName": "Ujjwal Goel",
+  "durationSec": 121,
+  "borrowerTurns": 4,
+  "replyGapMs": 4377,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": false
+   }
+  ]
+ },
+ {
+  "id": "sample-026",
+  "source": "sample",
+  "startedAt": "2026-10-04T15:47:23.000Z",
+  "customerName": "Pooja Nair",
+  "durationSec": 141,
+  "borrowerTurns": 3,
+  "replyGapMs": 4320,
+  "outcome": "promise_to_pay",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-11",
+  "promiseAmount": 4200,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-027",
+  "source": "sample",
+  "startedAt": "2026-10-04T11:52:59.000Z",
+  "customerName": "Imran Sheikh",
+  "durationSec": 139,
+  "borrowerTurns": 8,
+  "replyGapMs": 4310,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-028",
+  "source": "sample",
+  "startedAt": "2026-10-04T12:42:25.000Z",
+  "customerName": "Ujjwal Goel",
+  "durationSec": 120,
+  "borrowerTurns": 8,
+  "replyGapMs": 3184,
+  "outcome": "escalated",
+  "sentiment": "hostile",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": false
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-029",
+  "source": "sample",
+  "startedAt": "2026-10-04T16:00:06.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 113,
+  "borrowerTurns": 9,
+  "replyGapMs": 3572,
+  "outcome": "link_sent",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": 2100,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-030",
+  "source": "sample",
+  "startedAt": "2026-10-05T09:27:31.000Z",
+  "customerName": "Sunita Rao",
+  "durationSec": 174,
+  "borrowerTurns": 9,
+  "replyGapMs": 4292,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": false
+   }
+  ]
+ },
+ {
+  "id": "sample-031",
+  "source": "sample",
+  "startedAt": "2026-10-05T09:57:20.000Z",
+  "customerName": "Rakesh Verma",
+  "durationSec": 40,
+  "borrowerTurns": 0,
+  "replyGapMs": 5364,
+  "outcome": "incomplete",
+  "sentiment": "calm",
+  "identityConfirmed": false,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": []
+ },
+ {
+  "id": "sample-032",
+  "source": "sample",
+  "startedAt": "2026-10-05T16:46:30.000Z",
+  "customerName": "Amit Das",
+  "durationSec": 205,
+  "borrowerTurns": 4,
+  "replyGapMs": 3823,
+  "outcome": "promise_to_pay",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-07",
+  "promiseAmount": 4200,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-033",
+  "source": "sample",
+  "startedAt": "2026-10-06T17:08:42.000Z",
+  "customerName": "Pooja Nair",
+  "durationSec": 139,
+  "borrowerTurns": 7,
+  "replyGapMs": 2999,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-034",
+  "source": "sample",
+  "startedAt": "2026-10-06T12:40:17.000Z",
+  "customerName": "Sunita Rao",
+  "durationSec": 210,
+  "borrowerTurns": 4,
+  "replyGapMs": 4396,
+  "outcome": "part_payment",
+  "sentiment": "hostile",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-09",
+  "promiseAmount": 2100,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-035",
+  "source": "sample",
+  "startedAt": "2026-10-06T15:30:30.000Z",
+  "customerName": "Vikram Singh",
+  "durationSec": 153,
+  "borrowerTurns": 5,
+  "replyGapMs": 4387,
+  "outcome": "escalated",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-036",
+  "source": "sample",
+  "startedAt": "2026-10-06T11:27:41.000Z",
+  "customerName": "Rakesh Verma",
+  "durationSec": 147,
+  "borrowerTurns": 6,
+  "replyGapMs": 2860,
+  "outcome": "no_commitment",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-037",
+  "source": "sample",
+  "startedAt": "2026-10-07T15:18:56.000Z",
+  "customerName": "Neha Gupta",
+  "durationSec": 133,
+  "borrowerTurns": 3,
+  "replyGapMs": 4073,
+  "outcome": "no_commitment",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-038",
+  "source": "sample",
+  "startedAt": "2026-10-07T15:01:23.000Z",
+  "customerName": "Imran Sheikh",
+  "durationSec": 202,
+  "borrowerTurns": 3,
+  "replyGapMs": 4009,
+  "outcome": "no_commitment",
+  "sentiment": "irritated",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-039",
+  "source": "sample",
+  "startedAt": "2026-10-07T14:01:41.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 203,
+  "borrowerTurns": 5,
+  "replyGapMs": 2855,
+  "outcome": "refused",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-040",
+  "source": "sample",
+  "startedAt": "2026-10-07T16:22:21.000Z",
+  "customerName": "Sanjay Patel",
+  "durationSec": 208,
+  "borrowerTurns": 8,
+  "replyGapMs": 3222,
+  "outcome": "promise_to_pay",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": "2026-10-10",
+  "promiseAmount": 4200,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-041",
+  "source": "sample",
+  "startedAt": "2026-10-07T15:45:00.000Z",
+  "customerName": "Sunita Rao",
+  "durationSec": 115,
+  "borrowerTurns": 3,
+  "replyGapMs": 3273,
+  "outcome": "link_sent",
+  "sentiment": "calm",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": 3000,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": false
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-042",
+  "source": "sample",
+  "startedAt": "2026-10-08T09:37:30.000Z",
+  "customerName": "Rakesh Verma",
+  "durationSec": 21,
+  "borrowerTurns": 0,
+  "replyGapMs": 1800,
+  "outcome": "incomplete",
+  "sentiment": "calm",
+  "identityConfirmed": false,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": []
+ },
+ {
+  "id": "sample-043",
+  "source": "sample",
+  "startedAt": "2026-10-08T12:37:15.000Z",
+  "customerName": "Neha Gupta",
+  "durationSec": 93,
+  "borrowerTurns": 6,
+  "replyGapMs": 3580,
+  "outcome": "escalated",
+  "sentiment": "worried",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 1,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ },
+ {
+  "id": "sample-044",
+  "source": "sample",
+  "startedAt": "2026-10-08T12:25:03.000Z",
+  "customerName": "Imran Sheikh",
+  "durationSec": 177,
+  "borrowerTurns": 7,
+  "replyGapMs": 2725,
+  "outcome": "no_commitment",
+  "sentiment": "hostile",
+  "identityConfirmed": true,
+  "promiseDate": null,
+  "promiseAmount": null,
+  "tickets": 0,
+  "checks": [
+   {
+    "id": "identity_first",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_threats",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_paid_claim",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "offer_min",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "no_false_promise",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "facts_only",
+    "type": "Hard",
+    "pass": true
+   },
+   {
+    "id": "date_correct",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "one_question",
+    "type": "Judgement",
+    "pass": true
+   },
+   {
+    "id": "clean_close",
+    "type": "Judgement",
+    "pass": true
+   }
+  ]
+ }
+]
