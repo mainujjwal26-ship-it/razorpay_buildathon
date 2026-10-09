@@ -25,3 +25,8 @@
 {"ts":"2026-10-09T14:25:26.028Z","text":"नहीं पैसे ही नहीं है ना मेरे पास अभी सैलरी तो आ गई है बट पैसे नहीं है मेरे पास।","type":"borrower_reply","callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","source":"voice","clientTs":"2026-10-09T14:25:25.969Z"}
 {"ts":"2026-10-09T14:25:32.476Z","turn":3,"type":"llm_turn","llmMs":6417,"callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","parsedOk":true,"rawLength":257}
 {"ts":"2026-10-09T14:25:32.480Z","raw":"{\"say\":\"Samajh gayi, Ujjwal ji. Aadhi EMI, matlab do hazaar ek sau rupaye, kis tareekh tak bhar paayenge?\",\"speak\":\"समझ गई, उज्जवल जी। आधी EMI, मतलब दो हज़ार एक सौ रुपये, किस तारीख़ तक भर पाएँगे?\",\"action\":\"none\",\"amount\":null,\"reason\":null,\"endCall\":false}","say":"Samajh gayi, Ujjwal ji. Aadhi EMI, matlab do hazaar ek sau rupaye, kis tareekh tak bhar paayenge?","type":"agent_line","speak":"समझ गई, उज्जवल जी। आधी EMI, मतलब दो हज़ार एक सौ रुपये, किस तारीख़ तक भर पाएँगे?","action":"none","amount":null,"callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","reason":null,"endCall":false}
+{"ts":"2026-10-09T14:25:32.663Z","type":"speak_start","chars":79,"callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","clientTs":"2026-10-09T14:25:32.600Z"}
+{"ms":1436,"ts":"2026-10-09T14:25:34.097Z","type":"tts","chars":79,"callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155"}
+{"ts":"2026-10-09T14:25:39.014Z","type":"speak_end","callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","clientTs":"2026-10-09T14:25:38.944Z"}
+{"ts":"2026-10-09T14:25:39.046Z","type":"listen_start","micOn":true,"callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","clientTs":"2026-10-09T14:25:38.944Z"}
+{"ts":"2026-10-09T14:25:46.073Z","type":"call_end","callId":"b76fe40e-b545-4d4a-918d-b7b4e2ed3155","clientTs":"2026-10-09T14:25:45.997Z"}
