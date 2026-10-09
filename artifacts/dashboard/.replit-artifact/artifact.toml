@@ -17,6 +17,7 @@ BASE_PATH = "/"
 run = "pnpm --filter @workspace/dashboard run dev"
 
 [services.production]
+serve = "static"
 publicDir = "artifacts/dashboard/dist/public"
 
 [services.production.build]
