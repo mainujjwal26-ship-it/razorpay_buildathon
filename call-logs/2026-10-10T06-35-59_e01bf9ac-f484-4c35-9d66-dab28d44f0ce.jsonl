@@ -17,3 +17,8 @@
 {"ts":"2026-10-10T06:36:41.546Z","text":"मैम मेरी अभी तक सैलरी नहीं आई है।","type":"borrower_reply","callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","source":"voice","clientTs":"2026-10-10T06:36:41.413Z"}
 {"ts":"2026-10-10T06:36:44.389Z","turn":2,"type":"llm_turn","llmMs":2685,"callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","parsedOk":true,"rawLength":263}
 {"ts":"2026-10-10T06:36:44.394Z","raw":"{\"say\":\"Samajh rahi hoon Ujjwal ji, salary abhi tak nahi aayi. Aapki salary kis tareekh tak aane wali hai?\",\"speak\":\"समझ रही हूँ उज्जवल जी, salary अभी तक नहीं आई। आपकी salary किस तारीख़ तक आने वाली है?\",\"action\":\"none\",\"amount\":null,\"reason\":null,\"endCall\":false}","say":"Samajh rahi hoon Ujjwal ji, salary abhi tak nahi aayi. Aapki salary kis tareekh tak aane wali hai?","type":"agent_line","speak":"समझ रही हूँ उज्जवल जी, salary अभी तक नहीं आई। आपकी salary किस तारीख़ तक आने वाली है?","action":"none","amount":null,"callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","reason":null,"endCall":false}
+{"ts":"2026-10-10T06:36:49.512Z","type":"speak_start","chars":84,"callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","clientTs":"2026-10-10T06:36:44.420Z"}
+{"ms":1641,"ts":"2026-10-10T06:36:51.149Z","type":"tts","chars":84,"callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce"}
+{"ts":"2026-10-10T06:36:55.778Z","type":"speak_end","callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","clientTs":"2026-10-10T06:36:55.648Z"}
+{"ts":"2026-10-10T06:36:55.976Z","type":"listen_start","micOn":true,"callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","clientTs":"2026-10-10T06:36:55.648Z"}
+{"ts":"2026-10-10T06:37:01.228Z","type":"call_end","callId":"e01bf9ac-f484-4c35-9d66-dab28d44f0ce","clientTs":"2026-10-10T06:37:01.090Z"}
