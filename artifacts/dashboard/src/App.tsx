@@ -1,7 +1,6 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { getCallConfig, type CallConfig } from "./lib/api";
-import { NextStep } from "./components/Ui";
+import { getCallConfig, getCalls, type CallConfig } from "./lib/api";
 import { CallPage } from "./pages/CallPage";
 import { CallsPage, CallDetailPage } from "./pages/CallsPage";
 import { PerformancePage } from "./pages/PerformancePage";
@@ -17,6 +16,14 @@ function useRoute(): string {
   }, []);
   return hash;
 }
+
+const STEPS = [
+  { key: "call", href: "#/call", name: "Make the call" },
+  { key: "calls", href: "#/calls", name: "View call data" },
+  { key: "detail", href: "#/calls", name: "Review the call" },
+  { key: "performance", href: "#/performance", name: "Collections performance" },
+  { key: "quality", href: "#/quality", name: "Agent performance" },
+];
 
 export function App() {
   const route = useRoute();
@@ -39,7 +46,14 @@ export function App() {
     quality: ["Agent performance", "Is the agent safe to trust? Hard and judgement rule breaches"],
   };
   const [title, sub] = titles[tab];
-  const [stepsOpen, setStepsOpen] = useState(false);
+  const cur = STEPS.findIndex((x) => x.key === (tab === "calls" && detailId ? "detail" : tab));
+  const go = async (i: number) => {
+    const st = STEPS[Math.max(0, Math.min(STEPS.length - 1, i))]!;
+    if (st.key === "detail") {
+      const latest = await getCalls().then((r) => r.calls[0]?.id).catch(() => undefined);
+      window.location.hash = latest ? `#/calls/${latest}` : "#/calls";
+    } else window.location.hash = st.href;
+  };
   const item = (href: string, key: string, label: string, icon: React.ReactNode) => (
     <a href={href} aria-current={tab === key ? "page" : undefined}>{icon}{label}</a>
   );
@@ -54,20 +68,10 @@ export function App() {
           <span className="logoplate"><img src={`${import.meta.env.BASE_URL}razorpay-logo.png`} alt="Razorpay" height="20" /></span>
           <b>Trusted Collections Agent</b>
         </div>
-        <div className="stepsmenu">
-          <button type="button" className="stepsbtn" aria-expanded={stepsOpen} onClick={() => setStepsOpen((o) => !o)}>Steps</button>
-          {stepsOpen && (
-            <div className="stepspop" role="dialog" aria-label="How to review this build">
-              <b>How to review this build</b>
-              <ol>
-                <li><a href="#/call" onClick={() => setStepsOpen(false)}>Call.</a> Start a call as the borrower and talk to Meera. End it.</li>
-                <li><a href="#/calls" onClick={() => setStepsOpen(false)}>Calls.</a> Your call appears in the list with its AI-or-person recommendation.</li>
-                <li>Call review. Open a call: summary, recommendation and transcript.</li>
-                <li><a href="#/performance" onClick={() => setStepsOpen(false)}>Collections performance.</a> Is the agent recovering money?</li>
-                <li><a href="#/quality" onClick={() => setStepsOpen(false)}>Agent performance.</a> Is the agent safe to trust?</li>
-              </ol>
-            </div>
-          )}
+        <div className="stepper" role="group" aria-label="Review steps">
+          <button type="button" aria-label="Previous step" disabled={cur <= 0} onClick={() => void go(cur - 1)}>←</button>
+          <span className="stepname">{cur >= 0 ? `Step ${cur + 1}: ${STEPS[cur]!.name}` : "Start the review"}</span>
+          <button type="button" aria-label="Next step" disabled={cur === STEPS.length - 1} onClick={() => void go(cur + 1)}>→</button>
         </div>
       </header>
       <div className="layout">
@@ -92,7 +96,7 @@ export function App() {
               {/* Always mounted so a call in progress is not cut off when the tab changes. */}
               <div hidden={tab !== "call"}><CallPage config={config} /></div>
               {tab === "calls" && (detailId ? <CallDetailPage id={detailId} /> : <CallsPage />)}
-              {tab === "performance" && <><PerformancePage /><NextStep href="#/quality">Move to step 5: Agent performance</NextStep></>}
+              {tab === "performance" && <PerformancePage />}
               {tab === "quality" && <QualityPage />}
               {tab === "how" && <HowItWorksPage />}
             </>

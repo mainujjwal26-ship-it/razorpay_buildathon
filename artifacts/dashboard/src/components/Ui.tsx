@@ -45,6 +45,3 @@ export const Metric = ({ label, what, value, detail }: { label: string; what: st
   </div>
 );
 
-export function NextStep({ href, children }: { href: string; children: React.ReactNode }) {
-  return <div className="nextstep"><a className="btn pri linkbtn" href={href}>{children} →</a></div>;
-}
