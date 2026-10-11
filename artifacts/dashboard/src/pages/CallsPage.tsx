@@ -20,7 +20,7 @@ export function CallsPage() {
           <table className="grid">
             <thead>
               <tr>
-                <th>When</th><th>Customer</th><th>Outcome</th><th>Promise</th><th>Length</th>
+                <th>When</th><th>Customer</th><th>Outcome</th><th>Promise</th><th>Recommendation</th><th>Length</th>
               </tr>
             </thead>
             <tbody>
@@ -31,6 +31,7 @@ export function CallsPage() {
                     <td>{r.customerName}</td>
                     <td><Chip outcome={r.outcome} /></td>
                     <td>{r.promiseAmount ? `${inr(r.promiseAmount)}${r.promiseDate ? ` · ${dateOnly(r.promiseDate)}` : ""}` : "–"}</td>
+                    <td>{r.recommendation === "human" ? <span className="chip bad">Person</span> : r.recommendation === "ai" ? <span className="chip good">AI</span> : "–"}</td>
                     <td>{mmss(r.durationSec)}</td>
                   </tr>
                 );

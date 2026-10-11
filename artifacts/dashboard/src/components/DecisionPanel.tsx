@@ -22,58 +22,46 @@ export const BandChip = ({ band, score }: { band: Band; score: number }) => (
 );
 
 function Flow({ d }: { d: Decision }) {
+  const rt = d.route;
+  if (!rt) return null;
   const m = d.metrics;
-  const first = d.plan?.steps[0]?.action;
-  const person = first === "human" || first === "field";
-  const shifted = d.result.band === "Low" || person;
   const callEv = d.walk.filter((w) => w.source === "call");
   const broken = m.promisesTotal - m.promisesKept;
-  const q1 = [
-    `${m.bouncesInWindow} of the last ${m.windowSize} EMIs bounced`,
-    `${m.promisesKept} of ${m.promisesTotal} past promises kept`,
-    ...callEv.map((w) => `This call: ${w.label.toLowerCase()}, ${w.detail.replace(/\.$/, "")}`),
-    ...(callEv.length ? [] : ["This call: no borrower evidence"]),
-  ];
-  const q2 = [
-    `${m.callsAnswered} of ${m.callsMade} AI calls answered`,
-    `${broken} promise${broken === 1 ? "" : "s"} made to the AI broken`,
-    ...callEv.slice(0, 2).map((w) => `This call: ${w.label.toLowerCase()}`),
-  ];
-  const Node = ({ n, q, ev, ans, off }: { n: number; q: string; ev: string[]; ans: string; off?: boolean }) => (
-    <div className={`fnode ${off ? "off" : ""}`}>
-      <div className="fq"><span className="dnum">{n}</span><b>{q}</b><span className={`chip ${off ? "neutral" : ans === "Yes" ? "bad" : "good"}`}>{off ? "Not needed" : ans}</span></div>
+  const q1 = [`${m.bouncesInWindow} of the last ${m.windowSize} EMIs bounced`, `${m.promisesKept} of ${m.promisesTotal} past promises kept, ${broken} broken`];
+  const q2 = callEv.length ? callEv.filter((w) => w.id === "specific" || w.id === "coop").map((w) => `${w.label}: ${w.detail}`) : ["The borrower did not speak, so there is no promise."];
+  const Node = ({ n, q, ev, yes }: { n: number; q: string; ev: string[]; yes: boolean }) => (
+    <div className="fnode">
+      <div className="fq"><span className="dnum">{n}</span><b>{q}</b><span className={`chip ${yes ? "bad" : "good"}`}>{yes ? "Yes" : "No"}</span></div>
       <ul>{ev.map((e) => <li key={e}>{e}</li>)}</ul>
     </div>
   );
   return (
     <div className="flow">
-      <Node n={1} q="Has this borrower's intent shifted toward not paying?" ev={q1} ans={shifted ? "Yes" : "No"} />
-      <div className="farrow" aria-hidden="true">{shifted ? "Yes ↓" : "No ↓"}</div>
-      <Node n={2} q="Has the AI already been let down repeatedly?" ev={q2} ans={person ? "Yes" : "No"} off={!shifted} />
+      <Node n={1} q="Has this borrower's intent shifted toward not paying?" ev={q1} yes={rt.intentShifted} />
       <div className="farrow" aria-hidden="true">↓</div>
-      <div className={`fout ${person ? "human" : "ai"}`}>
+      <Node n={2} q="Did the borrower let the AI down on this call?" ev={q2} yes={rt.aiLetDown} />
+      <div className="farrow" aria-hidden="true">Either answer is Yes → person. Both No → AI. ↓</div>
+      <div className={`fout ${rt.to === "human" ? "human" : "ai"}`}>
         <span className="k">Recommendation</span>
-        <b>{d.plan?.headline ?? d.blocked ?? "No plan"}</b>
+        <b>{rt.headline}</b>
       </div>
     </div>
   );
 }
 
 export function DecisionPanel({ d }: { d: Decision }) {
-  const plan = d.plan;
+  const rt = d.route;
   return (
     <section className="panel dec" aria-label="Recommended next step">
       <header className="panel-h">
         <h2>Recommended next step</h2>
-        <BandChip band={d.result.band} score={d.result.score} />
       </header>
-      {d.blocked || !plan ? (
-        <p className="note bad">{d.blocked ?? "No plan could be made."}</p>
+      {d.blocked || !rt ? (
+        <p className="note bad">{d.blocked ?? "No recommendation could be made."}</p>
       ) : (
         <>
-          <p className="dec-head">Why: {d.because}</p>
+          <p className="dec-head">Why: {rt.why}</p>
           <Flow d={d} />
-          {plan.suggestion && <div className="dsug"><b>Fix the cause, not just this EMI.</b> {plan.suggestion}</div>}
         </>
       )}
     </section>

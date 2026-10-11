@@ -113,6 +113,8 @@ export interface CallRecord {
   handoff?: boolean;
   /** The decision layer routes this borrower to a person. */
   plannedHuman?: boolean;
+  /** AI or person, from the simple route. Null until the call is reviewed. */
+  recommendation?: "ai" | "human" | null;
   /** For the demo, a payment link that was sent counts as paid. Days to resolve is only filled for sample calls. */
   payment?: { due: number; paid: number; resolved: boolean; daysToResolve: number | null };
 }
@@ -156,14 +158,20 @@ export async function liveRecords(): Promise<CallRecord[]> {
       plannedHuman: (() => {
         const customer = getCustomer(String(start["customerId"] ?? ""));
         if (!customer || !r) return false;
-        return decisionFor(customer, factsOfReview(r))?.withHistory.action === "human";
+        return decisionFor(customer, factsOfReview(r))?.route?.to === "human";
+      })(),
+      recommendation: (() => {
+        const customer = getCustomer(String(start["customerId"] ?? ""));
+        if (!customer || !r) return null;
+        return decisionFor(customer, factsOfReview(r))?.route?.to ?? null;
       })(),
     });
   }
   return out;
 }
 
-export const sampleRecords = (): CallRecord[] => readContentJson<CallRecord[]>("demo/calls.json");
+export const sampleRecords = (): CallRecord[] =>
+  readContentJson<CallRecord[]>("demo/calls.json").map((r) => ({ ...r, recommendation: r.outcome === "unreviewed" ? null : r.plannedHuman ? "human" : "ai" }));
 
 const PROMISED: Outcome[] = ["promise_to_pay", "part_payment", "link_sent"];
 

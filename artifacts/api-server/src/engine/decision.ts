@@ -359,3 +359,29 @@ export function decide(input: DecisionInput): Decision {
 }
 
 export const monthLabel = monthName;
+
+// ----- The simple AI-or-person route shown to reviewers -----
+export interface Route {
+  /** Intent has shifted toward not paying, judged from the EMI history alone. */
+  intentShifted: boolean;
+  /** The AI was let down on this call: vague or no promise, or an uncooperative borrower. */
+  aiLetDown: boolean;
+  to: "ai" | "human";
+  headline: string;
+  why: string;
+}
+export function routeOf(m: HistoryMetrics, call: CallFacts, r: DecisionRules): Route {
+  const intentShifted = m.bouncesInWindow >= r.history.bounces.manyAtLeast;
+  const hasPromise = dayOf(call.promiseDate) !== null && typeof call.promiseAmount === "number" && call.promiseAmount > 0;
+  const aiLetDown = call.outcome === "wrong_person" ? false : !hasPromise || call.cooperation !== "cooperative";
+  const human = intentShifted || aiLetDown;
+  const hist = `${m.bouncesInWindow} of the last ${m.windowSize} EMIs bounced`;
+  const why = intentShifted && !aiLetDown
+    ? `${hist}, so intent to pay has clearly weakened. The AI was not let down on this call, but waiting for it to be let down again would only add another missed date, so a person should step in now.`
+    : intentShifted
+    ? `${hist} and the AI was let down on this call as well (no firm promise or an uncooperative borrower), so a person should take over.`
+    : aiLetDown
+    ? `Intent to pay has not shifted (${hist}), but the AI was let down on this call, so a person should follow up.`
+    : `${hist} and the borrower gave a firm date and amount on this call, so the AI can keep going.`;
+  return { intentShifted, aiLetDown, to: human ? "human" : "ai", headline: human ? "Hand over to a person" : "Continue with the AI", why };
+}

@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../../artifacts/api-server/src/engine/decis
 const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 const mod = { exports: {} };
 vm.runInNewContext(js, { module: mod, exports: mod.exports });
-const { decide, deriveHistory } = mod.exports;
+const { decide, deriveHistory, routeOf } = mod.exports;
 
 const rules = JSON.parse(readFileSync(new URL("../../content/decision-rules.json", import.meta.url), "utf8"));
 const history = JSON.parse(readFileSync(new URL("../../content/customers/history.json", import.meta.url), "utf8"))["c-ujjwal"];
@@ -99,4 +99,20 @@ test("no conversation: plan from history alone, no call steps in the walk", () =
 test("score never leaves the allowed range", () => {
   const d = run({ outcome: "refused", cooperation: "hostile", rootCause: "dispute" });
   assert.ok(d.result.score >= rules.min && d.result.score <= rules.max);
+});
+
+const routeFor = (call) => routeOf(deriveHistory(history, rules), { outcome: "promise_to_pay", rootCause: null, promiseDate: null, promiseAmount: null, cooperation: "cooperative", ...call }, rules);
+
+test("route: intent shifted goes to a person even when the AI was not let down", () => {
+  const r = routeFor({ promiseDate: "2026-10-10", promiseAmount: 4200 });
+  assert.equal(r.intentShifted, true);
+  assert.equal(r.aiLetDown, false);
+  assert.equal(r.to, "human");
+});
+
+test("route: a vague call also goes to a person; intent not shifted and a firm promise stays with AI", () => {
+  assert.equal(routeFor({ outcome: "no_commitment", cooperation: "evasive" }).aiLetDown, true);
+  const calm = { ...history, ledger: history.ledger.map((l) => ({ ...l, emi: "paid_on_time" })) };
+  const r = routeOf(deriveHistory(calm, rules), { outcome: "promise_to_pay", rootCause: null, promiseDate: "2026-10-10", promiseAmount: 4200, cooperation: "cooperative" }, rules);
+  assert.equal(r.to, "ai");
 });

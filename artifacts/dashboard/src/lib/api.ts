@@ -149,6 +149,7 @@ export interface CallRow {
   promiseDate: string | null;
   promiseAmount: number | null;
   tickets: number;
+  recommendation?: "ai" | "human" | null;
   checks: { id: string; type: string; pass: boolean }[];
 }
 export interface CallDetail {
@@ -180,6 +181,7 @@ export interface Decision {
   blocked: string | null;
   callAlone: { action: ActionKey; text: string };
   withHistory: { action: ActionKey | null; text: string };
+  route: { intentShifted: boolean; aiLetDown: boolean; to: "ai" | "human"; headline: string; why: string } | null;
   changed: boolean;
   because: string;
   usedCallEvidence: boolean;
