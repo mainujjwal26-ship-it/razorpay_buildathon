@@ -79,12 +79,12 @@ export function HowItWorksPage() {
       <section className="panel">
         <h2>How a bounced EMI becomes a resolved call, and what the lender sees</h2>
         <p className="muted" style={{ margin: "6px 0 14px" }}>
-          Follow the numbers 1 to 6. Click a screen at the bottom to open it.
+          Follow the numbers 1 to 7. Click a screen at the bottom to open it.
         </p>
         <div className="fcwrap">
           <figure style={{ margin: 0 }}>
             <svg viewBox="0 0 1300 820" role="img" className="fc"
-              aria-label="Flowchart: a bounced EMI triggers a call from Meera, who first checks she has the right person, then states only lender facts. The borrower promises to pay, offers a part payment, takes a payment link, or the case goes to a human. Every call is reviewed automatically and shows up on the Calls, Collections performance and Agent performance screens.">
+              aria-label="Flowchart: a bounced EMI triggers a call from Meera, who first checks she has the right person, then states only lender facts. The borrower promises to pay, offers a part payment, takes a payment link, or the case goes to a human. Every call is reviewed automatically, then a recommendation says whether the AI should continue or a person should take over. Calls, Collections performance and Agent performance show the results.">
               <defs>
                 <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
                   <path d="M0 0L10 5L0 10z" fill="#6b7788" />
@@ -101,7 +101,7 @@ export function HowItWorksPage() {
                 {/* all ends -> call ends */}
                 <path d="M570 429V485H1215M765 439V485M915 439V485M1065 439V485M1215 439V485" />
                 <path className="fc-arr" d="M1000 485V520" />
-                <path className="fc-arr" d="M895 570H842" /><path className="fc-arr" d="M630 570H577" strokeDasharray="5 4" />
+                <path className="fc-arr" d="M895 570H842" /><path className="fc-arr" d="M630 570H577" />
                 <path d="M735 618V668M620 668H1080M735 668H850" /><path className="fc-arr" d="M620 668V705" /><path className="fc-arr" d="M850 668V705" /><path className="fc-arr" d="M1080 668V705" />
               </g>
               <text x="672" y="90" className="fc-lbl">Yes</text>
@@ -139,24 +139,24 @@ export function HowItWorksPage() {
                 icon={ic("M-13 5c8-9 18-9 26 0l-5 5-5-3v-4a14 14 0 0 0-6 0v4l-5 3z")} />
               <Box cx={735} cy={570} w={210} cls="fc-rev" h={96} lines={["Auto-reviewed"]} sub="Summary + rule checks"
                 icon={ic("M0-14l13 5v8c0 8-6 13-13 15-7-2-13-7-13-15v-8zM-5 1l4 4 7-8", "#1a63d6")} />
-              <Box cx={470} cy={570} w={210} cls="fc-node" dashed lines={["Human spot-check"]} sub="Marks results right / wrong"
-                icon={<Person x={0} y={0} tone="#0d1b2e" />} />
+              <Box cx={470} cy={570} w={210} cls="fc-rev" h={96} lines={["AI or person?"]} sub="History + this call"
+                icon={<g><Person x={-6} y={2} tone="#1a63d6" /><path d="M8-6h10m-4-4l4 4-4 4" fill="none" stroke="#1a63d6" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /></g>} />
 
               {/* Row D: dashboards (clickable) */}
               <a href="#/calls" className="fc-link"><g>
                 <rect x={520} y={705} width={200} height={80} rx="12" className="fc-box fc-out" />
                 <g transform="translate(548,745)">{ic("M-12-8h24M-12 0h24M-12 8h14")}</g>
-                <text x={574} y={741} className="fc-t">Calls</text><text x={574} y={759} className="fc-s">Each call, reviewed</text>
+                <text x={574} y={741} className="fc-t">Calls</text><text x={574} y={759} className="fc-s">Review + recommendation</text>
               </g></a>
               <a href="#/performance" className="fc-link"><g>
                 <rect x={750} y={705} width={200} height={80} rx="12" className="fc-box fc-out" />
                 <g transform="translate(778,745)">{ic("M-12 12V0M-4 12V-12M4 12V-4M12 12V4")}</g>
-                <text x={804} y={741} className="fc-t">Performance</text><text x={804} y={759} className="fc-s">Money recovered</text>
+                <text x={804} y={741} className="fc-t">Collections</text><text x={804} y={759} className="fc-s">Money recovered</text>
               </g></a>
               <a href="#/quality" className="fc-link"><g>
                 <rect x={980} y={705} width={200} height={80} rx="12" className="fc-box fc-out" />
                 <g transform="translate(1008,745)">{ic("M0-13l12 5v7c0 7-5 12-12 14-7-2-12-7-12-14v-7zM-4 1l3 3 6-7")}</g>
-                <text x={1034} y={741} className="fc-t">Quality</text><text x={1034} y={759} className="fc-s">Are the rules holding?</text>
+                <text x={1034} y={741} className="fc-t">Agent performance</text><text x={1034} y={759} className="fc-s">Are the rules holding?</text>
               </g></a>
 
               {/* step badges */}
@@ -165,7 +165,8 @@ export function HowItWorksPage() {
               <Badge x={990} y={44} n={3} />
               <Badge x={1150} y={336} n={4} />
               <Badge x={640} y={526} n={5} />
-              <Badge x={534} y={689} n={6} />
+              <Badge x={365} y={526} n={6} />
+              <Badge x={534} y={689} n={7} />
 
               {/* legend */}
               <g transform="translate(30,330)">
@@ -184,13 +185,14 @@ export function HowItWorksPage() {
       </section>
 
       <section className="panel">
-        <h2>The six steps</h2>
+        <h2>The seven steps</h2>
         <ol className="how-steps">
           <li><b>A payment bounces.</b> An EMI auto-debit fails and the borrower becomes overdue.</li>
           <li><b>Meera calls within minutes.</b> She confirms she has the right person before mentioning the loan.</li>
           <li><b>She resolves it on the call.</b> A promise to pay, a part payment (never below the lender's minimum), or one payment link.</li>
           <li><b>Anything unusual goes to a human.</b> Disputes, hardship and questions outside her facts become a ticket with a summary.</li>
-          <li><b>Every call is reviewed automatically.</b> A summary, key data points and a check against the lender's rules, by code and AI, with human spot-checks.</li>
+          <li><b>Every call is reviewed automatically.</b> A summary, key data points and a check against the lender's rules, by code and AI.</li>
+          <li><b>A recommendation follows.</b> Has the borrower's intent shifted toward not paying, judged from the EMI history? And did the borrower let the AI down on this call? If either is yes, a person takes over; if both are no, the AI continues.</li>
           <li><b>The lender sees the numbers.</b> Calls, Collections performance and Agent performance show what happened, how much was recovered, and whether the rules held.</li>
         </ol>
       </section>
