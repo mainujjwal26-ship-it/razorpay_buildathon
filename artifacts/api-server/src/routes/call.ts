@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import { llmConfigured, LlmNotConfiguredError } from "../adapters/llm";
 import express from "express";
 import { speechConfigured, synthesize, transcribe } from "../adapters/speech";
-import { contentVersion, getCustomer, loadCustomers, loadDecisionRules, loadHistory, loadPolicy, type Customer } from "../lib/content";
-import { decide, type CallFacts, type Cooperation } from "../engine/decision";
+import { contentVersion, getCustomer, loadCustomers, loadPolicy } from "../lib/content";
+import type { CallFacts, Cooperation } from "../engine/decision";
+import { decisionFor, factsOfReview } from "../engine/decisionRun";
 import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
 import { runTurn, toSpeechVersion, type HistoryItem } from "../engine/turn";
@@ -16,20 +17,7 @@ import { listCalls, logEvent, loggingOn, readCall, renderReport, safeId, withRev
 
 const router: IRouter = Router();
 
-/** Joins the borrower's history with the facts of a call. Returns null when there is no history for this borrower. */
-function decisionFor(customer: Customer, facts: CallFacts) {
-  const history = loadHistory(customer.id);
-  if (!history) return null;
-  const decision = decide({ customer, history, call: facts, rules: loadDecisionRules(), minPartPercent: loadPolicy().minPartPaymentPercent });
-  return { ...decision, history: { sample: history.sample === true, note: history.note ?? null, profile: history.profile, ledger: history.ledger, calls: history.calls } };
-}
-
 const COOP: Cooperation[] = ["cooperative", "evasive", "hostile"];
-function factsOfReview(review: NonNullable<ReturnType<typeof reviewOf>>): CallFacts {
-  const cooperation: Cooperation =
-    review.cooperation ?? (review.sentiment === "hostile" || review.outcome === "refused" ? "hostile" : review.sentiment === "irritated" && review.outcome === "no_commitment" ? "evasive" : "cooperative");
-  return { outcome: review.outcome, rootCause: review.rootCause ?? null, promiseDate: review.promiseDate, promiseAmount: review.promiseAmount, cooperation };
-}
 
 router.get("/call/config", (_req, res) => {
   const policy = loadPolicy();

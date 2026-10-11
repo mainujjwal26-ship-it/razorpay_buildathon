@@ -35,9 +35,9 @@ export function App() {
     call: ["Call", "Place a test call and see the customer's details"],
     calls: [detailId ? "Call review" : "Calls", detailId ? "Summary, data points and rule checks" : "Every call, newest first"],
     decision: ["Decision", "What to do next, from the borrower's history and what they said on the call"],
-    performance: ["Performance", "How the collections team is doing"],
+    performance: ["Collections performance", "Is the agent recovering money?"],
     how: ["How it works", "From a bounced EMI to a reviewed call"],
-    quality: ["Quality", "Can we trust the calls? Rule breaches and checks"],
+    quality: ["Agent performance", "Is the agent safe to trust? Hard and judgement rule breaches"],
   };
   const [title, sub] = titles[tab];
   const item = (href: string, key: string, label: string, icon: React.ReactNode) => (
@@ -62,8 +62,8 @@ export function App() {
           {item("#/call", "call", "Call", ic("M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"))}
           {item("#/calls", "calls", "Calls", ic("M4 6h16M4 12h16M4 18h10"))}
           {item("#/decision", "decision", "Decision", ic("M12 3v6M12 9l-6 5M12 9l6 5M6 14v4M18 14v4"))}
-          {item("#/performance", "performance", "Performance", ic("M4 20V10M10 20V4M16 20v-8M22 20H2"))}
-          {item("#/quality", "quality", "Quality", ic("M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"))}
+          {item("#/performance", "performance", "Collections performance", ic("M4 20V10M10 20V4M16 20v-8M22 20H2"))}
+          {item("#/quality", "quality", "Agent performance", ic("M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"))}
           <div className="sec">About</div>
           {item("#/how", "how", "How it works", ic("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 8v.5"))}
           <div className="foot">{config?.testMode ? "Test mode: no real borrowers are called." : "Live mode"}</div>

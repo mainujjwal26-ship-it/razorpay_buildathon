@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
 import { getPerformance, type Performance } from "../lib/api";
 import { Section, Tile } from "../components/Ui";
-import { LineChart } from "../components/LineChart";
-import { day, inr, mmss, OUTCOME_LABEL, pct, ROOT_CAUSE_LABEL, secs } from "../lib/format";
+import { inr, pct, ROOT_CAUSE_LABEL } from "../lib/format";
 
-const ORDER = ["promise_to_pay", "part_payment", "link_sent", "no_commitment", "escalated", "refused", "wrong_person", "incomplete"];
-
-function Bars({ rows, max, format }: { rows: { label: string; value: number; sub?: string }[]; max: number; format: (n: number) => string }) {
+function Bars({ rows, max }: { rows: { label: string; value: number }[]; max: number }) {
   return (
     <ul className="bars">
       {rows.map((r) => (
         <li key={r.label}>
           <span className="bl">{r.label}</span>
           <span className="bt"><i style={{ width: `${Math.max(2, (r.value / max) * 100)}%` }} /></span>
-          <span className="bv">{format(r.value)}{r.sub && <span className="muted small"> {r.sub}</span>}</span>
+          <span className="bv">{r.value}</span>
         </li>
       ))}
     </ul>
   );
 }
 
+const NOT_CONNECTED = "Needs payment confirmation, which is not connected in this build. Shown from sample data.";
+
+/** Collections business performance: six metrics, then why borrowers miss payments. */
 export function PerformancePage() {
   const [sample, setSample] = useState(false);
   const [auto, setAuto] = useState(true);
@@ -36,21 +36,20 @@ export function PerformancePage() {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Failed"));
   }, [sample]);
 
-  if (error) return <Section title="Performance"><p className="note bad">{error}</p></Section>;
+  if (error) return <Section title="Collections performance"><p className="note bad">{error}</p></Section>;
   if (!p) return <p className="muted">Loading…</p>;
-  const k = p.kpis;
-  const outcomeRows = ORDER.filter((o) => p.outcomes[o]).map((o) => ({ label: OUTCOME_LABEL[o] ?? o, value: p.outcomes[o] ?? 0 }));
-  const outMax = Math.max(1, ...outcomeRows.map((r) => r.value));
+  const c = p.collections;
+  const reviewed = p.totals.reviewed > 0;
   const causeRows = Object.entries(p.rootCauses ?? {})
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => ({ label: ROOT_CAUSE_LABEL[k] ?? k, value: v }));
   const causeMax = Math.max(1, ...causeRows.map((r) => r.value));
-  const reviewed = p.totals.reviewed > 0;
+  const noPay = !c.collected;
 
   return (
     <div className="stack">
       <Section
-        title="Collections performance"
+        title="Is the agent recovering money?"
         right={
           <label className="toggle">
             <input type="checkbox" checked={sample} onChange={(e) => setSample(e.target.checked)} /> Include sample data
@@ -59,33 +58,49 @@ export function PerformancePage() {
       >
         <p className="note">
           {p.totals.liveCalls} live call{p.totals.liveCalls === 1 ? "" : "s"}
-          {p.includesSample && <> + <b>{p.totals.sampleCalls} sample calls</b> (synthetic, to show how this page looks at volume)</>}. Is the agent recovering money? For rule breaches and trust, see <a href="#/quality">Quality</a>.
+          {p.includesSample && <> + <b>{p.totals.sampleCalls} sample calls</b> (synthetic, with simulated payments)</>}. Rules and trust are on <a href="#/quality">Agent performance</a>.
         </p>
         {!reviewed ? (
           <p className="muted">No reviewed calls yet. Finish a call and it is added here.</p>
         ) : (
-          <div className="tiles big">
-            <Tile label="Promise-to-pay rate" value={pct(k.promiseToPayPct)} hint="Calls ending in a promise, part payment or link, of calls where identity was confirmed" />
-            <Tile label="Amount promised" value={inr(k.promisedAmount)} />
-            <Tile label="Avg reply time" value={secs(k.replyGapMs)} hint="Borrower stops → Meera speaks" />
-            <Tile label="Avg call length" value={k.avgDurationSec === null ? "–" : mmss(k.avgDurationSec)} />
-            <Tile label="Tickets per 100 calls" value={k.ticketsPer100 ?? "–"} />
-            <Tile label="Calls reviewed" value={p.totals.reviewed} />
-          </div>
+          <>
+            <h3 className="grp">Outcomes</h3>
+            <div className="tiles big">
+              <Tile
+                label="Payment collected"
+                value={c.collected ? pct(c.collected.pct) : "–"}
+                hint={c.collected ? `${inr(c.collected.paid)} of ${inr(c.collected.due)} due (EMI plus bounce charge)` : NOT_CONNECTED}
+              />
+              <Tile
+                label="Resolution rate"
+                value={c.resolution ? pct(c.resolution.pct) : "–"}
+                hint={c.resolution ? `${c.resolution.resolved} of ${c.resolution.cases} bounced EMIs paid in full` : NOT_CONNECTED}
+              />
+              <Tile
+                label="Resolution time"
+                value={c.resolutionDays?.median != null ? `${c.resolutionDays.median} days` : "–"}
+                hint={c.resolutionDays ? `Median, first call to full payment, over ${c.resolutionDays.n} resolved cases` : NOT_CONNECTED}
+              />
+            </div>
+            <h3 className="grp">How the conversations go</h3>
+            <div className="tiles big">
+              <Tile label="Promise-to-pay rate" value={pct(c.promise.pct)} hint={`${c.promise.clear} of ${c.promise.talked} conversations ended with a clear date and amount`} />
+              <Tile label="Clear reason given" value={pct(c.reason.pct)} hint={`${c.reason.clear} of ${c.reason.talked} conversations gave a usable reason`} />
+              <Tile
+                label="Human handoff rate"
+                value={pct(c.handoff.pct)}
+                hint={`${c.handoff.count} of ${c.handoff.talked}: ${c.handoff.inCall} handed off or ticketed in the call, ${c.handoff.routed} routed to a person by the plan. Context, not a target: hardship cases should reach a person.`}
+              />
+            </div>
+            {noPay && <p className="note">Payment-based metrics show “–” until payment status is connected. Turn on sample data to see how they look at volume.</p>}
+          </>
         )}
       </Section>
       {reviewed && (
-        <div className="two">
-          <Section title="How calls ended">
-            <Bars rows={outcomeRows} max={outMax} format={(n) => String(n)} />
-          </Section>
-          <Section title="Why borrowers miss payments">
-            {causeRows.length ? <Bars rows={causeRows} max={causeMax} format={(n) => String(n)} /> : <p className="muted">No reasons captured yet.</p>}
-          </Section>
-          <Section title="Reply time, by day">
-            <LineChart title="Average reply time" better="lower" yMin={0} format={(n) => secs(n)} points={p.trend.map((t) => ({ label: day(t.date), y: t.replyGapMs }))} />
-          </Section>
-        </div>
+        <Section title="Why borrowers miss payments">
+          <p className="note">Supporting view: the root cause the borrower gave, across conversations where they spoke.</p>
+          {causeRows.length ? <Bars rows={causeRows} max={causeMax} /> : <p className="muted">No reasons captured yet.</p>}
+        </Section>
       )}
     </div>
   );

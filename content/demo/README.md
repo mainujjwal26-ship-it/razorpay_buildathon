@@ -1,1 +1,3 @@
 Sample data for the Performance page. These calls are synthetic: they are not real borrowers or real calls. The page labels them "Sample data" and they can be switched off. Real calls come from `call-logs/`.
+
+Each call also carries simulated `payment` figures (due, paid, resolved, days to resolve), `handoff` and `plannedHuman`. Payment confirmation is not connected in this build, so these exist only here, and the Collections performance page labels the three payment-based metrics as sample data.

@@ -215,6 +215,15 @@ export interface Performance {
     ticketsPer100: number | null;
     promisedAmount: number;
   };
+  collections: {
+    talkedCalls: number;
+    collected: { paid: number; due: number; pct: number | null; cases: number } | null;
+    resolution: { resolved: number; cases: number; pct: number | null } | null;
+    resolutionDays: { median: number | null; n: number } | null;
+    promise: { clear: number; talked: number; pct: number | null };
+    reason: { clear: number; talked: number; pct: number | null };
+    handoff: { count: number; inCall: number; routed: number; talked: number; pct: number | null };
+  };
   outcomes: Record<string, number>;
   rootCauses: Record<string, number>;
   sentiments: Record<string, number>;
@@ -238,6 +247,8 @@ export interface Quality {
   core: {
     hardBreachPct: number | null;
     hardBreachCalls: number;
+    judgementBreachPct: number | null;
+    judgementBreachCalls: number;
     wrongDisclosurePct: number | null;
     withinFactsPct: number | null;
     judgementPassPct: number | null;

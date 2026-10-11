@@ -84,7 +84,7 @@ export function HowItWorksPage() {
         <div className="fcwrap">
           <figure style={{ margin: 0 }}>
             <svg viewBox="0 0 1300 820" role="img" className="fc"
-              aria-label="Flowchart: a bounced EMI triggers a call from Meera, who first checks she has the right person, then states only lender facts. The borrower promises to pay, offers a part payment, takes a payment link, or the case goes to a human. Every call is reviewed automatically and shows up on the Calls, Performance and Quality screens.">
+              aria-label="Flowchart: a bounced EMI triggers a call from Meera, who first checks she has the right person, then states only lender facts. The borrower promises to pay, offers a part payment, takes a payment link, or the case goes to a human. Every call is reviewed automatically and shows up on the Calls, Collections performance and Agent performance screens.">
               <defs>
                 <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
                   <path d="M0 0L10 5L0 10z" fill="#6b7788" />
@@ -191,7 +191,7 @@ export function HowItWorksPage() {
           <li><b>She resolves it on the call.</b> A promise to pay, a part payment (never below the lender's minimum), or one payment link.</li>
           <li><b>Anything unusual goes to a human.</b> Disputes, hardship and questions outside her facts become a ticket with a summary.</li>
           <li><b>Every call is reviewed automatically.</b> A summary, key data points and a check against the lender's rules, by code and AI, with human spot-checks.</li>
-          <li><b>The lender sees the numbers.</b> Calls, Performance and Quality show what happened and whether the rules held.</li>
+          <li><b>The lender sees the numbers.</b> Calls, Collections performance and Agent performance show what happened, how much was recovered, and whether the rules held.</li>
         </ol>
       </section>
     </div>

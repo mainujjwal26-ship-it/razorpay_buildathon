@@ -1,5 +1,7 @@
 import { listCalls, readCall } from "../lib/callLog";
-import { readContentJson, loadCustomers } from "../lib/content";
+import { readContentJson, loadCustomers, getCustomer } from "../lib/content";
+import { collectionsMetrics } from "./collections";
+import { decisionFor, factsOfReview } from "./decisionRun";
 import type { CallReview, Outcome, RootCause, Sentiment, TranscriptLine } from "./review";
 
 type Ev = Record<string, unknown>;
@@ -107,6 +109,12 @@ export interface CallRecord {
   checks: { id: string; type: "Hard" | "Judgement"; by?: string; pass: boolean }[];
   /** Person's verdicts on the checks: true = agrees with the result. Live calls only. */
   verdicts?: Record<string, boolean>;
+  /** Meera handed off or raised a ticket during the call. */
+  handoff?: boolean;
+  /** The decision layer routes this borrower to a person. */
+  plannedHuman?: boolean;
+  /** Sample calls only: payment is not connected, so live calls have none. */
+  payment?: { due: number; paid: number; resolved: boolean; daysToResolve: number | null };
 }
 
 export async function liveRecords(): Promise<CallRecord[]> {
@@ -137,6 +145,12 @@ export async function liveRecords(): Promise<CallRecord[]> {
       version: typeof start["version"] === "string" ? start["version"] : null,
       checks: (r?.checks ?? []).map((k) => ({ id: k.id, type: k.type, by: k.by, pass: k.pass })),
       verdicts: verdictsOf(call.events),
+      handoff: m.actions.handoff > 0 || m.actions.raiseTicket > 0 || r?.outcome === "escalated",
+      plannedHuman: (() => {
+        const customer = getCustomer(String(start["customerId"] ?? ""));
+        if (!customer || !r) return false;
+        return decisionFor(customer, factsOfReview(r))?.withHistory.action === "human";
+      })(),
     });
   }
   return out;
@@ -202,6 +216,7 @@ export function aggregate(records: CallRecord[]) {
       ticketsPer100: talked.length ? Math.round((talked.reduce((s, r) => s + r.tickets, 0) / talked.length) * 100) : null,
       promisedAmount: talked.reduce((s, r) => s + (r.promiseAmount ?? 0), 0),
     },
+    collections: collectionsMetrics(records),
     outcomes,
     rootCauses: talked.reduce<Record<string, number>>((m, r) => (r.rootCause ? ((m[r.rootCause] = (m[r.rootCause] ?? 0) + 1), m) : m), {}),
     sentiments: talked.reduce<Record<string, number>>((m, r) => ((m[r.sentiment ?? "calm"] = (m[r.sentiment ?? "calm"] ?? 0) + 1), m), {}),
@@ -231,6 +246,7 @@ export function qualityReport(records: CallRecord[]) {
   const hardFailCalls = talked.filter((r) => r.checks.some((c) => c.type === "Hard" && !c.pass));
   const of = (id: string) => allChecks.filter((c) => c.id === id);
   const judgement = allChecks.filter((c) => c.type === "Judgement");
+  const judgementFailCalls = talked.filter((r) => r.checks.some((c) => c.type === "Judgement" && !c.pass));
   const gaps = records.map((r) => r.replyGapMs).filter((x): x is number => x !== null);
 
   // How far the AI reviewer agrees with a person (live calls only: samples have no verdicts).
@@ -277,6 +293,8 @@ export function qualityReport(records: CallRecord[]) {
     core: {
       hardBreachPct: rate(hardFailCalls.length, talked.length),
       hardBreachCalls: hardFailCalls.length,
+      judgementBreachPct: rate(judgementFailCalls.length, talked.length),
+      judgementBreachCalls: judgementFailCalls.length,
       wrongDisclosurePct: rate(of("identity_first").filter((c) => !c.pass).length, talked.length),
       withinFactsPct: rate(of("facts_only").filter((c) => c.pass).length, of("facts_only").length),
       judgementPassPct: rate(judgement.filter((c) => c.pass).length, judgement.length),
