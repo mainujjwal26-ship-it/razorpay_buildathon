@@ -195,7 +195,7 @@ export function Phone(props: {
             )}
             {logCallId && (
               <a className="btn pri linkbtn" href={`#/calls/${logCallId}`}>
-                View call review
+                View review and next step
               </a>
             )}
             <button type="button" className="btn pri" onClick={onStart} disabled={!canStart}>

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "note": "Weights and thresholds for the pay-confidence walk and the plan rules. Illustrative until calibrated on real outcomes (promise kept or broken). Edit here; no code change needed.",
+  "start": 50,
+  "min": 5,
+  "max": 95,
+  "bands": { "high": 70, "medium": 40 },
+  "history": {
+    "bounces": { "manyAtLeast": 4, "manyDelta": -10, "someAtLeast": 2, "someDelta": -5, "fewDelta": 5, "window": 6 },
+    "promiseKept": { "goodAtLeastPct": 75, "goodDelta": 15, "poorBelowPct": 50, "poorDelta": -15 },
+    "payday": { "minBouncesPaid": 2, "minSharePct": 66, "delta": 10 },
+    "reachable": { "goodAtLeastPct": 80, "goodDelta": 5, "poorBelowPct": 40, "poorDelta": -10 }
+  },
+  "call": {
+    "specific": { "dateAndAmount": 15, "oneOf": 5, "neither": -10 },
+    "dateFit": { "inPaydayWindowDelta": 10, "graceDaysAfterPayday": 2, "beforePaydayDelta": -10 },
+    "reason": { "matchesDelta": 10, "differsDelta": -10 },
+    "cooperation": { "cooperative": 5, "evasive": -10, "hostile": -20 }
+  },
+  "field": { "minCallsMade": 6, "maxAnsweredPct": 25 },
+  "cost": { "aiPerMinute": 3.5, "humanPerMinute": 11, "aiMinutes": 3, "humanMinutes": 5, "source": "Reported by a Vrise collections analyst in an interview; field-visit cost not known, so field plans show no cost." },
+  "notBuilt": [
+    "Channel behaviour (WhatsApp or SMS reads and clicks) is not used: it needs the lender's communication tools.",
+    "'Do not put more effort' needs recovery-probability and cost data that the demo does not have.",
+    "Weights are illustrative. They become real only after comparing predicted confidence with whether promises were kept."
+  ]
+}

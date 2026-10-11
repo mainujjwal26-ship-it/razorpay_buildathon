@@ -1,0 +1,26 @@
+{
+  "c-ujjwal": {
+    "sample": true,
+    "note": "Sample history for the demo borrower. Not real data. Replace with the lender's ledger and call log when connected.",
+    "profile": {
+      "salaryDayFrom": 8,
+      "salaryDayTo": 10,
+      "emiDueDay": 5
+    },
+    "ledger": [
+      { "month": "2026-04", "emi": "paid_on_time", "paidOnDay": 5 },
+      { "month": "2026-05", "emi": "bounced", "paidOnDay": 9 },
+      { "month": "2026-06", "emi": "paid_on_time", "paidOnDay": 5 },
+      { "month": "2026-07", "emi": "bounced", "paidOnDay": 10 },
+      { "month": "2026-08", "emi": "paid_on_time", "paidOnDay": 5 },
+      { "month": "2026-09", "emi": "bounced", "paidOnDay": 10 },
+      { "month": "2026-10", "emi": "bounced", "paidOnDay": null }
+    ],
+    "calls": [
+      { "month": "2026-05", "made": 2, "answered": 2, "promise": { "day": 9, "result": "kept" } },
+      { "month": "2026-07", "made": 3, "answered": 3, "promise": { "day": 8, "result": "broken" } },
+      { "month": "2026-09", "made": 2, "answered": 2, "promise": { "day": 10, "result": "kept" } },
+      { "month": "2026-10", "made": 2, "answered": 2, "promise": { "day": 9, "result": "broken" } }
+    ]
+  }
+}

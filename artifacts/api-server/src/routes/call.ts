@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { llmConfigured, LlmNotConfiguredError } from "../adapters/llm";
 import express from "express";
 import { speechConfigured, synthesize, transcribe } from "../adapters/speech";
-import { contentVersion, getCustomer, loadCustomers, loadPolicy } from "../lib/content";
+import { contentVersion, getCustomer, loadCustomers, loadDecisionRules, loadHistory, loadPolicy, type Customer } from "../lib/content";
+import { decide, type CallFacts, type Cooperation } from "../engine/decision";
 import { checkCallingHours } from "../engine/rules";
 import { fillBrackets, getFixedLine } from "../engine/script";
 import { runTurn, toSpeechVersion, type HistoryItem } from "../engine/turn";
@@ -14,6 +15,21 @@ import { incompleteReview, loadChecks, mergeCodeFlags, reviewCall } from "../eng
 import { listCalls, logEvent, loggingOn, readCall, renderReport, safeId, withReviewLock } from "../lib/callLog";
 
 const router: IRouter = Router();
+
+/** Joins the borrower's history with the facts of a call. Returns null when there is no history for this borrower. */
+function decisionFor(customer: Customer, facts: CallFacts) {
+  const history = loadHistory(customer.id);
+  if (!history) return null;
+  const decision = decide({ customer, history, call: facts, rules: loadDecisionRules(), minPartPercent: loadPolicy().minPartPaymentPercent });
+  return { ...decision, history: { sample: history.sample === true, note: history.note ?? null, profile: history.profile, ledger: history.ledger, calls: history.calls } };
+}
+
+const COOP: Cooperation[] = ["cooperative", "evasive", "hostile"];
+function factsOfReview(review: NonNullable<ReturnType<typeof reviewOf>>): CallFacts {
+  const cooperation: Cooperation =
+    review.cooperation ?? (review.sentiment === "hostile" || review.outcome === "refused" ? "hostile" : review.sentiment === "irritated" && review.outcome === "no_commitment" ? "evasive" : "cooperative");
+  return { outcome: review.outcome, rootCause: review.rootCause ?? null, promiseDate: review.promiseDate, promiseAmount: review.promiseAmount, cooperation };
+}
 
 router.get("/call/config", (_req, res) => {
   const policy = loadPolicy();
@@ -213,7 +229,42 @@ router.get("/calls/:id", async (req, res) => {
     reviewError: reviewOf(call.events) ? null : [...call.events].reverse().find((e) => e["type"] === "review_error")?.["message"] ?? null,
     verdicts: verdictsOf(call.events),
     version: start?.["version"] ?? null,
+    decision: (() => {
+      const review = reviewOf(call.events);
+      return customer && review ? decisionFor(customer, factsOfReview(review)) : null;
+    })(),
+    planStatus: (() => {
+      const e = [...call.events].reverse().find((x) => x["type"] === "plan_decision");
+      return e ? { status: e["status"], action: e["action"] ?? null, ts: e["ts"] } : null;
+    })(),
   });
+});
+
+// The merchant approves, changes or dismisses the recommended plan. Test build: nothing is sent to the borrower.
+router.post("/calls/:id/plan", async (req, res) => {
+  const call = await readCall(req.params["id"]);
+  const { status, action } = (req.body ?? {}) as { status?: unknown; action?: unknown };
+  if (!call || !["approved", "changed", "dismissed"].includes(String(status))) return void res.status(400).json({ error: "status must be approved, changed or dismissed" });
+  await logEvent(req.params["id"], "plan_decision", { status, action: typeof action === "string" ? action : null });
+  res.json({ ok: true });
+});
+
+// "What if the call had gone differently?" Runs the same history against chosen call facts. Nothing is saved.
+router.post("/decision/preview", (req, res) => {
+  const customer = getCustomer(String(req.body?.customerId ?? ""));
+  if (!customer) return void res.status(404).json({ error: "Unknown customer" });
+  const c = (req.body?.call ?? {}) as Record<string, unknown>;
+  const date = typeof c["promiseDate"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(c["promiseDate"]) ? c["promiseDate"] : null;
+  const facts: CallFacts = {
+    outcome: typeof c["outcome"] === "string" ? c["outcome"] : "no_commitment",
+    rootCause: typeof c["rootCause"] === "string" ? c["rootCause"] : null,
+    promiseDate: date,
+    promiseAmount: typeof c["promiseAmount"] === "number" ? c["promiseAmount"] : null,
+    cooperation: COOP.includes(c["cooperation"] as Cooperation) ? (c["cooperation"] as Cooperation) : "cooperative",
+  };
+  const decision = decisionFor(customer, facts);
+  if (!decision) return void res.status(404).json({ error: "No history for this borrower" });
+  res.json({ customer, facts, decision });
 });
 
 // A person marks a rule-check result right (agree) or wrong (disagree). Used to measure how far the AI reviewer can be trusted.

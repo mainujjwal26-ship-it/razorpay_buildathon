@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { finishCall, getCallDetail, getCalls, sendVerdict, type CallDetail, type CallRow } from "../lib/api";
+import { finishCall, getCallDetail, getCalls, sendPlanDecision, sendVerdict, type CallDetail, type CallRow } from "../lib/api";
+import { DecisionPanel } from "../components/DecisionPanel";
 import { By, Chip, Pass, Section, Tile } from "../components/Ui";
 import { dateOnly, inr, mmss, ROOT_CAUSE_LABEL, SENTIMENT_LABEL, secs, when } from "../lib/format";
 
@@ -121,6 +122,17 @@ export function CallDetailPage({ id }: { id: string }) {
           </>
         )}
       </Section>
+
+      {d.decision && (
+        <DecisionPanel
+          d={d.decision}
+          status={d.planStatus ? { status: d.planStatus.status, action: d.planStatus.action } : null}
+          onPlan={async (status, action) => {
+            await sendPlanDecision(id, status, action);
+            setD((x) => (x ? { ...x, planStatus: { status, action: action ?? null, ts: new Date().toISOString() } } : x));
+          }}
+        />
+      )}
 
       <div className="two">
         <div className="stack">

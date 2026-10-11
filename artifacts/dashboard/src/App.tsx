@@ -6,6 +6,7 @@ import { CallsPage, CallDetailPage } from "./pages/CallsPage";
 import { PerformancePage } from "./pages/PerformancePage";
 import { QualityPage } from "./pages/QualityPage";
 import { HowItWorksPage } from "./pages/HowItWorksPage";
+import { DecisionPage } from "./pages/DecisionPage";
 
 function useRoute(): string {
   const [hash, setHash] = useState(() => window.location.hash.replace(/^#/, "") || "/call");
@@ -27,12 +28,13 @@ export function App() {
       .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : "Could not reach the server"));
   }, []);
 
-  const tab = route.startsWith("/how") ? "how" : route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
+  const tab = route.startsWith("/decision") ? "decision" : route.startsWith("/how") ? "how" : route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
   const detailId = route.startsWith("/calls/") ? route.slice("/calls/".length) : null;
 
   const titles: Record<string, [string, string]> = {
     call: ["Call", "Place a test call and see the customer's details"],
     calls: [detailId ? "Call review" : "Calls", detailId ? "Summary, data points and rule checks" : "Every call, newest first"],
+    decision: ["Decision", "What to do next, from the borrower's history and what they said on the call"],
     performance: ["Performance", "How the collections team is doing"],
     how: ["How it works", "From a bounced EMI to a reviewed call"],
     quality: ["Quality", "Can we trust the calls? Rule breaches and checks"],
@@ -59,6 +61,7 @@ export function App() {
           <div className="sec">Collections</div>
           {item("#/call", "call", "Call", ic("M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"))}
           {item("#/calls", "calls", "Calls", ic("M4 6h16M4 12h16M4 18h10"))}
+          {item("#/decision", "decision", "Decision", ic("M12 3v6M12 9l-6 5M12 9l6 5M6 14v4M18 14v4"))}
           {item("#/performance", "performance", "Performance", ic("M4 20V10M10 20V4M16 20v-8M22 20H2"))}
           {item("#/quality", "quality", "Quality", ic("M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"))}
           <div className="sec">About</div>
@@ -76,6 +79,7 @@ export function App() {
               {/* Always mounted so a call in progress is not cut off when the tab changes. */}
               <div hidden={tab !== "call"}><CallPage config={config} /></div>
               {tab === "calls" && (detailId ? <CallDetailPage id={detailId} /> : <CallsPage />)}
+              {tab === "decision" && <DecisionPage config={config} />}
               {tab === "performance" && <PerformancePage />}
               {tab === "quality" && <QualityPage />}
               {tab === "how" && <HowItWorksPage />}

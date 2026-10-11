@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import type { BorrowerHistory, DecisionRules } from "../engine/decision";
 
 /**
  * Everything the agent says or believes lives in /content (and /evals), not in code.
@@ -63,6 +64,10 @@ export interface GuardrailGroup {
   note: string | null;
   items: { id: string; text: string; type: "Hard" | "Judgement"; source: string }[];
 }
+
+export const loadHistory = (customerId: string): BorrowerHistory | null =>
+  readContentJson<Record<string, BorrowerHistory>>("customers/history.json")[customerId] ?? null;
+export const loadDecisionRules = () => readContentJson<DecisionRules>("decision-rules.json");
 
 export const loadPolicy = () => readContentJson<Policy>("policy.json");
 export const loadCustomers = () => readContentJson<Customer[]>("customers/customers.json");

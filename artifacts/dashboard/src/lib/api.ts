@@ -115,6 +115,7 @@ export interface CallReview {
   promiseDate: string | null;
   promiseAmount: number | null;
   sentiment: "calm" | "worried" | "irritated" | "hostile";
+  cooperation?: "cooperative" | "evasive" | "hostile";
   identityConfirmed: boolean;
   ticketReasons: string[];
   nextStep: string;
@@ -161,7 +162,45 @@ export interface CallDetail {
   reviewError: string | null;
   verdicts: Record<string, boolean>;
   version: string | null;
+  decision: Decision | null;
+  planStatus: { status: "approved" | "changed" | "dismissed"; action: string | null; ts: string } | null;
 }
+
+// ----- Decision layer: history + this call -> one recommended plan -----
+export type ActionKey = "ai_call" | "digital" | "human" | "field" | "none";
+export type Band = "High" | "Medium" | "Low";
+export interface WalkStep { id: string; source: "history" | "call"; label: string; detail: string; delta: number; running: number }
+export interface PlanStep { order: number; action: ActionKey; title: string; when: string; why: string; kind: "main" | "fallback" }
+export interface Decision {
+  metrics: { bouncesInWindow: number; windowSize: number; callsMade: number; callsAnswered: number; promisesKept: number; promisesTotal: number };
+  walk: WalkStep[];
+  prior: { score: number; band: Band };
+  result: { score: number; band: Band };
+  plan: { headline: string; steps: PlanStep[]; suggestion: string | null; estimatedCostRupees: number | null; costNote: string; amountAtStake: number } | null;
+  blocked: string | null;
+  callAlone: { action: ActionKey; text: string };
+  withHistory: { action: ActionKey | null; text: string };
+  changed: boolean;
+  because: string;
+  usedCallEvidence: boolean;
+  notBuilt: string[];
+  history: {
+    sample: boolean;
+    note: string | null;
+    profile: { salaryDayFrom: number; salaryDayTo: number; emiDueDay: number };
+    ledger: { month: string; emi: "paid_on_time" | "bounced"; paidOnDay: number | null }[];
+    calls: { month: string; made: number; answered: number; promise?: { day: number; result: "kept" | "broken" } }[];
+  };
+}
+export interface CallFactsInput {
+  outcome: string;
+  rootCause: string | null;
+  promiseDate: string | null;
+  promiseAmount: number | null;
+  cooperation: "cooperative" | "evasive" | "hostile";
+}
+export const previewDecision = (customerId: string, call: CallFactsInput) => request<{ customer: FullCustomer; facts: CallFactsInput; decision: Decision }>("/decision/preview", { customerId, call });
+export const sendPlanDecision = (callId: string, status: "approved" | "changed" | "dismissed", action?: string) => request<{ ok: boolean }>(`/calls/${callId}/plan`, { status, action });
 export interface Performance {
   includesSample: boolean;
   checks: { id: string; label: string; rule: string; type: string }[];
