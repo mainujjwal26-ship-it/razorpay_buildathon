@@ -43,8 +43,10 @@ export function Phone(props: {
   logCallId?: string;
   recording: boolean;
   onMic: () => void;
+  soundBlocked?: boolean;
+  onEnableSound?: () => void;
 }) {
-  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onMic, logCallId } = props;
+  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onMic, logCallId, soundBlocked, onEnableSound } = props;
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -126,6 +128,11 @@ export function Phone(props: {
               )}
               {phase === "thinking" && <div className="think">Meera is thinking…</div>}
               {micIssue && <p className="note bad">{micIssue}</p>}
+              {soundBlocked && live && (
+                <button type="button" className="soundfix" onClick={onEnableSound}>
+                  Can't hear Meera? Tap here to turn on sound
+                </button>
+              )}
             </div>
             {showTyped && (
               <form className="typed" onSubmit={send}>

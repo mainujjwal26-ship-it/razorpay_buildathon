@@ -16,7 +16,10 @@ export interface VoiceAdapter {
   canSpeak: boolean;
   canListen: boolean;
   hasHindiVoice(): boolean;
+  /** Call straight from a tap: phones only allow sound after a tap, so this unlocks audio for later lines. */
   prepare?(): Promise<void>;
+  /** Told when a line could not be played (for example, the phone blocked sound). */
+  setReporter?(report: (kind: "blocked" | "failed", message: string) => void): void;
   speak(text: string): Promise<void>;
   listen(timeoutMs: number, onIssue?: (msg: string) => void, onRecording?: (recording: boolean) => void): Listener;
   cancel(): void;
@@ -48,6 +51,20 @@ function recognitionCtor(): RecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+// A one-sample silent WAV. Playing it inside a tap "unlocks" an audio element on phones.
+const SILENT_WAV = "data:audio/wav;base64,UklGRiYAAAAXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQIAAACA";
+
+function primeBrowserSpeech(): void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    window.speechSynthesis.speak(u);
+  } catch {
+    /* nothing to unlock */
+  }
+}
+
 function pickHindiVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("hi"));
   if (voices.length === 0) return null;
@@ -58,11 +75,19 @@ function pickHindiVoice(): SpeechSynthesisVoice | null {
 export function createBrowserVoice(): VoiceAdapter {
   const Ctor = recognitionCtor();
   const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
+  let report: ((kind: "blocked" | "failed", message: string) => void) | null = null;
 
   return {
     canSpeak,
     canListen: Ctor !== null,
     hasHindiVoice: () => canSpeak && pickHindiVoice() !== null,
+    setReporter(fn) {
+      report = fn;
+    },
+    prepare() {
+      primeBrowserSpeech();
+      return Promise.resolve();
+    },
 
     speak(text) {
       if (!canSpeak) return new Promise((r) => setTimeout(r, Math.min(6000, text.length * 60)));
@@ -73,12 +98,23 @@ export function createBrowserVoice(): VoiceAdapter {
         const v = pickHindiVoice();
         if (v) u.voice = v;
         const guard = setTimeout(resolve, text.length * 130 + 4000);
+        let started = false;
+        const notStarted = setTimeout(() => {
+          if (!started) report?.("blocked", "The phone did not start the voice");
+        }, 2500);
         const done = () => {
           clearTimeout(guard);
+          clearTimeout(notStarted);
           resolve();
         };
+        u.onstart = () => {
+          started = true;
+        };
         u.onend = done;
-        u.onerror = done;
+        u.onerror = (e) => {
+          if (!started) report?.("blocked", `Voice error: ${(e as SpeechSynthesisErrorEvent).error ?? "unknown"}`);
+          done();
+        };
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(u);
       });
@@ -191,7 +227,17 @@ export function createSarvamVoice(): VoiceAdapter {
   const fallback = createBrowserVoice();
   const canListen =
     typeof window !== "undefined" && typeof MediaRecorder !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia);
-  let audio: HTMLAudioElement | null = null;
+  // One audio element for the whole call: phones only let an element play later if it was first started by a tap.
+  let player: HTMLAudioElement | null = null;
+  let report: ((kind: "blocked" | "failed", message: string) => void) | null = null;
+  const getPlayer = () => {
+    if (!player) {
+      player = new Audio();
+      player.preload = "auto";
+      player.setAttribute("playsinline", "");
+    }
+    return player;
+  };
   let context: AudioContext | null = null;
   const getContext = () => {
     if (!context || context.state === "closed") {
@@ -207,23 +253,32 @@ export function createSarvamVoice(): VoiceAdapter {
     canSpeak: true,
     canListen,
     hasHindiVoice: () => true,
-    // Called directly from the user's start/unmute click to unlock browser audio.
-    prepare: () => resumeMicrophoneContext(getContext()),
+    setReporter(fn) {
+      report = fn;
+    },
+    // Called directly from the user's start/unmute tap to unlock browser audio, for Meera's voice as well as the mic.
+    prepare() {
+      const el = getPlayer();
+      el.src = SILENT_WAV;
+      const unlocked = el.play().then(() => el.pause()).catch(() => undefined);
+      primeBrowserSpeech();
+      return Promise.all([resumeMicrophoneContext(getContext()), unlocked]).then(() => undefined);
+    },
 
     async speak(text) {
       try {
         const { audio: b64 } = await speakText(text);
-        const el = new Audio(`data:audio/wav;base64,${b64}`);
-        audio = el;
+        const el = getPlayer();
+        el.src = `data:audio/wav;base64,${b64}`;
         await new Promise<void>((resolve, reject) => {
           el.onended = () => resolve();
-          el.onerror = () => reject(new Error("audio"));
+          el.onerror = () => reject(new Error("audio could not be decoded"));
           el.play().catch(reject);
         });
-      } catch {
+      } catch (e) {
+        const name = e instanceof Error ? e.name : "";
+        report?.(name === "NotAllowedError" ? "blocked" : "failed", e instanceof Error ? `${e.name}: ${e.message}` : String(e));
         await fallback.speak(text);
-      } finally {
-        audio = null;
       }
     },
 
@@ -232,8 +287,7 @@ export function createSarvamVoice(): VoiceAdapter {
     },
 
     cancel() {
-      audio?.pause();
-      audio = null;
+      player?.pause();
       if (context) {
         void context.close().catch(() => undefined);
         context = null;

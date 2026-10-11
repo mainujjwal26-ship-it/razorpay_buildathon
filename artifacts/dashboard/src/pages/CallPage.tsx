@@ -33,6 +33,8 @@ export function CallPage({ config }: { config: CallConfig }) {
       recording={call.recording}
       logCallId={config.callLogging ? call.callId : undefined}
       onMic={call.toggleMic}
+      soundBlocked={call.soundBlocked}
+      onEnableSound={call.enableSound}
     />
     {customer && <CustomerCard customer={customer} lender={config.lenderName} />}
     </div>

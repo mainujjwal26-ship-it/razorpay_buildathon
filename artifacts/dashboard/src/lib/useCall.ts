@@ -31,6 +31,8 @@ export function useCall(voice: VoiceAdapter) {
   const [micOn, setMicOn] = useState(true);
   const [recording, setRecording] = useState(false);
   const micOnRef = useRef(true);
+  const [soundBlocked, setSoundBlocked] = useState(false);
+  const lastSpoken = useRef("");
   const muteSignal = useRef<(() => void) | null>(null);
   const unmuteSignal = useRef<(() => void) | null>(null);
 
@@ -95,6 +97,7 @@ export function useCall(voice: VoiceAdapter) {
       }
       setPhase("speaking");
       log("speak_start", { chars: speak.length });
+      lastSpoken.current = speak;
       await voice.speak(speak);
       log("speak_end");
       if (!active.current || generation.current !== session) return;
@@ -247,6 +250,22 @@ export function useCall(voice: VoiceAdapter) {
     else muteSignal.current?.();
   }, [voice, log]);
 
+  useEffect(() => {
+    voice.setReporter?.((kind, message) => {
+      log("tts_play_error", { kind, message });
+      setSoundBlocked(true);
+    });
+  }, [voice, log]);
+
+  // Tapped by the person: unlocks sound on the phone and says the last line again.
+  const enableSound = useCallback(() => {
+    setSoundBlocked(false);
+    void voice.prepare?.().then(() => {
+      log("sound_enabled");
+      if (lastSpoken.current && active.current) void voice.speak(lastSpoken.current);
+    }).catch(() => undefined);
+  }, [voice, log]);
+
   const finishVoiceReply = useCallback(() => listener.current?.finishNow(), []);
 
   const submitTyped = useCallback((text: string) => typed.current?.(text), []);
@@ -258,5 +277,5 @@ export function useCall(voice: VoiceAdapter) {
     listener.current?.abort();
   }, [voice]);
 
-  return { callId: loggedCallId, voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn, recording, finishVoiceReply };
+  return { callId: loggedCallId, voice, phase, lines, error, micIssue, seconds, start, end, submitTyped, toggleMic, micOn, recording, finishVoiceReply, soundBlocked, enableSound };
 }
