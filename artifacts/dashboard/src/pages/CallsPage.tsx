@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { finishCall, getCallDetail, getCalls, type CallDetail, type CallRow } from "../lib/api";
 import { DecisionPanel } from "../components/DecisionPanel";
-import { Chip, Section } from "../components/Ui";
+import { Chip, NextStep, Section } from "../components/Ui";
 import { dateOnly, inr, mmss, ROOT_CAUSE_LABEL, when } from "../lib/format";
 
 export function CallsPage() {
@@ -40,6 +40,7 @@ export function CallsPage() {
           </table>
         </div>
       )}
+      {rows && rows.length > 0 && <NextStep href={`#/calls/${rows[0]!.id}`}>Move to step 3: Open the latest call</NextStep>}
     </Section>
   );
 }
@@ -113,6 +114,8 @@ export function CallDetailPage({ id }: { id: string }) {
       {d.decision && (
         <DecisionPanel d={d.decision} />
       )}
+
+      <NextStep href="#/performance">Move to step 4: Collections performance</NextStep>
 
       <div className="two">
         <div className="stack">
