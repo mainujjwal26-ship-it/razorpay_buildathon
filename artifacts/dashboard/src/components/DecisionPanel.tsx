@@ -60,7 +60,7 @@ export function DecisionPanel({ d }: { d: Decision }) {
         <p className="note bad">{d.blocked ?? "No recommendation could be made."}</p>
       ) : (
         <>
-          <p className="dec-head">Why: {rt.why}</p>
+          <p className="dec-head">{rt.why}</p>
           <Flow d={d} />
         </>
       )}

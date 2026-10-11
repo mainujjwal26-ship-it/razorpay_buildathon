@@ -38,6 +38,15 @@ export function App() {
     quality: ["Agent performance", "Is the agent safe to trust? Hard and judgement rule breaches"],
   };
   const [title, sub] = titles[tab];
+  const steps = [
+    { key: "call", href: "#/call", name: "Call", look: "Pick the borrower and talk to Meera. End the call when you are done." },
+    { key: "calls", href: "#/calls", name: "Calls", look: "Every call lands here with its outcome, promise and the AI-or-person recommendation. Open one." },
+    { key: "detail", href: "#/calls", name: "Call review", look: "Read the summary, the two-question recommendation and the transcript to see what drove it." },
+    { key: "performance", href: "#/performance", name: "Collections performance", look: "Is the agent recovering money? Six metrics on a sample of 100 payments of ₹5,000." },
+    { key: "quality", href: "#/quality", name: "Agent performance", look: "Is the agent safe to trust? Every rule, with how often it was broken." },
+  ];
+  const cur = steps.findIndex((x) => x.key === (tab === "calls" && detailId ? "detail" : tab));
+  const next = cur >= 0 && cur < steps.length - 1 ? steps[cur + 1] : null;
   const item = (href: string, key: string, label: string, icon: React.ReactNode) => (
     <a href={href} aria-current={tab === key ? "page" : undefined}>{icon}{label}</a>
   );
@@ -52,7 +61,6 @@ export function App() {
           <span className="logoplate"><img src={`${import.meta.env.BASE_URL}razorpay-logo.png`} alt="Razorpay" height="20" /></span>
           <b>Trusted Collections Agent</b>
         </div>
-        {config?.testMode && <span className="testwrap">Test mode <span className="sw" aria-hidden="true" /></span>}
       </header>
       <div className="layout">
         <nav className="side" aria-label="Sections">
@@ -67,6 +75,14 @@ export function App() {
         </nav>
         <main className="main">
           <div className="pagehead"><h1>{title}</h1><span>{sub}</span></div>
+          {cur >= 0 && (
+            <nav className="path" aria-label="Review path">
+              <ol>
+                {steps.map((x, i) => <li key={x.key} aria-current={i === cur ? "step" : undefined} className={i < cur ? "done" : ""}><span>{i + 1}</span>{x.name}</li>)}
+              </ol>
+              <div className="pathrow"><span><b>Step {cur + 1} of {steps.length}.</b> {steps[cur]!.look}</span>{next && <a className="btn sm" href={next.href}>Next: {next.name} →</a>}</div>
+            </nav>
+          )}
           {loadError ? (
             <div className="panel"><h2>Can't reach the server</h2><p className="note bad">{loadError}</p></div>
           ) : !config ? (
