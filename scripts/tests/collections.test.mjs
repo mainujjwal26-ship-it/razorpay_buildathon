@@ -67,3 +67,15 @@ test("no calls at all gives null rates, not NaN", () => {
   assert.equal(m.promise.pct, null);
   assert.equal(m.handoff.pct, null);
 });
+
+test("the demo sample is 100 targeted payments of 5,000 each, 5 lakh in total", () => {
+  const sample = JSON.parse(readFileSync(new URL("../../content/demo/calls.json", import.meta.url), "utf8"));
+  assert.equal(sample.length, 100);
+  assert.ok(sample.every((r) => r.payment.due === 5000));
+  const m = collectionsMetrics(sample);
+  assert.equal(m.collected.due, 500000);
+  assert.ok(m.collected.paid > 0 && m.collected.paid < 500000);
+  assert.ok(m.resolutionDays.median > 0, "resolution time is a real number of days");
+  // a sent link counts as paid: every paid rupee comes from a link or part-payment outcome
+  assert.ok(sample.filter((r) => r.payment.paid > 0).every((r) => ["link_sent", "part_payment"].includes(r.outcome)));
+});

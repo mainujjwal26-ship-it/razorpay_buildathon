@@ -1,5 +1,5 @@
 import { listCalls, readCall } from "../lib/callLog";
-import { readContentJson, loadCustomers, getCustomer } from "../lib/content";
+import { readContentJson, loadCustomers, getCustomer, amountDue } from "../lib/content";
 import { collectionsMetrics } from "./collections";
 import { decisionFor, factsOfReview } from "./decisionRun";
 import type { CallReview, Outcome, RootCause, Sentiment, TranscriptLine } from "./review";
@@ -113,7 +113,7 @@ export interface CallRecord {
   handoff?: boolean;
   /** The decision layer routes this borrower to a person. */
   plannedHuman?: boolean;
-  /** Sample calls only: payment is not connected, so live calls have none. */
+  /** For the demo, a payment link that was sent counts as paid. Days to resolve is only filled for sample calls. */
   payment?: { due: number; paid: number; resolved: boolean; daysToResolve: number | null };
 }
 
@@ -145,6 +145,13 @@ export async function liveRecords(): Promise<CallRecord[]> {
       version: typeof start["version"] === "string" ? start["version"] : null,
       checks: (r?.checks ?? []).map((k) => ({ id: k.id, type: k.type, by: k.by, pass: k.pass })),
       verdicts: verdictsOf(call.events),
+      payment: (() => {
+        const customer = getCustomer(String(start["customerId"] ?? ""));
+        if (!customer) return undefined;
+        const link = transcriptOf(call.events).filter((l) => l.action === "send_link" && typeof l.amount === "number").pop();
+        const paid = link?.amount ?? 0;
+        return { due: amountDue(customer), paid, resolved: paid >= customer.emiAmount, daysToResolve: null };
+      })(),
       handoff: m.actions.handoff > 0 || m.actions.raiseTicket > 0 || r?.outcome === "escalated",
       plannedHuman: (() => {
         const customer = getCustomer(String(start["customerId"] ?? ""));

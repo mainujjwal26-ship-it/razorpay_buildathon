@@ -34,3 +34,13 @@ export const By = ({ by }: { by: string }) => (
     {by === "code" ? "Code" : by === "AI" ? "AI" : "Code + AI"}
   </span>
 );
+
+/** A metric: header, a one-line explanation of what it measures, then the number and its detail. */
+export const Metric = ({ label, what, value, detail }: { label: string; what: string; value: ReactNode; detail?: string }) => (
+  <div className="metric">
+    <div className="m-h">{label}</div>
+    <div className="m-w">{what}</div>
+    <div className="m-v">{value}</div>
+    {detail && <div className="m-d">{detail}</div>}
+  </div>
+);

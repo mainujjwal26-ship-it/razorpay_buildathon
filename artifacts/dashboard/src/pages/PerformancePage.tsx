@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getPerformance, type Performance } from "../lib/api";
-import { Section, Tile } from "../components/Ui";
+import { Metric, Section } from "../components/Ui";
 import { inr, pct, ROOT_CAUSE_LABEL } from "../lib/format";
 
 function Bars({ rows, max }: { rows: { label: string; value: number }[]; max: number }) {
@@ -16,8 +16,6 @@ function Bars({ rows, max }: { rows: { label: string; value: number }[]; max: nu
     </ul>
   );
 }
-
-const NOT_CONNECTED = "Needs payment confirmation, which is not connected in this build. Shown from sample data.";
 
 /** Collections business performance: six metrics, then why borrowers miss payments. */
 export function PerformancePage() {
@@ -44,7 +42,6 @@ export function PerformancePage() {
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => ({ label: ROOT_CAUSE_LABEL[k] ?? k, value: v }));
   const causeMax = Math.max(1, ...causeRows.map((r) => r.value));
-  const noPay = !c.collected;
 
   return (
     <div className="stack">
@@ -58,47 +55,60 @@ export function PerformancePage() {
       >
         <p className="note">
           {p.totals.liveCalls} live call{p.totals.liveCalls === 1 ? "" : "s"}
-          {p.includesSample && <> + <b>{p.totals.sampleCalls} sample calls</b> (synthetic, with simulated payments)</>}. Rules and trust are on <a href="#/quality">Agent performance</a>.
+          {p.includesSample && <> + <b>{p.totals.sampleCalls} sample calls</b> (synthetic: {p.totals.sampleCalls} payments of ₹5,000 each, ₹{(p.totals.sampleCalls * 5000).toLocaleString("en-IN")} in total)</>}. Rules and trust are on <a href="#/quality">Agent performance</a>.
         </p>
         {!reviewed ? (
           <p className="muted">No reviewed calls yet. Finish a call and it is added here.</p>
         ) : (
           <>
             <h3 className="grp">Outcomes</h3>
-            <div className="tiles big">
-              <Tile
+            <div className="mgrid">
+              <Metric
                 label="Payment collected"
+                what="Rupees recovered out of the rupees we set out to recover. A payment link that has been sent counts as paid."
                 value={c.collected ? pct(c.collected.pct) : "–"}
-                hint={c.collected ? `${inr(c.collected.paid)} of ${inr(c.collected.due)} due (EMI plus bounce charge)` : NOT_CONNECTED}
+                detail={c.collected ? `${inr(c.collected.paid)} of ${inr(c.collected.due)} across ${c.collected.cases} payments` : undefined}
               />
-              <Tile
+              <Metric
                 label="Resolution rate"
+                what="Share of bounced EMIs that were recovered in full."
                 value={c.resolution ? pct(c.resolution.pct) : "–"}
-                hint={c.resolution ? `${c.resolution.resolved} of ${c.resolution.cases} bounced EMIs paid in full` : NOT_CONNECTED}
+                detail={c.resolution ? `${c.resolution.resolved} of ${c.resolution.cases} EMIs` : undefined}
               />
-              <Tile
+              <Metric
                 label="Resolution time"
+                what="Median number of days from the first call to the EMI being recovered in full."
                 value={c.resolutionDays?.median != null ? `${c.resolutionDays.median} days` : "–"}
-                hint={c.resolutionDays ? `Median, first call to full payment, over ${c.resolutionDays.n} resolved cases` : NOT_CONNECTED}
+                detail={c.resolutionDays ? `Across ${c.resolutionDays.n} recovered EMIs` : undefined}
               />
             </div>
             <h3 className="grp">How the conversations go</h3>
-            <div className="tiles big">
-              <Tile label="Promise-to-pay rate" value={pct(c.promise.pct)} hint={`${c.promise.clear} of ${c.promise.talked} conversations ended with a clear date and amount`} />
-              <Tile label="Clear reason given" value={pct(c.reason.pct)} hint={`${c.reason.clear} of ${c.reason.talked} conversations gave a usable reason`} />
-              <Tile
+            <div className="mgrid">
+              <Metric
+                label="Promise-to-pay rate"
+                what="Share of conversations that ended with a clear date and amount to pay."
+                value={pct(c.promise.pct)}
+                detail={`${c.promise.clear} of ${c.promise.talked} conversations`}
+              />
+              <Metric
+                label="Clear reason given"
+                what="Share of conversations where the borrower gave a usable reason for the missed EMI."
+                value={pct(c.reason.pct)}
+                detail={`${c.reason.clear} of ${c.reason.talked} conversations`}
+              />
+              <Metric
                 label="Human handoff rate"
+                what="Share of conversations that needed a person, either handed over during the call or routed there by the next-step plan."
                 value={pct(c.handoff.pct)}
-                hint={`${c.handoff.count} of ${c.handoff.talked}: ${c.handoff.inCall} handed off or ticketed in the call, ${c.handoff.routed} routed to a person by the plan. Context, not a target: hardship cases should reach a person.`}
+                detail={`${c.handoff.count} of ${c.handoff.talked} conversations`}
               />
             </div>
-            {noPay && <p className="note">Payment-based metrics show “–” until payment status is connected. Turn on sample data to see how they look at volume.</p>}
           </>
         )}
       </Section>
       {reviewed && (
         <Section title="Why borrowers miss payments">
-          <p className="note">Supporting view: the root cause the borrower gave, across conversations where they spoke.</p>
+          <p className="note">The root cause the borrower gave, across conversations where they spoke.</p>
           {causeRows.length ? <Bars rows={causeRows} max={causeMax} /> : <p className="muted">No reasons captured yet.</p>}
         </Section>
       )}
