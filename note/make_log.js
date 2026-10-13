@@ -1,8 +1,11 @@
 const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType,
-  BorderStyle, ShadingType, ImageRun, AlignmentType, convertInchesToTwip,
+  BorderStyle, ShadingType, ImageRun, AlignmentType, ExternalHyperlink, convertInchesToTwip,
 } = require("docx");
+
+const REPO = "https://github.com/mainujjwal26-ship-it/razorpay_buildathon";
+const BLOB = `${REPO}/blob/main`;
 
 const INK = "11243A";
 const MUTED = "5B6B85";
@@ -22,6 +25,13 @@ const H = (text) =>
 
 const bullet = (children) =>
   new Paragraph({ children, bullet: { level: 0 }, spacing: { after: 32, line: 225 }, indent: { left: 190, hanging: 150 } });
+
+/** A clickable file path. */
+const link = (text, href, size = 17) =>
+  new ExternalHyperlink({
+    children: [new TextRun({ text, font: "Calibri", size, color: "1A4FD6", underline: {}, bold: true })],
+    link: href,
+  });
 
 const mkTable = (cols, rows) => {
   const cell = (text, i, head) =>
@@ -106,6 +116,61 @@ const SPLIT = mkTable(
   ],
 );
 
+const FILE_ROWS = [
+  ["content/prompts/agent.md", "How Meera speaks: her role, her limits, and the JSON she must return"],
+  ["content/script.md", "The call itself: opening, identity check, how to ask for a promise, how to close"],
+  ["content/policy.json", "What she may offer: minimum part payment, link rules, calling hours"],
+  ["content/guardrails.json", "The never-do rules: no false promise, no threat, lender facts only"],
+  ["content/review-checks.json", "What the reviewer scores after the call, hard rules and judgement rules"],
+  ["content/decision-rules.json", "The thresholds that route a borrower: bounces, promises kept, cooperation"],
+  ["content/customers/history.json", "The borrower history the decision reads: EMIs, promises, calls answered"],
+];
+
+const fcell = (children, w) =>
+  new TableCell({
+    children: [new Paragraph({ children, spacing: { after: 0, line: 205 } })],
+    width: { size: w, type: WidthType.DXA },
+    margins: { top: 40, bottom: 40, left: 85, right: 85 },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 2, color: RULE },
+      bottom: { style: BorderStyle.SINGLE, size: 2, color: RULE },
+      left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+    },
+  });
+
+/** The files that govern the agent, each one clickable. */
+const FILES = new Table({
+  columnWidths: [3400, 5840],
+  width: { size: 9240, type: WidthType.DXA },
+  rows: [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        new TableCell({
+          children: [new Paragraph({ children: [run("File (click to open on GitHub)", { size: 15, bold: true })], spacing: { after: 0, line: 205 } })],
+          width: { size: 3400, type: WidthType.DXA },
+          margins: { top: 40, bottom: 40, left: 85, right: 85 },
+          shading: { type: ShadingType.CLEAR, fill: "EEF3FB", color: "auto" },
+          borders: { top: { style: BorderStyle.SINGLE, size: 2, color: RULE }, bottom: { style: BorderStyle.SINGLE, size: 2, color: RULE }, left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } },
+        }),
+        new TableCell({
+          children: [new Paragraph({ children: [run("What it governs", { size: 15, bold: true })], spacing: { after: 0, line: 205 } })],
+          width: { size: 5840, type: WidthType.DXA },
+          margins: { top: 40, bottom: 40, left: 85, right: 85 },
+          shading: { type: ShadingType.CLEAR, fill: "EEF3FB", color: "auto" },
+          borders: { top: { style: BorderStyle.SINGLE, size: 2, color: RULE }, bottom: { style: BorderStyle.SINGLE, size: 2, color: RULE }, left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }, right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } },
+        }),
+      ],
+    }),
+    ...FILE_ROWS.map(([path, what]) =>
+      new TableRow({
+        children: [fcell([link(path, `${BLOB}/${path}`, 15)], 3400), fcell([run(what, { size: 15, color: MUTED })], 5840)],
+      }),
+    ),
+  ],
+});
+
 const doc = new Document({
   styles: { default: { document: { run: { font: "Calibri", size: 17, color: INK } } } },
   sections: [
@@ -130,7 +195,7 @@ const doc = new Document({
           spacing: { after: 30 },
         }),
         new Paragraph({
-          children: [run("Ujjwal Goel  ·  55 commits, 5–13 October 2026  ·  ~5,000 lines of application code, 8,400 lines of rules and content, 37 tests", { size: 15, color: MUTED })],
+          children: [run("Ujjwal Goel  ·  55 commits, 5–13 October 2026  ·  ~5,000 lines of application code, 8,400 lines of rules and content, 37 tests  \u00b7  ", { size: 15, color: MUTED }), link("repository", REPO, 15)],
           spacing: { after: 45 },
           border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RULE, space: 5 } },
         }),
@@ -147,30 +212,22 @@ const doc = new Document({
 
         H("Key prompts, workflows and agent setup"),
         P([
-          run("The agent's behaviour does not live in code. It lives in content files that are read fresh on every call — "),
-          b("agent.md"),
-          run(" for how Meera speaks, "),
-          b("script.md"),
-          run(" and "),
-          b("policy.json"),
-          run(" for what she may say, "),
-          b("guardrails.json"),
-          run(" and "),
-          b("review-checks.json"),
-          run(" for what counts as a breach, and "),
-          b("decision-rules.json"),
-          run(" for the thresholds that route a borrower. Changing her tone, or the number of bounces that sends a case to a person, is a text edit."),
+          run("The agent is three things: a set of written instructions, two prompts that return JSON, and a rule engine the model is not allowed to overrule. The first part is all in the repository and can be read directly \u2014 these are the files that decide what the agent says and when it hands a borrower over."),
         ]),
+        FILES,
         P([
           run("Two prompts do the work, and both return JSON rather than prose. The "),
           b("turn prompt"),
           run(" takes the call so far and returns what to say, what to speak aloud, which action to take (one payment link, raise a ticket, hand off) and whether to end the call. The "),
           b("review prompt"),
-          run(" takes the finished transcript and returns the outcome, the reason, the root cause, the promise, the borrower's cooperation and a verdict on every rule. Structured output is what lets the rest of the system be ordinary code."),
-        ]),
-        ...figure("agent.png", 500, 151, "The agent: the call produces facts, the rules produce the route."),
+          run(" takes the finished transcript and returns the outcome, the reason, the root cause, the promise, the borrower\u2019s cooperation and a verdict on every rule. Structured output is what lets the rest of the system be ordinary, testable code \u2014 and it is why the model never picks the route."),
+        ], { spacing: { before: 70, after: 55 } }),
+        ...figure("agent.png", 500, 230, "The system: speech and reasoning are separate services, and the rules, not the model, decide what happens next."),
         P([
-          run("The build loop mattered as much as the prompts. Claude was connected to GitHub, and GitHub to Replit, so a change was live in minutes and I could watch it. More usefully, the call logs are pushed back to a branch in the same repository, so Claude could read what actually happened on a real call — what the borrower said, which rule tripped, where the agent stalled — and I could act on it immediately instead of listening to recordings and writing notes by hand."),
+          run("Reading it across: the borrower\u2019s audio goes to the server, which sends it to Sarvam for transcription, builds the turn prompt from the content files, and calls the Claude API \u2014 which returns a structured turn rather than free text. Speech goes back out through Sarvam. Every event is written to Postgres as it happens, and the whole call log is pushed to a branch on GitHub. When the call ends, the review prompt and the checks written in code score the same call independently, and a flag from either counts. Only then does the decision engine combine those facts with the borrower\u2019s history and pick a route.", { size: 16 }),
+        ]),
+        P([
+          run("The build loop mattered as much as the prompts. Claude was connected to GitHub, and GitHub to Replit, so a change was live in minutes and I could watch it. More usefully, those call logs are pushed back into the same repository, so Claude Code could read what actually happened on a real call \u2014 what the borrower said, which rule tripped, where the agent stalled \u2014 and I could act on it immediately instead of listening to recordings and writing notes by hand."),
         ]),
         ...figure("buildloop.png", 500, 140, "The build loop: a live call could change the agent the same evening."),
         P([
