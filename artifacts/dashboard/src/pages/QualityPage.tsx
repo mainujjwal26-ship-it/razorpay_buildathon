@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getQuality, type Quality } from "../lib/api";
+import { isDemoMode, getQuality, type Quality } from "../lib/api";
 import { By, Section, Tile } from "../components/Ui";
 import { pct } from "../lib/format";
 
@@ -48,7 +48,7 @@ function RuleGroup({ title, hint, ids, q, labelOf, type }: { title: string; hint
 
 /** AI agent performance: how often Meera breaks a hard rule or a judgement rule. */
 export function QualityPage() {
-  const [sample, setSample] = useState(false);
+  const [sample, setSample] = useState(isDemoMode);
   const [auto, setAuto] = useState(true);
   const [q, setQ] = useState<Quality | null>(null);
   const [error, setError] = useState<string | null>(null);

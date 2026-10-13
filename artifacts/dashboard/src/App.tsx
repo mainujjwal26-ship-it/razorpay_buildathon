@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { getCallConfig, getCalls, type CallConfig } from "./lib/api";
+import { getCallConfig, getCalls, setDemoMode, type CallConfig } from "./lib/api";
+import { DEMO_CONFIG, GUIDE } from "./lib/demo";
 import { CallPage } from "./pages/CallPage";
 import { CallsPage, CallDetailPage } from "./pages/CallsPage";
 import { PerformancePage } from "./pages/PerformancePage";
@@ -25,18 +26,43 @@ const STEPS = [
   { key: "quality", href: "#/quality", name: "Agent performance" },
 ];
 
+type Mode = "demo" | "live";
+const readMode = (): Mode => {
+  try {
+    return localStorage.getItem("mode") === "live" ? "live" : "demo";
+  } catch {
+    return "demo";
+  }
+};
+
 export function App() {
   const route = useRoute();
   const [config, setConfig] = useState<CallConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [mode, setMode] = useState<Mode>(readMode);
+  // Set before any child fetches, so the data layer is in the right mode.
+  setDemoMode(mode === "demo");
+
   useEffect(() => {
     getCallConfig()
       .then(setConfig)
       .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : "Could not reach the server"));
   }, []);
 
+  const pick = (m: Mode) => {
+    setMode(m);
+    setDemoMode(m === "demo");
+    try {
+      localStorage.setItem("mode", m);
+    } catch {
+      /* private browsing: the choice just does not persist */
+    }
+    window.location.hash = "#/call";
+  };
+
   const tab = route.startsWith("/how") ? "how" : route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
   const detailId = route.startsWith("/calls/") ? route.slice("/calls/".length) : null;
+  const demo = mode === "demo";
 
   const titles: Record<string, [string, string]> = {
     call: ["Call", "Place a test call and see the customer's details"],
@@ -47,6 +73,7 @@ export function App() {
   };
   const [title, sub] = titles[tab];
   const cur = STEPS.findIndex((x) => x.key === (tab === "calls" && detailId ? "detail" : tab));
+  const guide = demo ? GUIDE[tab === "calls" && detailId ? "detail" : tab] : undefined;
   const go = async (i: number) => {
     const st = STEPS[Math.max(0, Math.min(STEPS.length - 1, i))]!;
     if (st.key === "detail") {
@@ -61,6 +88,9 @@ export function App() {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
   );
 
+  // In demo mode nothing needs the server, so a failed config does not stop the walkthrough.
+  const cfg = config ?? (demo ? DEMO_CONFIG : null);
+
   return (
     <div className="shell">
       <header className="topbar">
@@ -73,6 +103,10 @@ export function App() {
           <span className="stepname">{cur >= 0 ? `Step ${cur + 1}: ${STEPS[cur]!.name}` : "Start the review"}</span>
           <button type="button" aria-label="Next step" disabled={cur === STEPS.length - 1} onClick={() => void go(cur + 1)}>→</button>
         </div>
+        <div className="modesw" role="group" aria-label="Mode">
+          <button type="button" aria-pressed={demo} onClick={() => pick("demo")}>Demo</button>
+          <button type="button" aria-pressed={!demo} onClick={() => pick("live")}>Live</button>
+        </div>
       </header>
       <div className="layout">
         <nav className="side" aria-label="Sections">
@@ -83,18 +117,24 @@ export function App() {
           {item("#/quality", "quality", "Agent performance", ic("M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"))}
           <div className="sec">About</div>
           {item("#/how", "how", "How it works", ic("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 8v.5"))}
-          <div className="foot">{config?.testMode ? "Test mode: no real borrowers are called." : "Live mode"}</div>
+          <div className="foot">{demo ? "Demo mode: sample data, no borrower is called." : "Live mode: a real call, reviewed by the model."}</div>
         </nav>
         <main className="main">
           <div className="pagehead"><h1>{title}</h1><span>{sub}</span></div>
-          {loadError ? (
+          {guide && (
+            <div className="guide">
+              <b>{guide.title}</b>
+              <span>{guide.body}</span>
+            </div>
+          )}
+          {loadError && !demo ? (
             <div className="panel"><h2>Can't reach the server</h2><p className="note bad">{loadError}</p></div>
-          ) : !config ? (
+          ) : !cfg ? (
             <p className="muted">Loading…</p>
           ) : (
             <>
               {/* Always mounted so a call in progress is not cut off when the tab changes. */}
-              <div hidden={tab !== "call"}><CallPage config={config} /></div>
+              <div hidden={tab !== "call"}><CallPage config={cfg} demo={demo} key={demo ? "demo" : "live"} /></div>
               {tab === "calls" && (detailId ? <CallDetailPage id={detailId} /> : <CallsPage />)}
               {tab === "performance" && <PerformancePage />}
               {tab === "quality" && <QualityPage />}

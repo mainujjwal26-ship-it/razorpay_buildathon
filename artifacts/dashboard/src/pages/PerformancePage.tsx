@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getPerformance, type Performance } from "../lib/api";
+import { isDemoMode, getPerformance, type Performance } from "../lib/api";
 import { Metric, Section } from "../components/Ui";
 import { inr, pct, ROOT_CAUSE_LABEL } from "../lib/format";
 
@@ -19,7 +19,7 @@ function Bars({ rows, max }: { rows: { label: string; value: number }[]; max: nu
 
 /** Collections business performance: six metrics, then why borrowers miss payments. */
 export function PerformancePage() {
-  const [sample, setSample] = useState(false);
+  const [sample, setSample] = useState(isDemoMode);
   const [auto, setAuto] = useState(true);
   const [p, setP] = useState<Performance | null>(null);
   const [error, setError] = useState<string | null>(null);

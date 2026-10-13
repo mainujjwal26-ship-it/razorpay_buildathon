@@ -45,8 +45,10 @@ export function Phone(props: {
   onMic: () => void;
   soundBlocked?: boolean;
   onEnableSound?: () => void;
+  /** Demo mode: the call is scripted, so the mic and keyboard controls are hidden. */
+  demo?: boolean;
 }) {
-  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onMic, logCallId, soundBlocked, onEnableSound } = props;
+  const { agentName, lenderName, summary, phase, lines, seconds, micIssue, error, keyMissing, canStart, onStart, onEnd, onSubmit, micOn, recording, onMic, logCallId, soundBlocked, onEnableSound, demo } = props;
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -55,7 +57,7 @@ export function Phone(props: {
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
   }, [lines, phase]);
-  const showTyped = typing || Boolean(micIssue);
+  const showTyped = !demo && (typing || Boolean(micIssue));
 
   const send = (e: FormEvent) => {
     e.preventDefault();
@@ -151,7 +153,7 @@ export function Phone(props: {
             )}
             <div className="bar">
               <span className="timer">{mmss(seconds)}</span>
-              <button
+              {!demo && <button
                 type="button"
                 className={`mic ${micOn ? "on" : "off"} ${micOn && recording ? "live" : ""}`}
                 onClick={onMic}
@@ -163,11 +165,11 @@ export function Phone(props: {
                   <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
                   {!micOn && <path d="M4 4l16 16" />}
                 </svg>
-              </button>
+              </button>}
               <div className="bar-right">
-                <button type="button" className="kb" onClick={() => setTyping((t) => !t)} aria-label="Type a reply instead" aria-pressed={showTyped}>
+                {!demo && <button type="button" className="kb" onClick={() => setTyping((t) => !t)} aria-label="Type a reply instead" aria-pressed={showTyped}>
                   ⌨
-                </button>
+                </button>}
                 <button type="button" className="hangup" onClick={onEnd} aria-label="End call">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M12 9c-3.3 0-6.4 1-8.7 2.8a1.2 1.2 0 0 0-.1 1.8l1.6 1.6c.4.4 1 .5 1.5.2l2.3-1.2c.4-.2.6-.6.6-1V11.7c1.2-.4 2.5-.6 3.8-.6s2.6.2 3.8.6v1.5c0 .4.2.8.6 1l2.3 1.2c.5.3 1.1.2 1.5-.2l1.6-1.6a1.2 1.2 0 0 0-.1-1.8C18.4 10 15.3 9 12 9z" />
@@ -186,7 +188,7 @@ export function Phone(props: {
               {mmss(seconds)}
             </p>
             {error && <p className="note bad">{error}</p>}
-            {logCallId && (
+            {logCallId && !demo && (
               <p className="note">
                 Call log (test build):{" "}
                 <a href={callLogUrl(logCallId, "text")} target="_blank" rel="noreferrer">read</a> ·{" "}
@@ -199,12 +201,12 @@ export function Phone(props: {
               </a>
             )}
             <button type="button" className="btn pri" onClick={onStart} disabled={!canStart}>
-              Start another call
+              {demo ? "Play the call again" : "Start another call"}
             </button>
           </div>
         )}
 
-        <div className="testline">Test build · the payment link is a dummy · calls are logged for testing</div>
+        <div className="testline">{demo ? "Demo mode · a scripted call with sample data · no borrower is contacted" : "Test build · the payment link is a dummy · calls are logged for testing"}</div>
       </div>
     </div>
   );

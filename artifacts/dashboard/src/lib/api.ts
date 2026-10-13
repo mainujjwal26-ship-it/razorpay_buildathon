@@ -47,6 +47,17 @@ export interface TurnReply {
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+/**
+ * Demo mode serves fixed sample payloads instead of calling the server, so the
+ * same screens render with the same code on a machine with no key, no mic and
+ * no database. Live mode is untouched.
+ */
+let demo = false;
+export const setDemoMode = (on: boolean) => {
+  demo = on;
+};
+export const isDemoMode = () => demo;
+
 async function request<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${base}/api${path}`, {
     method: body === undefined ? "GET" : "POST",
@@ -233,14 +244,16 @@ export interface Performance {
   trend: { date: string; calls: number; hardFailPct: number | null; guardrailPassPct: number | null; replyGapMs: number | null }[];
 }
 export const finishCall = async (callId: string) => {
+  if (demo) return { ok: true, pending: false };
   await flushCallEvents(callId);
   return request<{ ok: boolean; pending: boolean }>("/call/finish", { callId });
 };
-export const getCalls = () => request<{ calls: CallRow[] }>("/calls");
-export const getCallDetail = (id: string) => request<CallDetail>(`/calls/${id}`);
+export const getCalls = async () => (demo ? { calls: [(await import("./demo")).DEMO_ROW] } : request<{ calls: CallRow[] }>("/calls"));
+export const getCallDetail = async (id: string) => (demo ? (await import("./demo")).DEMO_DETAIL : request<CallDetail>(`/calls/${id}`));
 export const getPerformance = (sample: boolean) => request<Performance>(`/performance?sample=${sample ? 1 : 0}`);
 
-export const sendVerdict = (callId: string, checkId: string, agree: boolean) => request<{ ok: boolean }>("/call/verdict", { callId, checkId, agree });
+export const sendVerdict = (callId: string, checkId: string, agree: boolean) =>
+  demo ? Promise.resolve({ ok: true }) : request<{ ok: boolean }>("/call/verdict", { callId, checkId, agree });
 
 export interface Quality {
   includesSample: boolean;
