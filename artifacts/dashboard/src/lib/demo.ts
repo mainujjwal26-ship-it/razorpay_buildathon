@@ -241,31 +241,44 @@ export const DEMO_ROW: CallRow = {
   checks: CHECKS.map((c) => ({ id: c.id, type: c.type, pass: c.pass })),
 };
 
-/** One line per screen, so a reviewer knows what they are looking at. */
-export const GUIDE: Record<string, { title: string; body: string }> = {
+/** Per screen: whose problem it is, why it matters, and what changes. Shown in both modes. */
+export interface Guide { who: string; why: string; problem: string[]; fix: string }
+export const GUIDE: Record<string, Guide> = {
   call: {
-    title: "Step 1 of 6 · The call",
-    body: "A bounced EMI, minutes old. Press the green button and the call plays out line by line, with a note beside each line saying what Meera is doing and which rule it satisfies. In Live mode this same screen places a real call you can talk to.",
+    who: "Collections head at a lender",
+    why: "Every day a bounced EMI waits, it gets harder to recover.",
+    problem: ["Calls start days after the bounce", "Every caller says it differently, and rules get broken"],
+    fix: "Meera calls within minutes, follows the rules every time, and records the reason and a dated promise.",
   },
   calls: {
-    title: "Step 2 of 6 · Every call lands here",
-    body: "One row per call, with the outcome, the promise and the recommendation the system reached. Open the call to see how it got there.",
+    who: "Collections team lead",
+    why: "What happened on a call is the input to the next decision.",
+    problem: ["Call outcomes sit in notes and spreadsheets", "Analysts spend each day preparing the data"],
+    fix: "Every call becomes one row: outcome, promise and a recommendation, with no data preparation.",
   },
   detail: {
-    title: "Step 3 of 6 · The review and the recommendation",
-    body: "The call is now data: a reason, a root cause, a dated promise and a ticket. Below that, two questions decide whether the AI keeps this borrower or a person takes over. Note that the call went well and the answer is still a person.",
+    who: "Collections manager deciding who to call next",
+    why: "A good call can still hide a borrower who has stopped intending to pay.",
+    problem: ["One playbook for every borrower", "Nobody can see why a case went to a person"],
+    fix: "Two questions decide AI or person, and the reason is shown.",
   },
   performance: {
-    title: "Step 4 of 6 · Is it recovering money?",
-    body: "The same screens over a sample book of 100 bounced EMIs of ₹5,000 each. Sample figures, not live results.",
+    who: "Collections head",
+    why: "Money recovered is the number the business is judged on.",
+    problem: ["Reports arrive late, built by hand", "Hard to tell if the calling is working"],
+    fix: "Recovery, speed and promises kept, read straight from the calls.",
   },
   plan: {
-    title: "Step 5 of 6 · What the next cycle needs",
-    body: "The same routing, applied to a whole book. See whether the target is met, where the gap sits (AI agent, our callers, where effort goes), and what to do about it.",
+    who: "Collections head planning the cycle",
+    why: "A wrong plan is found out only after the cycle has ended.",
+    problem: ["The team pre-plans a fixed resource allocation and behaviour", "The gap to target shows up too late to act on"],
+    fix: "The AI recommends where AI, callers and reminders go, and what closes the gap, from live results.",
   },
   quality: {
-    title: "Step 6 of 6 · Is it safe to trust?",
-    body: "Every call is scored against the lender's rules, rather than the 10 to 20 per cent a quality team can sample by hand. Hard rules are never-do; judgement rules are how well the call was handled.",
+    who: "Risk and compliance head at the lender",
+    why: "One rule-breaking call can become a regulator's complaint.",
+    problem: ["A quality team hears only a sample of calls", "Fixing the agent is guesswork"],
+    fix: "Every call is scored against the rules, so you can see what to tighten in the agent.",
   },
 };
 

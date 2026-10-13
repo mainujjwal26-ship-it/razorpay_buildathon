@@ -76,7 +76,7 @@ export function App() {
   };
   const [title, sub] = titles[tab];
   const cur = STEPS.findIndex((x) => x.key === (tab === "calls" && detailId ? "detail" : tab));
-  const guide = demo ? GUIDE[tab === "calls" && detailId ? "detail" : tab] : undefined;
+  const guide = GUIDE[tab === "calls" && detailId ? "detail" : tab];
   const go = async (i: number) => {
     const st = STEPS[Math.max(0, Math.min(STEPS.length - 1, i))]!;
     if (st.key === "detail") {
@@ -126,10 +126,14 @@ export function App() {
         <main className={`main${demo ? " demo" : ""}`}>
           <div className="pagehead"><h1>{title}</h1><span>{sub}</span></div>
           {guide && (
-            <div className="guide">
-              <b>{guide.title}</b>
-              <span>{guide.body}</span>
-            </div>
+            <aside className="guide" aria-label="Who this is for">
+              <p className="g-who"><span>For</span> <b>{guide.who}</b></p>
+              <p className="g-why">{guide.why}</p>
+              <ul>
+                {guide.problem.map((t) => <li key={t}>{t}</li>)}
+              </ul>
+              <p className="g-fix"><span>Here</span> {guide.fix}</p>
+            </aside>
           )}
           {loadError && !demo ? (
             <div className="panel"><h2>Can't reach the server</h2><p className="note bad">{loadError}</p></div>
