@@ -48,8 +48,13 @@ export function planShape(records: CollectionsRec[]) {
     const cleared = days.filter((x) => x <= d).length;
     curve.push({ day: d, cleared, share: reviewed.length ? cleared / reviewed.length : 0 });
   }
+  const promised = reviewed.filter((r) => r.promiseDate && typeof r.promiseAmount === "number" && r.promiseAmount > 0);
   return {
     cases: reviewed.length,
+    // Promises made on the call, and how many of them were not paid.
+    promises: { made: promised.length, broken: promised.filter((r) => !r.payment?.resolved).length },
+    // Borrowers who only forgot, or whose auto-debit failed: a message is enough.
+    reminderOnly: reviewed.filter((r) => r.rootCause === "forgot_or_autodebit").length,
     routes: { ai, human, field: 0, routed: routed.length },
     resolvedShare: reviewed.length ? paid.length / reviewed.length : 0,
     curve,

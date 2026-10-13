@@ -261,7 +261,7 @@ export const GUIDE: Record<string, { title: string; body: string }> = {
   },
   plan: {
     title: "Step 5 of 6 · What the next cycle needs",
-    body: "The same routing, applied to a whole book. Set the size of the cycle and the target, and the plan says what lands, when it lands, and how much is still short.",
+    body: "The same routing, applied to a whole book. See whether the target is met, where the gap sits (AI agent, our callers, where effort goes), and what to do about it.",
   },
   quality: {
     title: "Step 6 of 6 · Is it safe to trust?",

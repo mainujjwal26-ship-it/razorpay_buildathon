@@ -324,3 +324,6 @@ td.spot{border-radius:8px}
 .dt u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#b3261e;text-decoration:none}
 .dv{text-align:right;font-weight:600}
 .dp{text-align:right;color:var(--muted)}
+
+/* Plan: the three actions */
+.todo { margin: 0; padding-left: 1.2rem; display: grid; gap: .6rem; line-height: 1.45; }

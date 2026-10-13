@@ -243,6 +243,8 @@ export interface Performance {
   weakestChecks: { id: string; fails: number; total: number; type: string }[];
   plan?: {
     cases: number;
+    promises: { made: number; broken: number };
+    reminderOnly: number;
     routes: { ai: number; human: number; field: number; routed: number };
     resolvedShare: number;
     curve: { day: number; cleared: number; share: number }[];

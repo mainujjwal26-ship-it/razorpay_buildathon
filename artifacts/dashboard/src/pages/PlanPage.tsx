@@ -5,18 +5,36 @@ import { inr } from "../lib/format";
 
 const BOOKS = [1000, 10000, 50000];
 const TARGETS = [40, 50, 60];
+const CALLERS = [1, 2, 3, 5];
 const EMI = 5000;
 /** One caller works about this many borrowers in a cycle (lender interview). */
 const PER_CALLER = 400;
 
 const crore = (n: number) =>
   n >= 10000000 ? `₹${(n / 10000000).toFixed(2)} crore` : n >= 100000 ? `₹${(n / 100000).toFixed(1)} lakh` : inr(n);
+const num = (n: number) => Math.round(n).toLocaleString("en-IN");
+
+function Pick({ label, values, value, set, unit = "" }: { label: string; values: number[]; value: number; set: (n: number) => void; unit?: string }) {
+  return (
+    <div>
+      <span className="pl">{label}</span>
+      <div className="pbtns">
+        {values.map((v) => (
+          <button key={v} type="button" aria-pressed={value === v} onClick={() => set(v)}>
+            {v.toLocaleString("en-IN")}{unit}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function PlanPage() {
   const [p, setP] = useState<Performance | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [book, setBook] = useState(10000);
   const [target, setTarget] = useState(50);
+  const [callers, setCallers] = useState(2);
 
   useEffect(() => {
     getPerformance(true)
@@ -26,137 +44,108 @@ export function PlanPage() {
 
   if (error) return <Section title="Plan next cycle"><p className="note bad">{error}</p></Section>;
   if (!p) return <p className="muted">Loading…</p>;
-
   const plan = p.plan;
   if (!plan || plan.cases === 0) return <Section title="Plan next cycle"><p className="muted">No reviewed calls yet, so there is nothing to plan from.</p></Section>;
 
-  const share = (n: number) => (plan.routes.routed ? n / plan.routes.routed : 0);
-  const aiCalls = Math.round(book * share(plan.routes.ai));
-  const personCalls = Math.round(book * share(plan.routes.human));
-  const callers = Math.max(1, Math.ceil(personCalls / PER_CALLER));
+  const per = (n: number) => (plan.cases ? n / plan.cases : 0); // share of the book
+  const routed = (n: number) => (plan.routes.routed ? n / plan.routes.routed : 0);
 
   const pending = book * EMI;
-  const targetAmount = (pending * target) / 100;
-  const expectedShare = plan.resolvedShare;
-  const expected = pending * expectedShare;
-  const gap = targetAmount - expected;
-  const dayToHit = plan.curve.find((c) => c.share >= target / 100)?.day ?? null;
-  const half = plan.curve.find((c) => c.share >= expectedShare / 2)?.day ?? null;
-  const extraCases = Math.max(0, Math.ceil(gap / EMI));
+  const targetAmt = (pending * target) / 100;
+  const expected = pending * plan.resolvedShare;
+  const gap = targetAmt - expected;
+  const gapEmis = Math.max(0, Math.ceil(gap / EMI));
+  const at = (day: number) => plan.curve.filter((c) => c.day <= day).pop()?.share ?? 0;
+
+  // The three gaps, each in EMIs.
+  const broken = Math.round(book * per(plan.promises.broken));
+  const brokenPct = plan.promises.made ? Math.round((plan.promises.broken / plan.promises.made) * 100) : 0;
+  const closePct = broken ? Math.min(100, Math.round((gapEmis / broken) * 100)) : 0;
+  const personCalls = Math.round(book * routed(plan.routes.human));
+  const needed = Math.max(1, Math.ceil(personCalls / PER_CALLER));
+  const uncovered = Math.max(0, personCalls - callers * PER_CALLER);
+  const reminder = Math.round(book * per(plan.reminderOnly));
+  const aiCalls = Math.round(book * routed(plan.routes.ai));
 
   return (
     <div className="stack">
-      <Section title="What does the next cycle need?">
-        <p className="note">
-          The routing and the recovery curve below come from the {plan.cases} reviewed calls in the sample book. Set the size of
-          the cycle and the target, and the plan scales to it.
-        </p>
+      <Section title="The cycle">
         <div className="planin">
-          <div>
-            <span className="pl">Bounced EMIs this cycle</span>
-            <div className="pbtns">
-              {BOOKS.map((b) => (
-                <button key={b} type="button" aria-pressed={book === b} onClick={() => setBook(b)}>
-                  {b.toLocaleString("en-IN")}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <span className="pl">Recovery target</span>
-            <div className="pbtns">
-              {TARGETS.map((t) => (
-                <button key={t} type="button" aria-pressed={target === t} onClick={() => setTarget(t)}>
-                  {t}%
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="pstake">
-            <span className="pl">Money in the cycle</span>
-            <b>{crore(pending)}</b>
-            <span className="muted small">{book.toLocaleString("en-IN")} EMIs of {inr(EMI)}</span>
-          </div>
+          <Pick label="Bounced EMIs" values={BOOKS} value={book} set={setBook} />
+          <Pick label="Recovery target" values={TARGETS} value={target} set={setTarget} unit="%" />
+          <Pick label="Callers available" values={CALLERS} value={callers} set={setCallers} />
         </div>
       </Section>
 
-      <Section title="Will the target be met?">
+      <Section title="How it pans out">
         <div className="mgrid three">
           <div className="metric">
             <div className="m-h">Target</div>
-            <div className="m-w">What the team is being asked to recover this cycle.</div>
-            <div className="m-v">{crore(targetAmount)}</div>
+            <div className="m-v">{crore(targetAmt)}</div>
             <div className="m-d">{target}% of {crore(pending)}</div>
           </div>
           <div className="metric">
             <div className="m-h">The plan delivers</div>
-            <div className="m-w">At the resolution rate the agent reaches in the sample book.</div>
             <div className="m-v">{crore(expected)}</div>
-            <div className="m-d">{Math.round(expectedShare * 100)}% of the book, half of it by day {half ?? "–"}</div>
+            <div className="m-d">{Math.round(plan.resolvedShare * 100)}% of the book</div>
           </div>
           <div className={`metric ${gap > 0 ? "bad" : "good"}`}>
             <div className="m-h">{gap > 0 ? "Short by" : "Ahead by"}</div>
-            <div className="m-w">{gap > 0 ? "What the plan does not reach, and must be closed." : "What the plan recovers above the target."}</div>
             <div className="m-v">{crore(Math.abs(gap))}</div>
-            <div className="m-d">
-              {gap > 0
-                ? `About ${extraCases.toLocaleString("en-IN")} more EMIs need to clear`
-                : `Target met by day ${dayToHit ?? "–"}`}
-            </div>
+            <div className="m-d">{gap > 0 ? `About ${num(gapEmis)} EMIs` : "Target met"}</div>
           </div>
         </div>
-      </Section>
-
-      <Section title="When the money lands">
-        <p className="note">Cumulative recovery by day, from the day each EMI actually cleared in the sample. The line stops where the sample stops.</p>
         <ul className="daybars">
-          {plan.curve.map((c) => {
-            const amount = pending * c.share;
-            const hit = c.share >= target / 100;
-            return (
-              <li key={c.day}>
-                <span className="dl">Day {c.day}</span>
-                <span className="dt">
-                  <i style={{ width: `${Math.max(1, c.share * 100)}%` }} className={hit ? "hit" : ""} />
-                  <u style={{ left: `${target}%` }} aria-hidden="true" />
-                </span>
-                <span className="dv">{crore(amount)}</span>
-                <span className="dp">{Math.round(c.share * 100)}%</span>
-              </li>
-            );
-          })}
+          {[1, 3, 7].map((d) => (
+            <li key={d}>
+              <span className="dl">{d === 1 ? "Next day" : d === 3 ? "By day 3" : "By day 7"}</span>
+              <span className="dt">
+                <i style={{ width: `${Math.max(1, at(d) * 100)}%` }} className={at(d) >= target / 100 ? "hit" : ""} />
+                <u style={{ left: `${target}%` }} aria-hidden="true" />
+              </span>
+              <span className="dv">{crore(pending * at(d))}</span>
+              <span className="dp">{Math.round(at(d) * 100)}%</span>
+            </li>
+          ))}
         </ul>
-        <p className="note">
-          The marker on each bar is the {target}% target.{" "}
-          {dayToHit ? `The sample reaches it on day ${dayToHit}.` : "The sample never reaches it, so the gap above has to be closed another way."}
-        </p>
       </Section>
 
-      <Section title="What the team does today">
+      <Section title="Where the gap sits">
         <div className="mgrid three">
           <div className="metric">
-            <div className="m-h">AI calls to place</div>
-            <div className="m-w">Borrowers the agent keeps, because intent has not shifted and the call went well.</div>
-            <div className="m-v">{aiCalls.toLocaleString("en-IN")}</div>
-            <div className="m-d">{Math.round(share(plan.routes.ai) * 100)}% of the cycle</div>
+            <div className="m-h">The AI agent</div>
+            <div className="m-v">{num(broken)} EMIs</div>
+            <div className="m-d">promised on the call, then not paid ({brokenPct}% of promises)</div>
+          </div>
+          <div className={`metric ${uncovered > 0 ? "bad" : ""}`}>
+            <div className="m-h">Our callers</div>
+            <div className="m-v">{uncovered > 0 ? `${num(uncovered)} uncovered` : "Covered"}</div>
+            <div className="m-d">{num(personCalls)} person calls need {needed} caller{needed === 1 ? "" : "s"}; you have {callers}</div>
           </div>
           <div className="metric">
-            <div className="m-h">Calls for a person</div>
-            <div className="m-w">Borrowers whose intent has shifted, or who let the agent down on the call.</div>
-            <div className="m-v">{personCalls.toLocaleString("en-IN")}</div>
-            <div className="m-d">{callers} caller{callers === 1 ? "" : "s"} at ~{PER_CALLER} borrowers each</div>
-          </div>
-          <div className="metric">
-            <div className="m-h">Field visits</div>
-            <div className="m-w">Borrowers who have stopped answering the phone altogether.</div>
-            <div className="m-v">0</div>
-            <div className="m-d">No borrower in the sample stops answering, so this route is never triggered</div>
+            <div className="m-h">Where effort goes</div>
+            <div className="m-v">{num(reminder)} EMIs</div>
+            <div className="m-d">only forgot or hit an auto-debit failure, but get a full AI call</div>
           </div>
         </div>
+      </Section>
+
+      <Section title="What to do">
+        <ol className="todo">
+          <li>
+            <b>Agent.</b> Follow up every broken promise on its promised date.
+            {gap > 0 && broken > 0 ? ` Getting ${closePct}% of them to pay closes the gap.` : ""}
+          </li>
+          <li>
+            <b>Team.</b> {uncovered > 0 ? `Add ${Math.ceil(uncovered / PER_CALLER)} caller${Math.ceil(uncovered / PER_CALLER) === 1 ? "" : "s"}: ${num(uncovered)} person calls have nobody.` : `The ${num(personCalls)} person calls are covered.`}
+          </li>
+          <li>
+            <b>Allocation.</b> Send {num(reminder)} borrowers a reminder, not a call. AI calls fall from {num(aiCalls)} to {num(aiCalls - reminder)}. It saves effort; it recovers nothing extra.
+          </li>
+        </ol>
         <p className="note">
-          Sample figures. The route mix and the recovery curve come from the {plan.cases}-call sample book; the ratio of about{" "}
-          {PER_CALLER} borrowers per caller is from a collections interview at an Indian lender.
-          {isDemoMode() ? " Demo mode: nothing here is a live borrower." : ""}
+          From the {plan.cases}-call sample. Field visits: none in the sample, so none planned. No person-call results exist yet, so none are assumed.
+          {isDemoMode() ? " Demo mode: sample data." : ""}
         </p>
       </Section>
     </div>
