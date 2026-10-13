@@ -112,7 +112,20 @@ export async function transcribeAudio(blob: Blob, callId: string | undefined = c
   if (!res.ok) throw new Error(data.error ?? `Transcription failed (${res.status})`);
   return data.text ?? "";
 }
-export const speakText = (text: string, callId: string | undefined = currentCallId) => request<{ audio: string }>("/call/speak", { text, callId });
+// Demo only: Meera's lines are fetched ahead of time, so each one starts at once instead of after a round trip.
+const speechCache = new Map<string, Promise<{ audio: string }>>();
+export const prefetchSpeech = (texts: string[]) => {
+  for (const t of texts) {
+    if (speechCache.has(t)) continue;
+    const p = request<{ audio: string }>("/call/speak", { text: t, callId: undefined });
+    speechCache.set(t, p);
+    p.catch(() => speechCache.delete(t));
+  }
+};
+export const speakText = (text: string, callId: string | undefined = currentCallId) =>
+  demo && speechCache.has(text)
+    ? speechCache.get(text)!.catch(() => request<{ audio: string }>("/call/speak", { text, callId }))
+    : request<{ audio: string }>("/call/speak", { text, callId });
 
 // ----- Review, call list, performance -----
 export type Outcome = "promise_to_pay" | "part_payment" | "link_sent" | "no_commitment" | "refused" | "wrong_person" | "escalated" | "incomplete" | "unreviewed";

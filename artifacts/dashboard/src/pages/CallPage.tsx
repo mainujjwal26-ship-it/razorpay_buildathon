@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import type { CallConfig } from "../lib/api";
+import { useEffect, useMemo } from "react";
+import { prefetchSpeech, type CallConfig } from "../lib/api";
 import { useCall } from "../lib/useCall";
 import { useDemoCall } from "../lib/useDemoCall";
 import { DEMO_LINES } from "../lib/demo";
@@ -13,6 +13,11 @@ export function CallPage({ config, demo = false }: { config: CallConfig; demo?: 
   const liveCall = useCall(voice);
   const demoCall = useDemoCall(voice);
   const call = demo ? demoCall : liveCall;
+
+  // Demo: fetch every Meera line now, so the call starts talking at once and never waits between turns.
+  useEffect(() => {
+    if (demo && useSarvam) prefetchSpeech(DEMO_LINES.filter((l) => l.who === "meera").map((l) => l.text));
+  }, [demo, useSarvam]);
 
   const customer = config.customers[0] ?? null;
   const live = call.phase !== "idle" && call.phase !== "ended";

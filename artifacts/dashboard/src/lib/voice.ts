@@ -20,7 +20,8 @@ export interface VoiceAdapter {
   prepare?(): Promise<void>;
   /** Told when a line could not be played (for example, the phone blocked sound). */
   setReporter?(report: (kind: "blocked" | "failed", message: string) => void): void;
-  speak(text: string): Promise<void>;
+  /** `rate` above 1 plays a little faster (Sarvam voice only). */
+  speak(text: string, rate?: number): Promise<void>;
   listen(timeoutMs: number, onIssue?: (msg: string) => void, onRecording?: (recording: boolean) => void): Listener;
   cancel(): void;
 }
@@ -265,11 +266,12 @@ export function createSarvamVoice(): VoiceAdapter {
       return Promise.all([resumeMicrophoneContext(getContext()), unlocked]).then(() => undefined);
     },
 
-    async speak(text) {
+    async speak(text, rate) {
       try {
         const { audio: b64 } = await speakText(text);
         const el = getPlayer();
         el.src = `data:audio/wav;base64,${b64}`;
+        el.playbackRate = rate ?? 1;
         await new Promise<void>((resolve, reject) => {
           el.onended = () => resolve();
           el.onerror = () => reject(new Error("audio could not be decoded"));

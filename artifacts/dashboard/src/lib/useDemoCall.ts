@@ -10,7 +10,9 @@ import type { Line, Phase } from "./useCall";
  * demo call is audible; if speech is unavailable each line is simply timed.
  */
 const READ_MS = (text: string) => Math.min(4500, 1000 + text.length * 24);
-const PAUSE_MS = 600;
+const PAUSE_MS = 300;
+/** Demo pace: Meera's recorded lines play slightly faster, and nothing waits once the audio ends. */
+const RATE = 1.15;
 
 export function useDemoCall(voice: VoiceAdapter) {
   const [phase, setPhase] = useState<Phase>("idle");
@@ -49,15 +51,15 @@ export function useDemoCall(voice: VoiceAdapter) {
         if (l.who === "meera") {
           setPhase("speaking");
           setLines((x) => [...x, { id: i + 1, who: "agent", text: l.text }]);
-          const spoken = voice.speak(l.text).then(() => true).catch(() => false);
-          // Whichever finishes last: real audio, or a readable pause when speech is unavailable.
-          await Promise.all([spoken, wait(READ_MS(l.text), session)]);
+          const spoken = voice.speak(l.text, RATE).then(() => true).catch(() => false);
+          // With audio, the line ends when the audio ends; without it, leave time to read the line.
+          await Promise.all([spoken, wait(voice.canSpeak ? 300 : READ_MS(l.text), session)]);
         } else {
           setPhase("listening");
           await wait(PAUSE_MS, session);
           if (generation.current !== session) return;
           setLines((x) => [...x, { id: i + 1, who: "borrower", text: l.text }]);
-          await wait(READ_MS(l.text) * 0.55, session);
+          await wait(Math.min(1400, READ_MS(l.text) * 0.4), session);
         }
       }
       if (generation.current !== session) return;
