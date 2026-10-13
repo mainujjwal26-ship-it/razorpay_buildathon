@@ -6,6 +6,8 @@
  * show "not connected" for collected amount, resolution rate and resolution time.
  */
 export interface CollectionsRec {
+  /** Which route the decision engine picked for this borrower. */
+  recommendation?: "ai" | "human" | null;
   outcome: string;
   rootCause?: string | null;
   promiseDate: string | null;
@@ -27,6 +29,33 @@ const median = (xs: number[]) => {
 };
 
 /** Calls where the borrower actually spoke to Meera (right person, reviewed). */
+/**
+ * Forward-looking plan: how the next cycle's bounced EMIs are routed, and when
+ * recovery actually lands. Both come from the records themselves — the route the
+ * decision engine picked, and the day each resolved EMI was cleared.
+ */
+export function planShape(records: CollectionsRec[]) {
+  const reviewed = records.filter((r) => r.outcome !== "unreviewed");
+  const routed = reviewed.filter((r) => r.recommendation === "ai" || r.recommendation === "human");
+  const ai = routed.filter((r) => r.recommendation === "ai").length;
+  const human = routed.filter((r) => r.recommendation === "human").length;
+  const paid = reviewed.filter((r) => r.payment?.resolved);
+  const days = paid.map((r) => r.payment?.daysToResolve).filter((d): d is number => typeof d === "number");
+  const last = days.length ? Math.max(...days) : 0;
+  // Cumulative share of the whole book cleared by the end of each day.
+  const curve: { day: number; cleared: number; share: number }[] = [];
+  for (let d = 1; d <= last; d++) {
+    const cleared = days.filter((x) => x <= d).length;
+    curve.push({ day: d, cleared, share: reviewed.length ? cleared / reviewed.length : 0 });
+  }
+  return {
+    cases: reviewed.length,
+    routes: { ai, human, field: 0, routed: routed.length },
+    resolvedShare: reviewed.length ? paid.length / reviewed.length : 0,
+    curve,
+  };
+}
+
 export const spoke = (r: CollectionsRec) => !["incomplete", "unreviewed", "wrong_person"].includes(r.outcome);
 
 export function collectionsMetrics(records: CollectionsRec[]) {

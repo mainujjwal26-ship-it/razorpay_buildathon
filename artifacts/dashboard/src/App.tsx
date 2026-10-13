@@ -7,6 +7,7 @@ import { CallsPage, CallDetailPage } from "./pages/CallsPage";
 import { PerformancePage } from "./pages/PerformancePage";
 import { QualityPage } from "./pages/QualityPage";
 import { HowItWorksPage } from "./pages/HowItWorksPage";
+import { PlanPage } from "./pages/PlanPage";
 
 function useRoute(): string {
   const [hash, setHash] = useState(() => window.location.hash.replace(/^#/, "") || "/call");
@@ -23,6 +24,7 @@ const STEPS = [
   { key: "calls", href: "#/calls", name: "View call data" },
   { key: "detail", href: "#/calls", name: "Review the call" },
   { key: "performance", href: "#/performance", name: "Collections performance" },
+  { key: "plan", href: "#/plan", name: "Plan next cycle" },
   { key: "quality", href: "#/quality", name: "Agent performance" },
 ];
 
@@ -60,7 +62,7 @@ export function App() {
     window.location.hash = "#/call";
   };
 
-  const tab = route.startsWith("/how") ? "how" : route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
+  const tab = route.startsWith("/plan") ? "plan" : route.startsWith("/how") ? "how" : route.startsWith("/quality") ? "quality" : route.startsWith("/performance") ? "performance" : route.startsWith("/calls") ? "calls" : "call";
   const detailId = route.startsWith("/calls/") ? route.slice("/calls/".length) : null;
   const demo = mode === "demo";
 
@@ -68,6 +70,7 @@ export function App() {
     call: ["Call", "Place a test call and see the customer's details"],
     calls: [detailId ? "Call review" : "Calls", detailId ? "Summary, data points and rule checks" : "Every call, newest first"],
     performance: ["Collections performance", "Is the agent recovering money?"],
+    plan: ["Plan next cycle", "What does the next cycle need to hit its target?"],
     how: ["How it works", "From a bounced EMI to a reviewed call"],
     quality: ["Agent performance", "Is the agent safe to trust? Hard and judgement rule breaches"],
   };
@@ -114,6 +117,7 @@ export function App() {
           {item("#/call", "call", "Call", ic("M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"))}
           {item("#/calls", "calls", "Calls", ic("M4 6h16M4 12h16M4 18h10"))}
           {item("#/performance", "performance", "Collections performance", ic("M4 20V10M10 20V4M16 20v-8M22 20H2"))}
+          {item("#/plan", "plan", "Plan next cycle", ic("M3 20h18M7 20V9M12 20V4M17 20v-7"))}
           {item("#/quality", "quality", "Agent performance", ic("M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3zM9 12l2 2 4-4"))}
           <div className="sec">About</div>
           {item("#/how", "how", "How it works", ic("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 8v.5"))}
@@ -137,6 +141,7 @@ export function App() {
               <div hidden={tab !== "call"}><CallPage config={cfg} demo={demo} key={demo ? "demo" : "live"} /></div>
               {tab === "calls" && (detailId ? <CallDetailPage id={detailId} /> : <CallsPage />)}
               {tab === "performance" && <PerformancePage />}
+              {tab === "plan" && <PlanPage />}
               {tab === "quality" && <QualityPage />}
               {tab === "how" && <HowItWorksPage />}
             </>

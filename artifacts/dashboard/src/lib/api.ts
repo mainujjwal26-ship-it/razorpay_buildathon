@@ -241,6 +241,12 @@ export interface Performance {
   rootCauses: Record<string, number>;
   sentiments: Record<string, number>;
   weakestChecks: { id: string; fails: number; total: number; type: string }[];
+  plan?: {
+    cases: number;
+    routes: { ai: number; human: number; field: number; routed: number };
+    resolvedShare: number;
+    curve: { day: number; cleared: number; share: number }[];
+  };
   trend: { date: string; calls: number; hardFailPct: number | null; guardrailPassPct: number | null; replyGapMs: number | null }[];
 }
 export const finishCall = async (callId: string) => {

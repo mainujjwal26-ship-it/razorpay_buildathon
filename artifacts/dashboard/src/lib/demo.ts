@@ -244,23 +244,27 @@ export const DEMO_ROW: CallRow = {
 /** One line per screen, so a reviewer knows what they are looking at. */
 export const GUIDE: Record<string, { title: string; body: string }> = {
   call: {
-    title: "Step 1 of 5 · The call",
+    title: "Step 1 of 6 · The call",
     body: "A bounced EMI, minutes old. Press the green button and the call plays out line by line, with a note beside each line saying what Meera is doing and which rule it satisfies. In Live mode this same screen places a real call you can talk to.",
   },
   calls: {
-    title: "Step 2 of 5 · Every call lands here",
+    title: "Step 2 of 6 · Every call lands here",
     body: "One row per call, with the outcome, the promise and the recommendation the system reached. Open the call to see how it got there.",
   },
   detail: {
-    title: "Step 3 of 5 · The review and the recommendation",
+    title: "Step 3 of 6 · The review and the recommendation",
     body: "The call is now data: a reason, a root cause, a dated promise and a ticket. Below that, two questions decide whether the AI keeps this borrower or a person takes over. Note that the call went well and the answer is still a person.",
   },
   performance: {
-    title: "Step 4 of 5 · Is it recovering money?",
+    title: "Step 4 of 6 · Is it recovering money?",
     body: "The same screens over a sample book of 100 bounced EMIs of ₹5,000 each. Sample figures, not live results.",
   },
+  plan: {
+    title: "Step 5 of 6 · What the next cycle needs",
+    body: "The same routing, applied to a whole book. Set the size of the cycle and the target, and the plan says what lands, when it lands, and how much is still short.",
+  },
   quality: {
-    title: "Step 5 of 5 · Is it safe to trust?",
+    title: "Step 6 of 6 · Is it safe to trust?",
     body: "Every call is scored against the lender's rules, rather than the 10 to 20 per cent a quality team can sample by hand. Hard rules are never-do; judgement rules are how well the call was handled.",
   },
 };

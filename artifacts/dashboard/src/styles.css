@@ -304,3 +304,23 @@ td.spot{border-radius:8px}
 }
 .main.demo .bars li:hover{background:#eef3fb;border-radius:8px}
 .main.demo table.grid tbody tr:hover{background:#eef3fb;cursor:pointer}
+
+/* Plan next cycle */
+.planin{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin-top:14px}
+.pl{display:block;font:600 11px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.pbtns{display:flex;gap:6px}
+.pbtns button{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:7px 14px;font:600 14px Inter,sans-serif;color:var(--muted);cursor:pointer}
+.pbtns button[aria-pressed=true]{background:#2b6be4;border-color:#2b6be4;color:#fff}
+.pstake b{display:block;font:700 22px Inter,sans-serif}
+.mgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.metric.bad{border-color:#e6b8b8;background:#fdf3f3}
+.metric.good{border-color:#b6d8c2;background:#f1f8f3}
+.daybars{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.daybars li{display:grid;grid-template-columns:62px 1fr 110px 48px;gap:12px;align-items:center;font-size:14px}
+.dl{color:var(--muted)}
+.dt{position:relative;height:16px;background:#e9eef6;border-radius:8px;overflow:hidden}
+.dt i{position:absolute;left:0;top:0;bottom:0;background:#2b6be4;border-radius:8px}
+.dt i.hit{background:#1d7a4c}
+.dt u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#b3261e;text-decoration:none}
+.dv{text-align:right;font-weight:600}
+.dp{text-align:right;color:var(--muted)}

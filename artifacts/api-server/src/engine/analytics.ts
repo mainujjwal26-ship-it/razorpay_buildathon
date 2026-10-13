@@ -1,6 +1,6 @@
 import { listCalls, readCall } from "../lib/callLog";
 import { readContentJson, loadCustomers, getCustomer, amountDue } from "../lib/content";
-import { collectionsMetrics } from "./collections";
+import { collectionsMetrics, planShape } from "./collections";
 import { decisionFor, factsOfReview } from "./decisionRun";
 import type { CallReview, Outcome, RootCause, Sentiment, TranscriptLine } from "./review";
 
@@ -232,6 +232,7 @@ export function aggregate(records: CallRecord[]) {
       promisedAmount: talked.reduce((s, r) => s + (r.promiseAmount ?? 0), 0),
     },
     collections: collectionsMetrics(records),
+    plan: planShape(records),
     outcomes,
     rootCauses: talked.reduce<Record<string, number>>((m, r) => (r.rootCause ? ((m[r.rootCause] = (m[r.rootCause] ?? 0) + 1), m) : m), {}),
     sentiments: talked.reduce<Record<string, number>>((m, r) => ((m[r.sentiment ?? "calm"] = (m[r.sentiment ?? "calm"] ?? 0) + 1), m), {}),
