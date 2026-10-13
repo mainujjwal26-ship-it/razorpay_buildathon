@@ -9,31 +9,30 @@ const MUTED = "5B6B85";
 const RULE = "C9D2E0";
 const ACCENT = "1A4FD6";
 
-const P = (children, opts = {}) => new Paragraph({ children, spacing: { after: 70, line: 240 }, ...opts });
-const run = (text, o = {}) => new TextRun({ text, font: "Calibri", size: 18, color: INK, ...o });
+const P = (children, opts = {}) => new Paragraph({ children, spacing: { after: 55, line: 225 }, ...opts });
+const run = (text, o = {}) => new TextRun({ text, font: "Calibri", size: 17, color: INK, ...o });
 const b = (text, o = {}) => run(text, { bold: true, ...o });
 
 const H = (text) =>
   new Paragraph({
-    children: [new TextRun({ text, font: "Calibri", size: 19, bold: true, color: ACCENT, allCaps: true, characterSpacing: 20 })],
-    spacing: { before: 150, after: 60 },
+    children: [new TextRun({ text, font: "Calibri", size: 18, bold: true, color: ACCENT, allCaps: true, characterSpacing: 20 })],
+    spacing: { before: 105, after: 45 },
   });
 
 const bullet = (children) =>
-  new Paragraph({ children, bullet: { level: 0 }, spacing: { after: 45, line: 240 }, indent: { left: 200, hanging: 160 } });
+  new Paragraph({ children, bullet: { level: 0 }, spacing: { after: 32, line: 225 }, indent: { left: 190, hanging: 150 } });
 
-// ---- generic compact table ----
-const mkTable = (cols, rows, headRow = true) => {
+const mkTable = (cols, rows) => {
   const cell = (text, i, head) =>
     new TableCell({
       children: [
         new Paragraph({
-          children: [run(text, { size: 16, bold: head, color: head ? INK : i === 0 ? INK : MUTED })],
-          spacing: { after: 0, line: 220 },
+          children: [run(text, { size: 15, bold: head, color: head ? INK : i === 0 ? INK : MUTED })],
+          spacing: { after: 0, line: 205 },
         }),
       ],
       width: { size: cols[i], type: WidthType.DXA },
-      margins: { top: 50, bottom: 50, left: 90, right: 90 },
+      margins: { top: 40, bottom: 40, left: 85, right: 85 },
       shading: head ? { type: ShadingType.CLEAR, fill: "EEF3FB", color: "auto" } : undefined,
       borders: {
         top: { style: BorderStyle.SINGLE, size: 2, color: RULE },
@@ -45,19 +44,19 @@ const mkTable = (cols, rows, headRow = true) => {
   return new Table({
     columnWidths: cols,
     width: { size: cols.reduce((a, c) => a + c, 0), type: WidthType.DXA },
-    rows: rows.map((r, ri) => new TableRow({ children: r.map((t, i) => cell(t, i, headRow && ri === 0)), tableHeader: headRow && ri === 0 })),
+    rows: rows.map((r, ri) => new TableRow({ children: r.map((t, i) => cell(t, i, ri === 0)), tableHeader: ri === 0 })),
   });
 };
 
-const SCALE = mkTable(
-  [3450, 3450, 2340],
+const MARKET = mkTable(
+  [2750, 4100, 2390],
   [
-    ["Where the money is", "Figure", "Source"],
-    ["Retail loans outstanding in India", "₹170.2 lakh crore, up 16.6% YoY", "CRIF High Mark, Mar 2026"],
-    ["The unsecured book this agent serves", "₹16.5 lakh crore of personal loans, 12.2 crore live loans", "CRIF High Mark"],
-    ["EMIs that bounce on auto-debit", "29.6% of NACH debits by volume; ~20% of e-mandate EMIs at one lender", "NPCI data; lender interview"],
-    ["Still unpaid 31–180 days later", "2.4% of the personal-loan book ≈ ₹40,000 crore", "CRIF %; rupee figure is my arithmetic"],
-    ["What chasing it costs", "₹11 a minute of human calling; ~400 borrowers per caller, so a 1 lakh bounce book needs ~250 callers", "Lender interview; headcount is my arithmetic"],
+    ["India's personal loan market", "Figure", "Source"],
+    ["Loans outstanding", "₹17.0 lakh crore across 12.7 crore live loans (Jun 2026)", "CRIF High Mark"],
+    ["Typical ticket", "₹61,112 on average, but ₹18,802 at digital NBFCs, who write 70% of sanctions by volume", "CRIF High Mark; FACE"],
+    ["EMI auto-debits that fail", "~29% of NACH debits by volume, 22% by value", "NPCI data (public series ends 2022)"],
+    ["Still unpaid 31–180 days later", "2.3% of the book ≈ ₹39,000 crore; 5.7% for small-ticket NBFC loans", "CRIF Jun-26; rupee figure is my arithmetic"],
+    ["What chasing it costs", "₹11 a minute of human calling, and one caller covers ~400 borrowers", "Lender interview"],
   ],
 );
 
@@ -67,23 +66,22 @@ const METRICS = mkTable(
     ["Metric", "What it tells the lender", "Demo build (sample of 100 EMIs)"],
     ["Payment collected", "Rupees recovered of rupees targeted", "46% · ₹2,30,000 of ₹5,00,000"],
     ["Resolution rate and time", "Bounced EMIs cleared in full, and how fast", "40 of 100 EMIs · 5 days median"],
-    ["Promise-to-pay rate", "Calls ending in a dated, costed promise", "63.9% of conversations"],
-    ["Clear reason captured", "Calls that explain why the EMI missed", "92.8% of conversations"],
-    ["Routing accuracy", "Share of handovers a reviewer agrees with", "Not yet measured — needs live calls"],
+    ["Promise and reason capture", "Calls ending in a dated promise, and in a clear reason", "63.9% and 92.8% of conversations"],
+    ["Routing accuracy", "Handovers a reviewer agrees with", "Not yet measured — needs live calls"],
     ["Hard-rule breach rate", "Compliance; the target is zero", "29.7% — the gap to close first"],
     ["Cost per contact", "Cost of reaching one borrower", "₹10.50 by AI vs ₹55 by a person"],
   ],
 );
 
 const doc = new Document({
-  styles: { default: { document: { run: { font: "Calibri", size: 18, color: INK } } } },
+  styles: { default: { document: { run: { font: "Calibri", size: 17, color: INK } } } },
   sections: [
     {
       properties: {
         page: {
           margin: {
-            top: convertInchesToTwip(0.5),
-            bottom: convertInchesToTwip(0.45),
+            top: convertInchesToTwip(0.45),
+            bottom: convertInchesToTwip(0.4),
             left: convertInchesToTwip(0.6),
             right: convertInchesToTwip(0.6),
           },
@@ -95,52 +93,47 @@ const doc = new Document({
           spacing: { after: 25 },
         }),
         new Paragraph({
-          children: [run("A Hindi voice agent that calls the moment an EMI bounces, and decides whether the AI, a person or the field team should take the borrower next.", { size: 19, color: MUTED })],
-          spacing: { after: 35 },
+          children: [run("A Hindi voice agent for bounced personal-loan EMIs: it holds the call, then decides whether the AI, a person or the field team takes the borrower next.", { size: 18, color: MUTED })],
+          spacing: { after: 30 },
         }),
         new Paragraph({
-          children: [run("Ujjwal Goel  ·  Build Challenge Track 2: Recover and Grow with AI  ·  13 October 2026", { size: 16, color: MUTED })],
-          spacing: { after: 50 },
+          children: [run("Ujjwal Goel  ·  Build Challenge Track 2: Recover and Grow with AI  ·  13 October 2026", { size: 15, color: MUTED })],
+          spacing: { after: 45 },
           border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RULE, space: 5 } },
         }),
 
-        H("The problem: a large bounce book chased by a headcount that cannot grow with it"),
-        SCALE,
+        H("The problem"),
+        P([
+          b("India's personal-loan book is 12.7 crore live loans, most of them small-ticket, and roughly one EMI auto-debit in three fails. "),
+          b("Recovery is then bought in headcount — one caller covers about 400 borrowers — so chasing more bounces means hiring more people, each calling without the borrower's history and logging a one-word reason. "),
+          b("The decision that actually moves money, which borrower deserves which kind of effort, is never made at all."),
+        ]),
+        MARKET,
 
-        new Paragraph({ children: [run("Four reasons the money stays uncollected:", { color: MUTED, size: 17 })], spacing: { before: 90, after: 50 } }),
-        bullet([b("Calling capacity cannot scale. "), run("Recovery is bought in headcount: more book means more agents, each needing training and a ramp, against NBFC attrition reported near 77% a year. Cost per rupee recovered rises exactly when the book grows.")]),
-        bullet([b("Agent quality varies, and incentives make it worse. "), run("It varies between agents and within the same agent across a shift or a month. Only 10–20% of calls are ever reviewed, and agents are paid on promises logged rather than promises kept, so a soft promise counts the same as a real one.")]),
-        bullet([b("The record captures fields, not signals. "), run("An agent marks a disposition and a date. Tone, how firmly the borrower committed, and the words they chose — the things that actually predict whether a promise holds — are never written down, so they cannot be learned from.")]),
-        bullet([b("The signals that exist sit in separate systems. "), run("Communication behaviour, call history and the credit profile live in different tools. Few lenders triangulate them into one view of a borrower's intent and a single next step.")]),
+        new Paragraph({ children: [run("Four reasons it stays uncollected:", { color: MUTED, size: 16 })], spacing: { before: 65, after: 38 } }),
+        bullet([b("Calling capacity cannot scale. "), run("More book means more agents, each needing training and a ramp, against NBFC attrition reported near 77% a year. Cost per rupee recovered rises exactly when the book grows.", { size: 16 })]),
+        bullet([b("Agent quality varies, and incentives make it worse. "), run("It varies between agents and within one agent across a shift. Only 10–20% of calls are reviewed, and agents are paid on promises logged rather than promises kept, so a soft promise counts the same as a real one.", { size: 16 })]),
+        bullet([b("The record captures fields, not signals. "), run("An agent marks a disposition and a date. Tone, how firmly the borrower committed and the words they chose — the things that predict whether a promise holds — are never written down, so nothing can learn from them.", { size: 16 })]),
+        bullet([b("The signals that do exist sit in separate systems. "), run("Communication behaviour, call history and the credit profile live in different tools. Few lenders triangulate them into one view of intent and one next step.", { size: 16 })]),
 
         H("The solution"),
-        P([
-          run("Meera calls within minutes of the bounce, in Hindi and Hinglish, and holds a real conversation: she confirms identity before mentioning the loan, asks why the EMI missed and listens to the answer, negotiates a date that fits when the borrower is actually paid, and asks for a promise with a date "),
-          run("and", { italics: true }),
-          run(" an amount. She states only the lender's facts, sends exactly one payment link, and raises a ticket rather than promising anything she has no authority over, such as waiving a charge."),
-        ]),
-        P([
-          run("Every call then becomes structured data — reason, root cause, promise, cooperation, tone, tickets, and a transcript scored against every rule — and is combined with the borrower's own history to produce one recommendation: "),
-          b("keep dialling with the AI"),
-          run(", "),
-          b("hand to a human agent"),
-          run(", or "),
-          b("move to field collection"),
-          run(". The rules decide and are readable: intent has shifted when four or more of the last six EMIs bounced or past promises were mostly broken; the AI was let down when there is no firm date and amount or the borrower was evasive; the field team takes over when the borrower has stopped answering calls altogether. The model extracts the facts; it never picks the route."),
-        ]),
-        P([
-          run("The demo borrower makes the point. He gives a firm promise that fits his payday, so the call alone says book a callback — but four bounces in six months hand him to a person ", { size: 17 }),
-          run("before", { italics: true, size: 17 }),
-          run(" he breaks another promise. That is the decision a CRM cannot make.", { size: 17 }),
-        ]),
+        bullet([b("Calls within minutes, in Hindi and Hinglish. "), run("The Razorpay Trusted Collections Agent reaches the borrower while the bounce is hours old, not days.")]),
+        bullet([b("Negotiates like a good agent. "), run("Asks why the EMI missed and listens, then proposes a date that fits when the borrower is actually paid, and asks for a promise with a date and an amount.")]),
+        bullet([b("Stays inside the lender's rules. "), run("Identity first, the lender's facts only, exactly one payment link, and a ticket instead of a promise it has no authority to make, such as waiving a charge.")]),
+        bullet([b("Turns the call into signals. "), run("Reason, root cause, tone, cooperation and promise specificity — on every call, with the transcript scored against every rule.")]),
+        bullet([b("Recommends the next step. "), run("Call signals plus the borrower's history produce one route: keep dialling with the AI, hand to a human agent, or move to field collection. Rules decide and can be read aloud; the model only extracts facts. The demo borrower proves it — a firm promise, yet four bounces in six months hand him to a person before he breaks another.")]),
+
+        H("Why this fits Razorpay"),
+        bullet([b("Razorpay already runs the mandate that bounced. "), run("e-NACH and UPI Autopay for NBFCs sit behind one Razorpay API, and a failed debit already fires a webhook — the exact trigger this agent needs. No new integration to know who to call, or when.")]),
+        bullet([b("The bounce and the cure live on the same rails. "), run("The link the agent sends is a Razorpay link, so the money and the measurement land in one place.")]),
+        bullet([b("It turns a payments product into an outcome. "), run("Lenders buy mandate infrastructure today; this sells rupees recovered on the same plumbing, priced against ₹11-a-minute human calling.")]),
+        bullet([b("Compliance and scale both favour the aggregator. "), run("An RBI-authorised payment aggregator is better placed than a point vendor to run recorded, rule-scored calls under the RBI recovery directions of August 2026 — and bounce outcomes seen across many lenders calibrate the routing better than any single book can.")]),
 
         H("Success metrics"),
         METRICS,
-
-        H("Known gaps"),
         P([
-          run("The recommendation is shown but not yet executed: no handoff packet, override or pause control is built, and the demo routes between AI and a person because the field rule needs unreachable-borrower history the sample does not have. Weights are uncalibrated — nothing records yet whether a promise was kept, so there is no learning loop. The 29.7% hard-rule breach rate on sample calls is the first thing to fix before any pilot.", { size: 17 }),
-        ]),
+          run("Not yet built: the recommendation is shown but not executed, weights are uncalibrated because nothing records whether a promise was kept, and the demo routes between AI and a person only.", { size: 15, color: MUTED }),
+        ], { spacing: { before: 55 } }),
       ],
     },
   ],
