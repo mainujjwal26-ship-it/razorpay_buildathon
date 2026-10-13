@@ -53,10 +53,9 @@ const MARKET = mkTable(
   [
     ["India's personal loan market", "Figure", "Source"],
     ["Loans outstanding", "₹17.0 lakh crore across 12.7 crore live loans (Jun 2026)", "CRIF High Mark"],
-    ["Typical ticket", "₹61,112 on average, but ₹18,802 at digital NBFCs, who write 70% of sanctions by volume", "CRIF High Mark; FACE"],
     ["EMI auto-debits that fail", "~29% of NACH debits by volume, 22% by value", "NPCI data (public series ends 2022)"],
     ["Still unpaid 31–180 days later", "2.3% of the book ≈ ₹39,000 crore; 5.7% for small-ticket NBFC loans", "CRIF Jun-26; rupee figure is my arithmetic"],
-    ["What chasing it costs", "₹11 a minute of human calling, and one caller covers ~400 borrowers", "Lender interview"],
+    ["What chasing it costs", "₹11 a minute of human calling; one caller covers ~400 borrowers", "Lender interviews"],
   ],
 );
 
@@ -64,12 +63,10 @@ const METRICS = mkTable(
   [2450, 3550, 3240],
   [
     ["Metric", "What it tells the lender", "Demo build (sample of 100 EMIs)"],
-    ["Payment collected", "Rupees recovered of rupees targeted", "46% · ₹2,30,000 of ₹5,00,000"],
-    ["Resolution rate and time", "Bounced EMIs cleared in full, and how fast", "40 of 100 EMIs · 5 days median"],
-    ["Promise and reason capture", "Calls ending in a dated promise, and in a clear reason", "63.9% and 92.8% of conversations"],
-    ["Routing accuracy", "Handovers a reviewer agrees with", "Not yet measured — needs live calls"],
+    ["PRIMARY: payment collected", "Rupees recovered of rupees due", "46% · ₹2,30,000 of ₹5,00,000"],
+    ["Resolution rate and time", "Bounced EMIs cleared in full, and how fast", "40 of 100 · 5 days median"],
     ["Hard-rule breach rate", "Compliance; the target is zero", "29.7% — the gap to close first"],
-    ["Cost per contact", "Cost of reaching one borrower", "₹10.50 by AI vs ₹55 by a person"],
+    ["Routing accuracy", "Handovers a reviewer agrees with", "Not yet measured; needs live calls"],
   ],
 );
 
@@ -93,7 +90,7 @@ const doc = new Document({
           spacing: { after: 25 },
         }),
         new Paragraph({
-          children: [run("A Hindi voice agent for bounced personal-loan EMIs: it holds the call, then decides whether the AI, a person or the field team takes the borrower next.", { size: 18, color: MUTED })],
+          children: [run("A Hindi voice agent for bounced personal-loan EMIs: it holds the call, then recommends whether the AI or a person takes the borrower next.", { size: 18, color: MUTED })],
           spacing: { after: 30 },
         }),
         new Paragraph({
@@ -104,35 +101,40 @@ const doc = new Document({
 
         H("The problem"),
         P([
-          b("India's personal-loan book is 12.7 crore live loans, most of them small-ticket, and roughly one EMI auto-debit in three fails. "),
-          b("Recovery is then bought in headcount — one caller covers about 400 borrowers — so chasing more bounces means hiring more people, each calling without the borrower's history and logging a one-word reason. "),
-          b("The decision that actually moves money, which borrower deserves which kind of effort, is never made at all."),
+          b("For the head of collections at an NBFC: roughly one EMI auto-debit in three fails, and recovery is bought in headcount. "),
+          b("One caller covers about 400 borrowers, so chasing more bounces means hiring more people. The decision that moves money, which borrower deserves which kind of effort, is made by feel."),
         ]),
         MARKET,
 
-        new Paragraph({ children: [run("Four reasons it stays uncollected:", { color: MUTED, size: 16 })], spacing: { before: 65, after: 38 } }),
-        bullet([b("Calling capacity cannot scale. "), run("More book means more agents, each needing training and a ramp, against NBFC attrition reported near 77% a year. Cost per rupee recovered rises exactly when the book grows.", { size: 16 })]),
-        bullet([b("Agent quality varies, and incentives make it worse. "), run("It varies between agents and within one agent across a shift. Only 10–20% of calls are reviewed, and agents are paid on promises logged rather than promises kept, so a soft promise counts the same as a real one.", { size: 16 })]),
-        bullet([b("The record captures fields, not signals. "), run("An agent marks a disposition and a date. Tone, how firmly the borrower committed and the words they chose — the things that predict whether a promise holds — are never written down, so nothing can learn from them.", { size: 16 })]),
-        bullet([b("The signals that do exist sit in separate systems. "), run("Communication behaviour, call history and the credit profile live in different tools. Few lenders triangulate them into one view of intent and one next step.", { size: 16 })]),
+        H("What we heard, and how it is handled today"),
+        P([run("Three interviews at an Indian lender that runs collections in-house: a product lead, a collections analyst and a data-science lead.", { size: 16, color: MUTED })]),
+        bullet([b("A fixed pattern. "), run("Bounces drop into the CRM and each agent places 900–1,000 calls a day, repeating until a positive disposition. A promise just schedules a callback. Good agents prioritise in Excel and follow up on WhatsApp, which is encouraged but not tracked.", { size: 16 })]),
+        bullet([b("Intent is judged by gut. "), run("About 30% of non-payers have an intent problem and 70% a genuine one (medical, salary delay, family), but there is no fixed rule and it varies by agent and region. The record is a one-word disposition.", { size: 16 })]),
+        bullet([b("Quality is sampled. "), run("A quality team hears 10–20% of calls. An LLM now scores all of them, and its dispositions match the agents' about 80% of the time.", { size: 16 })]),
+        bullet([b("The bot already works; the decision does not. "), run("AI calling cut cost from ₹11 to ₹3–4 a minute and matched humans in an A/B test. What is still unbuilt: choosing which borrower goes to a person, and using the last call to shape the next.", { size: 16 })]),
 
         H("The solution"),
-        bullet([b("Calls within minutes, in Hindi and Hinglish. "), run("The Razorpay Trusted Collections Agent reaches the borrower while the bounce is hours old, not days.")]),
-        bullet([b("Negotiates like a good agent. "), run("Asks why the EMI missed and listens, then proposes a date that fits when the borrower is actually paid, and asks for a promise with a date and an amount.")]),
-        bullet([b("Stays inside the lender's rules. "), run("Identity first, the lender's facts only, exactly one payment link, and a ticket instead of a promise it has no authority to make, such as waiving a charge.")]),
-        bullet([b("Turns the call into signals. "), run("Reason, root cause, tone, cooperation and promise specificity — on every call, with the transcript scored against every rule.")]),
-        bullet([b("Recommends the next step. "), run("Call signals plus the borrower's history produce one route: keep dialling with the AI, hand to a human agent, or move to field collection. Rules decide and can be read aloud; the model only extracts facts. The demo borrower proves it — a firm promise, yet four bounces in six months hand him to a person before he breaks another.")]),
+        bullet([b("Calls within minutes, in Hindi and Hinglish. "), run("The Razorpay Trusted Collections Agent reaches the borrower while the bounce is hours old.")]),
+        bullet([b("Negotiates like a good agent, inside the lender's rules. "), run("Identity first, asks why and listens, proposes a date that fits payday, one payment link, a ticket instead of a promise it cannot make.")]),
+        bullet([b("Turns the call into signals and recommends the next step. "), run("Reason, tone and promise specificity plus the borrower's history give one route: keep the AI, or hand to a person. The demo borrower makes the point: a firm promise, yet four bounces in six months send him to a person.")]),
 
-        H("Why this fits Razorpay"),
-        bullet([b("Razorpay already runs the mandate that bounced. "), run("e-NACH and UPI Autopay for NBFCs sit behind one Razorpay API, and a failed debit already fires a webhook — the exact trigger this agent needs. No new integration to know who to call, or when.")]),
-        bullet([b("The bounce and the cure live on the same rails. "), run("The link the agent sends is a Razorpay link, so the money and the measurement land in one place.")]),
-        bullet([b("It turns a payments product into an outcome. "), run("Lenders buy mandate infrastructure today; this sells rupees recovered on the same plumbing, priced against ₹11-a-minute human calling.")]),
-        bullet([b("Compliance and scale both favour the aggregator. "), run("An RBI-authorised payment aggregator is better placed than a point vendor to run recorded, rule-scored calls under the RBI recovery directions of August 2026 — and bounce outcomes seen across many lenders calibrate the routing better than any single book can.")]),
+        H("Key product and AI decisions"),
+        bullet([b("Two questions decide the route. "), run("Has intent shifted (four or more bounces in the window)? Did the AI let the borrower down on this call? Either yes sends the borrower to a person. Two questions fit on a screen and match how the lender's team described judging intent.")]),
+        bullet([b("Rules route; the model never does. "), run("The model only extracts facts (reason, promise, tone). Fixed, readable rules decide, so every route can be explained and a threshold is a one-line edit in a content file.")]),
+        bullet([b("Every call is checked twice. "), run("A model review plus exact checks in code; a flag from either counts as a breach. No waiver or unapproved promise is ever made; a ticket is raised instead.")]),
 
-        H("Success metrics"),
+        H("Deliberately left out"),
+        bullet([run("No approve-or-override workflow, so the manager sees the route and the reason, not another queue. No field-visit model: the sample never triggers it and I did not invent one. No channel or timing optimisation. No bureau or bank data: one call plus the lender's own history. India-only numbers, no global benchmarks.", { size: 16 })]),
+
+        H("Why Razorpay"),
+        bullet([b("It already runs the mandate that bounced. "), run("A failed debit already fires a webhook, which is the trigger this agent needs, and the payment link and the measurement land on the same rails.")]),
+        bullet([b("It sells an outcome, not plumbing. "), run("Rupees recovered, priced against ₹11-a-minute human calling, under a regulated aggregator's recorded, rule-scored calls.")]),
+
+        H("Success metric and what to test next"),
         METRICS,
         P([
-          run("Not yet built: the recommendation is shown but not executed, weights are uncalibrated because nothing records whether a promise was kept, and the demo routes between AI and a person only.", { size: 15, color: MUTED }),
+          b("Next test: "),
+          run("split one month's bounced EMIs, half through the agent and its routing and half through today's process, and compare rupees collected in nine days and whether routed-to-person cases recover more than if left with the AI. Sample figures are synthetic; weights are uncalibrated and the recommendation is shown, not executed.", { size: 15, color: MUTED }),
         ], { spacing: { before: 55 } }),
       ],
     },
