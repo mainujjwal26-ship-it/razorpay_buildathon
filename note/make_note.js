@@ -55,7 +55,6 @@ const MARKET = mkTable(
     ["Loans outstanding", "₹17.0 lakh crore across 12.7 crore live loans (Jun 2026)", "CRIF High Mark"],
     ["EMI auto-debits that fail", "~29% of NACH debits by volume, 22% by value", "NPCI data (public series ends 2022)"],
     ["Still unpaid 31–180 days later", "2.3% of the book ≈ ₹39,000 crore; 5.7% for small-ticket NBFC loans", "CRIF Jun-26; rupee figure is my arithmetic"],
-    ["What chasing it costs", "₹11 a minute of human calling; one caller covers ~400 borrowers", "Lender interviews"],
   ],
 );
 
@@ -90,7 +89,7 @@ const doc = new Document({
           spacing: { after: 25 },
         }),
         new Paragraph({
-          children: [run("A Hindi voice agent for bounced personal-loan EMIs: it holds the call, then recommends whether the AI or a person takes the borrower next.", { size: 18, color: MUTED })],
+          children: [run("A Hindi voice agent for bounced EMIs that recommends who takes the borrower next: the AI or a person.", { size: 18, color: MUTED })],
           spacing: { after: 30 },
         }),
         new Paragraph({
@@ -116,15 +115,16 @@ const doc = new Document({
         H("The solution"),
         bullet([b("Calls within minutes, in Hindi and Hinglish. "), run("The Razorpay Trusted Collections Agent reaches the borrower while the bounce is hours old.")]),
         bullet([b("Negotiates like a good agent, inside the lender's rules. "), run("Identity first, asks why and listens, proposes a date that fits payday, one payment link, a ticket instead of a promise it cannot make.")]),
-        bullet([b("Turns the call into signals and recommends the next step. "), run("Reason, tone and promise specificity plus the borrower's history give one route: keep the AI, or hand to a person. The demo borrower makes the point: a firm promise, yet four bounces in six months send him to a person.")]),
+        bullet([b("Turns the call into signals, then recommends and plans the next step. "), run("Reason, tone and promise specificity plus the borrower's history give one route: keep the AI, or hand to a person. The demo borrower makes the point: a firm promise, yet four bounces in six months send him to a person.")]),
 
         H("Key product and AI decisions"),
-        bullet([b("Two questions decide the route. "), run("Has intent shifted (four or more bounces in the window)? Did the AI let the borrower down on this call? Either yes sends the borrower to a person. Two questions fit on a screen and match how the lender's team described judging intent.")]),
-        bullet([b("Rules route; the model never does. "), run("The model only extracts facts (reason, promise, tone). Fixed, readable rules decide, so every route can be explained and a threshold is a one-line edit in a content file.")]),
-        bullet([b("Every call is checked twice. "), run("A model review plus exact checks in code; a flag from either counts as a breach. No waiver or unapproved promise is ever made; a ticket is raised instead.")]),
+        bullet([b("The product ends in a plan, not a recommendation. "), run("A route for one borrower does not change collections. The Plan tab turns the routes into resource allocation for the cycle: how many AI calls, person calls and reminders, how much lands by day 1, 3 and 7, and where the gap to target sits (the agent, our callers, or where effort goes).")]),
+        bullet([b("Two questions decide the route, and rules decide, not the model. "), run("Has intent shifted (four or more bounces in the window)? Did the AI let the borrower down on this call? Either yes sends the borrower to a person. The model only extracts facts (reason, promise, tone).")]),
+        bullet([b("Hard rules and judgement rules, so every verdict can be explained. "), run("Hard rules (one link, no threat, nothing unapproved) are checked in code; judgement rules (listened first) are scored by a model against a quote from the call. AI suggested leaving all judgement to the model; I kept the split because a lender cannot audit a verdict it cannot explain.")]),
 
         H("Deliberately left out"),
-        bullet([run("No approve-or-override workflow, so the manager sees the route and the reason, not another queue. No field-visit model: the sample never triggers it and I did not invent one. No channel or timing optimisation. No bureau or bank data: one call plus the lender's own history. India-only numbers, no global benchmarks.", { size: 16 })]),
+        bullet([b("Pre-bounce awareness calling. "), run("That is about making the borrower aware in time, which an IVR call or a reminder already does. The talking happens after the bounce, and that is where capturing intent matters, so that is where we started.", { size: 16 })]),
+        bullet([b("One collections playbook for every lender. "), run("Each bank or NBFC sets up its own agent, so the demo journey is a sample, not a standard. We provide the layer beneath any agent, better signals and the next step rather than another collections bot, so teams can build their own agent on it.", { size: 16 })]),
 
         H("Why Razorpay"),
         bullet([b("It already runs the mandate that bounced. "), run("A failed debit already fires a webhook, which is the trigger this agent needs, and the payment link and the measurement land on the same rails.")]),
