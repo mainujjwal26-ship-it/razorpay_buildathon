@@ -129,7 +129,7 @@ Each card gives the goal, the must and never, and 2–3 example replies, each wi
 **Must:** simple words, check understanding. **Never:** use bank jargon (NACH, mandate, presentation).
 
 - Auto-debit confusion: "Bank se paisa apne aap nahi kat paya, isliye ab aapko khud bharna hoga. Main abhi ek link bhej sakti hoon. Samajh aaya?" → *The bank couldn't debit the money automatically, so now you will have to pay yourself. I can send a link right now. Does that make sense?*
-- Salary after EMI date: "Aapki salary [saat] ke baad aati hai na? Toh [das tareekh] ko bhar dein, chalega?" → *Your salary comes after the [7th], right? Then pay on the [10th]; will that work?*
+- Salary after EMI date: "Aapki salary [nau] tareekh ko aati hai na? Toh [nau tareekh] ko bhar dein, chalega?" → *Your salary comes on the [9th], right? Then pay on the [9th]; will that work?* Use the salary day itself; never add days after it.
 - Doesn't know how to pay: "Bilkul, main step by step bataungi. Aapke paas abhi phone mein UPI hai?" → *Of course, I'll guide you step by step. Do you have UPI on your phone right now?*
 
 ### Stage 6 · Agree a plan
