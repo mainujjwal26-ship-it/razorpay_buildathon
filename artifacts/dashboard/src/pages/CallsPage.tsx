@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { finishCall, getCallDetail, getCalls, type CallDetail, type CallRow } from "../lib/api";
 import { DecisionPanel } from "../components/DecisionPanel";
 import { Chip, Section } from "../components/Ui";
-import { isDemoMode } from "../lib/api";
 import { dateOnly, inr, mmss, ROOT_CAUSE_LABEL, when } from "../lib/format";
 
 export function CallsPage() {
@@ -32,7 +31,7 @@ export function CallsPage() {
                     <td>{r.customerName}</td>
                     <td><Chip outcome={r.outcome} /></td>
                     <td>{r.promiseAmount ? `${inr(r.promiseAmount)}${r.promiseDate ? ` · ${dateOnly(r.promiseDate)}` : ""}` : "–"}</td>
-                    <td>{r.recommendation === "human" ? <span className={`chip bad${isDemoMode() ? " spot" : ""}`}>Person</span> : r.recommendation === "ai" ? <span className={`chip good${isDemoMode() ? " spot" : ""}`}>AI</span> : "–"}</td>
+                    <td>{r.recommendation === "human" ? <span className="chip bad">Person</span> : r.recommendation === "ai" ? <span className="chip good">AI</span> : "–"}</td>
                     <td>{mmss(r.durationSec)}</td>
                   </tr>
                 );
@@ -112,7 +111,7 @@ export function CallDetailPage({ id }: { id: string }) {
       </Section>
 
       {d.decision && (
-        <div className={isDemoMode() ? "spot" : undefined}><DecisionPanel d={d.decision} /></div>
+        <DecisionPanel d={d.decision} />
       )}
 
       <div className="two">

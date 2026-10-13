@@ -286,3 +286,21 @@ td.spot{border-radius:8px}
 @media (prefers-reduced-motion:reduce){.spot{animation:none;box-shadow:0 0 0 2px rgba(43,107,228,.8)}}
 .chip.spot{border-radius:99px}
 .kv .spot{border-radius:8px}
+
+/* Demo mode: hover any card to light it up, so a walkthrough can point at one thing at a time. */
+.main.demo .metric,
+.main.demo .rcard,
+.main.demo .tile,
+.main.demo .fnode,
+.main.demo .bars li,
+.main.demo .panel{transition:box-shadow .15s ease, background-color .15s ease}
+.main.demo .metric:hover,
+.main.demo .rcard:hover,
+.main.demo .tile:hover,
+.main.demo .fnode:hover,
+.main.demo .panel:not(:has(.metric:hover)):not(:has(.rcard:hover)):not(:has(.tile:hover)):not(:has(.fnode:hover)):not(:has(.bars li:hover)):not(:has(tbody tr:hover)):hover{
+  box-shadow:0 0 0 2px rgba(43,107,228,.9), 0 0 0 9px rgba(43,107,228,.13);
+  border-radius:10px;
+}
+.main.demo .bars li:hover{background:#eef3fb;border-radius:8px}
+.main.demo table.grid tbody tr:hover{background:#eef3fb;cursor:pointer}

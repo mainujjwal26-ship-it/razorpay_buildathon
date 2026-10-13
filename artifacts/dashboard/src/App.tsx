@@ -119,7 +119,7 @@ export function App() {
           {item("#/how", "how", "How it works", ic("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 8v.5"))}
           <div className="foot">{demo ? "Demo mode: sample data, no borrower is called." : "Live mode: a real call, reviewed by the model."}</div>
         </nav>
-        <main className="main">
+        <main className={`main${demo ? " demo" : ""}`}>
           <div className="pagehead"><h1>{title}</h1><span>{sub}</span></div>
           {guide && (
             <div className="guide">
