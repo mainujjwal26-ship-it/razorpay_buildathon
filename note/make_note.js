@@ -1,7 +1,7 @@
 const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType,
-  BorderStyle, ShadingType, convertInchesToTwip,
+  BorderStyle, ShadingType, convertInchesToTwip, ExternalHyperlink,
 } = require("docx");
 
 const INK = "11243A";
@@ -12,6 +12,10 @@ const ACCENT = "1A4FD6";
 const P = (children, opts = {}) => new Paragraph({ children, spacing: { after: 55, line: 225 }, ...opts });
 const run = (text, o = {}) => new TextRun({ text, font: "Calibri", size: 17, color: INK, ...o });
 const b = (text, o = {}) => run(text, { bold: true, ...o });
+
+const link = (text, url) =>
+  new ExternalHyperlink({ link: url, children: [new TextRun({ text, font: "Calibri", size: 16, color: ACCENT, underline: {} })] });
+const WISPR = "https://notes.wisprflow.ai/shared/";
 
 const H = (text) =>
   new Paragraph({
@@ -106,16 +110,25 @@ const doc = new Document({
         MARKET,
 
         H("What we heard, and how it is handled today"),
-        P([run("Three interviews at an Indian lender that runs collections in-house: a product lead, a collections analyst and a data-science lead.", { size: 16, color: MUTED })]),
-        bullet([b("A fixed pattern. "), run("Bounces drop into the CRM and each agent places 900–1,000 calls a day, repeating until a positive disposition. A promise just schedules a callback. Good agents prioritise in Excel and follow up on WhatsApp, which is encouraged but not tracked.", { size: 16 })]),
-        bullet([b("Intent is judged by gut. "), run("About 30% of non-payers have an intent problem and 70% a genuine one (medical, salary delay, family), but there is no fixed rule and it varies by agent and region. The record is a one-word disposition.", { size: 16 })]),
-        bullet([b("Quality is sampled. "), run("A quality team hears 10–20% of calls. An LLM now scores all of them, and its dispositions match the agents' about 80% of the time.", { size: 16 })]),
+        P([
+          run("Three interviews at an Indian lender that runs collections in-house: ", { size: 16, color: MUTED }),
+          link("a product lead", WISPR + "vOJs1Uq_6balt58qXI-NhptISXss1Ru_2IFtK3rlYhI"),
+          run(", ", { size: 16, color: MUTED }),
+          link("a collections analyst", WISPR + "n9w-XilXtBm9QImnmkkci38FG3EUC8UbCTJE-CUFnTE"),
+          run(" and ", { size: 16, color: MUTED }),
+          link("a data-science lead", WISPR + "7XFk1Q79FXjCwW-3QSH8rjpszFu2XLhz2fNNkYbO3-Q"),
+          run(".", { size: 16, color: MUTED }),
+        ]),
+        bullet([b("A fixed pattern. "), run("Bounces drop into the CRM and each agent places 900–1,000 calls a day, repeating until a call ends well. A promise just books a callback. Good agents prioritise in Excel and follow up on WhatsApp, which is encouraged but not tracked.", { size: 16 })]),
+        bullet([b("Intent is judged by gut. "), run("About 30% of non-payers have an intent problem and 70% a genuine one (medical, salary delay, family), but there is no fixed rule and it varies by agent and region. The record is a one-word tag.", { size: 16 })]),
+        bullet([b("Quality is sampled. "), run("A quality team hears 10–20% of calls. An AI now scores all of them, and its call tags match the agents' about 80% of the time.", { size: 16 })]),
         bullet([b("The bot already works; the decision does not. "), run("AI calling cut cost from ₹11 to ₹3–4 a minute and matched humans in an A/B test. What is still unbuilt: choosing which borrower goes to a person, and using the last call to shape the next.", { size: 16 })]),
 
         H("The solution"),
-        bullet([b("Calls within minutes, in Hindi and Hinglish. "), run("The Razorpay Trusted Collections Agent reaches the borrower while the bounce is hours old.")]),
-        bullet([b("Negotiates like a good agent, inside the lender's rules. "), run("Identity first, asks why and listens, proposes a date that fits payday, one payment link, a ticket instead of a promise it cannot make.")]),
-        bullet([b("Turns the call into signals, then recommends and plans the next step. "), run("Reason, tone and promise specificity plus the borrower's history give one route: keep the AI, or hand to a person. The demo borrower makes the point: a firm promise, yet four bounces in six months send him to a person.")]),
+        P([run("A platform that makes the collection call for you, reviews what happened on it, and then recommends the next step, so you can plan your next collections. It works in three layers.")]),
+        bullet([b("1 · The calling bot. "), run("Calls the borrower within minutes, in Hindi and Hinglish, while the bounce is hours old. It asks why the EMI was missed, listens, and asks for a date and an amount. It follows the lender's rules: confirms who it is speaking to first, sends one payment link, and raises a ticket for anything it cannot promise.")]),
+        bullet([b("2 · The call review bot. "), run("Reads every call after it ends and notes the reason for the miss, the borrower's mood and how firm the promise was, then checks the call against the lender's rules.")]),
+        bullet([b("3 · The bot that recommends an action plan. "), run("Uses the call and the borrower's history to say who should call next, the AI or a person, then turns that into a plan for the cycle: how many calls, how much money, by when. A borrower with a firm promise but four bounces in six months, for example, goes to a person.")]),
 
         H("Key product and AI decisions"),
         bullet([b("The product ends in a plan, not a recommendation. "), run("A route for one borrower does not change collections. The Plan tab turns the routes into resource allocation for the cycle: how many AI calls, person calls and reminders, how much lands by day 1, 3 and 7, and where the gap to target sits (the agent, our callers, or where effort goes).")]),
@@ -127,14 +140,13 @@ const doc = new Document({
         bullet([b("One collections playbook for every lender. "), run("Each bank or NBFC sets up its own agent, so the demo journey is a sample, not a standard. We provide the layer beneath any agent, better signals and the next step rather than another collections bot, so teams can build their own agent on it.", { size: 16 })]),
 
         H("Why Razorpay"),
-        bullet([b("It already runs the mandate that bounced. "), run("A failed debit already fires a webhook, which is the trigger this agent needs, and the payment link and the measurement land on the same rails.")]),
-        bullet([b("It sells an outcome, not plumbing. "), run("Rupees recovered, priced against ₹11-a-minute human calling, under a regulated aggregator's recorded, rule-scored calls.")]),
+        bullet([b("It already runs the mandate that bounced. "), run("A failed debit already fires a webhook, which is the trigger this needs, and the payment link and the measurement sit on the same rails. Razorpay would sell rupees recovered, not plumbing.")]),
 
         H("Success metric and what to test next"),
         METRICS,
         P([
           b("Next test: "),
-          run("split one month's bounced EMIs, half through the agent and its routing and half through today's process, and compare rupees collected in nine days and whether routed-to-person cases recover more than if left with the AI. Sample figures are synthetic; weights are uncalibrated and the recommendation is shown, not executed.", { size: 15, color: MUTED }),
+          run("send half of one month's bounced EMIs through the agent and half through today's process, and compare rupees collected in nine days. Sample figures are synthetic; the weights are not yet tuned and the plan is shown, not executed.", { size: 15, color: MUTED }),
         ], { spacing: { before: 55 } }),
       ],
     },
