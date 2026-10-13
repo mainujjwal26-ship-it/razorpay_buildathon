@@ -57,7 +57,7 @@ def agent_diagram():
     p.append(label(30, 55, "One bounced EMI: what calls what, and where each decision is actually made.", 15))
 
     # ---------------- band A: during the call
-    p.append(label(30, 92, "DURING THE CALL", 13, ACCENT, bold=True, caps=True))
+    p.append(label(30, 92, "LAYER 1 · THE CALLING BOT", 13, ACCENT, bold=True, caps=True))
     p.append(label(816, 92, "WHAT THE SERVER CALLS", 13, ACCENT, bold=True, caps=True))
     p.append(box(30, 104, 182, 128, "Borrower's phone", ["Speaks Hindi,", "hears Meera"], ts=17))
 
@@ -82,7 +82,8 @@ def agent_diagram():
     p.append(label(1330, 296, "Read by Claude Code between calls — see the next diagram", 12, ACCENT, "end"))
 
     # ---------------- band B: when the call ends
-    p.append(label(30, 330, "WHEN THE CALL ENDS", 13, ACCENT, bold=True, caps=True))
+    p.append(label(30, 330, "LAYER 2 · THE CALL REVIEW BOT", 13, ACCENT, bold=True, caps=True))
+    p.append(label(734, 330, "LAYER 3 · THE ACTION-PLAN BOT", 13, ACCENT, bold=True, caps=True))
     p.append(box(30, 342, 150, 112, "Call ends", ["/call/finish"]))
     p.append(arrow(186, 372, 214, 372))
     p.append(arrow(186, 424, 214, 424))
@@ -97,11 +98,12 @@ def agent_diagram():
 
     p.append(box(734, 352, 250, 112, "Decision engine", ["Borrower history + this call", "Two questions, rules only", "The model never routes"]))
     p.append(arrow(990, 388, 1018, 360))
-    p.append(arrow(990, 408, 1018, 408))
-    p.append(arrow(990, 428, 1018, 456))
-    p.append(box(1022, 334, 234, 52, "AI keeps dialling", [], ts=16))
-    p.append(box(1022, 382, 234, 52, "A person calls", [], ts=16))
-    p.append(box(1022, 430, 234, 52, "Field visit", [], ts=16))
+    p.append(arrow(990, 408, 1018, 412))
+    p.append(arrow(990, 428, 1018, 466))
+    p.append(box(1022, 336, 234, 46, "AI keeps dialling", [], ts=16))
+    p.append(box(1022, 390, 234, 46, "A person calls", [], ts=16))
+    p.append(box(1022, 444, 234, 46, "Plan next cycle", [], fill=SOFT, stroke="#A9C6F5", ts=16))
+    p.append(label(1139, 506, "Calls, money, by when, gap to target", 12, MUTED, "middle"))
 
     # ---------------- band C: content files
     p.append(box(236, 516, 748, 92, "What the agent says and where the thresholds sit: the content files", [], fill="#FAFBFD", ts=16, dash=True, top=True))

@@ -102,12 +102,12 @@ const SPLIT = mkTable(
       "Implemented each rule twice — as exact code and as an AI reviewer — so a flag from either counts, and built the harness that scores every call.",
     ],
     [
-      "Set the decision design: rules decide the route, the model only extracts facts. One persona with real history rather than six shallow ones.",
-      "Built the decision engine, the confidence walk behind it, and 12 tests that pin the thresholds.",
+      "Set the decision design: rules decide the route, the model only extracts facts. Hard rules in code, judgement rules scored by the model, so every verdict can be explained. One persona with real history rather than six shallow ones.",
+      "Built the decision engine and the tests that pin its thresholds, and implemented the hard and judgement rules as I specified them.",
     ],
     [
-      "Specified the dashboard: which tabs exist, what each one answers, and which metrics matter enough to be shown large.",
-      "Built the screens, computed the metrics across a 100-call sample book, and rebuilt them when I changed the structure.",
+      "Specified the dashboard: which tabs exist, what each one answers, and who each is for. Decided the product must end in a plan, not a recommendation, and what the gap areas are: the agent, our callers, and where effort goes.",
+      "Built the screens and the Plan tab, computed the metrics across a 100-call sample book, and rebuilt them when I changed the structure.",
     ],
     [
       "Judged every output: what shipped, what was cut, and what was wrong.",
@@ -195,7 +195,7 @@ const doc = new Document({
           spacing: { after: 30 },
         }),
         new Paragraph({
-          children: [run("Ujjwal Goel  ·  55 commits, 5–13 October 2026  ·  ~5,000 lines of application code, 8,400 lines of rules and content, 37 tests  \u00b7  ", { size: 15, color: MUTED }), link("repository", REPO, 15)],
+          children: [run("Ujjwal Goel  ·  68 commits, 5–13 October 2026 (45 by Claude Code, 13 by the Replit agent, 10 by me)  ·  ~11,800 lines of TypeScript, 8,400 lines of rules and content, 37 tests  \u00b7  ", { size: 15, color: MUTED }), link("repository", REPO, 15)],
           spacing: { after: 45 },
           border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RULE, space: 5 } },
         }),
@@ -212,7 +212,13 @@ const doc = new Document({
 
         H("Key prompts, workflows and agent setup"),
         P([
-          run("The agent is three things: a set of written instructions, two prompts that return JSON, and a rule engine the model is not allowed to overrule. The first part is all in the repository and can be read directly \u2014 these are the files that decide what the agent says and when it hands a borrower over."),
+          run("The product is three layers: "),
+          b("the calling bot"),
+          run(" that makes the call, "),
+          b("the call review bot"),
+          run(" that reads it afterwards, and "),
+          b("the bot that recommends an action plan"),
+          run(" from what the calls revealed. Between them sit written instructions, two prompts that return JSON, and a rule engine the model is not allowed to overrule. The instructions are all in the repository and can be read directly \u2014 these are the files that decide what the agent says and when it hands a borrower over."),
         ]),
         FILES,
         P([
@@ -222,24 +228,31 @@ const doc = new Document({
           b("review prompt"),
           run(" takes the finished transcript and returns the outcome, the reason, the root cause, the promise, the borrower\u2019s cooperation and a verdict on every rule. Structured output is what lets the rest of the system be ordinary, testable code \u2014 and it is why the model never picks the route."),
         ], { spacing: { before: 70, after: 55 } }),
-        ...figure("agent.png", 500, 230, "The system: speech and reasoning are separate services, and the rules, not the model, decide what happens next."),
+        ...figure("agent.png", 480, 221, "The three layers: the call, the review of the call, and the plan. The rules, not the model, decide what happens next."),
         P([
-          run("Reading it across: the borrower\u2019s audio goes to the server, which sends it to Sarvam for transcription, builds the turn prompt from the content files, and calls the Claude API \u2014 which returns a structured turn rather than free text. Speech goes back out through Sarvam. Every event is written to Postgres as it happens, and the whole call log is pushed to a branch on GitHub. When the call ends, the review prompt and the checks written in code score the same call independently, and a flag from either counts. Only then does the decision engine combine those facts with the borrower\u2019s history and pick a route.", { size: 16 }),
+          run("Reading it across: the borrower\u2019s audio goes to the server, which sends it to Sarvam for transcription, builds the turn prompt from the content files, and calls the Claude API \u2014 which returns a structured turn rather than free text. Speech goes back out through Sarvam. Every event is written to Postgres as it happens, and the whole call log is pushed to a branch on GitHub. When the call ends, the review prompt and the checks written in code score the same call independently, and a flag from either counts. Only then does the decision engine combine those facts with the borrower\u2019s history and pick a route. The third layer does not stop at one borrower: the Plan tab turns every route into a plan for the cycle \u2014 how many AI calls, person calls and reminders, how much money lands by day 1, 3 and 7, and whether the gap to target sits in the agent, in our callers or in where effort goes.", { size: 16 }),
         ]),
         P([
           run("The build loop mattered as much as the prompts. Claude was connected to GitHub, and GitHub to Replit, so a change was live in minutes and I could watch it. More usefully, those call logs are pushed back into the same repository, so Claude Code could read what actually happened on a real call \u2014 what the borrower said, which rule tripped, where the agent stalled \u2014 and I could act on it immediately instead of listening to recordings and writing notes by hand."),
         ]),
-        ...figure("buildloop.png", 500, 140, "The build loop: a live call could change the agent the same evening."),
+        ...figure("buildloop.png", 480, 134, "The build loop: a live call could change the agent the same evening."),
         P([
           run("Every change ran the same gate before it was committed: typecheck, build, 37 tests, then a screenshot of the actual screen that the AI had to look at before claiming it worked. The decision engine deliberately has no runtime imports so its tests run standalone.", { size: 16 }),
         ]),
 
         H("One AI output I rejected, corrected or significantly improved"),
         P([
-          run("[ To be completed ]", { color: ACCENT, bold: true }),
+          b("The suggestion: let the model judge everything. "),
+          run("When I specified how the agent\u2019s calls would be scored, the AI proposed the simplest design: give the model the transcript and let it judge every rule, hard and soft. It would have been less code and it read well in a demo."),
         ]),
         P([
-          run("Candidates under consideration: the demo mode built on a separate interface, rejected because a demo on different screens proves nothing about the product; the fabricated statistic caught during review; the six-persona signal model cut down to one borrower with real history.", { size: 15, color: MUTED, italics: true }),
+          b("Why I rejected it. "),
+          run("A lender cannot audit a verdict it cannot explain. If a model alone says a call broke a rule, nobody can show the regulator why, and nobody can tell whether the model or the agent was wrong. "),
+          b("What I did instead. "),
+          run("The hard rules (one payment link, no threat, nothing the lender has not approved) are checked in exact code. The judgement rules (did she listen first, did she handle the reason) are scored by the model, but each verdict must cite a quote from the call. A flag from either side counts as a breach. Every verdict can be traced to a line of code or a line of the transcript."),
+        ]),
+        P([
+          run("Also rejected: a demo mode first built on its own interface, because a demo on different screens proves nothing about the product. It now runs the real screens with canned data.", { size: 15, color: MUTED }),
         ]),
 
         H("What the AI did versus what I decided"),
@@ -248,12 +261,17 @@ const doc = new Document({
           run("The honest summary: the AI was a computational assistant. It did the heavy lifting — code, computation, research, sample data — and it sharpened what I already knew by arguing with it. It did not choose the problem, define the collections process, write the guardrails or decide what the dashboard should answer. Those came from my own time in this domain and from the three interviews.", { size: 16 }),
         ], { spacing: { before: 60 } }),
 
+        H("What I deliberately left out"),
+        P([run("These were scoping decisions, not things the AI could not build. The reasons are in the product note.", { size: 16 })]),
+        bullet([b("Pre-bounce awareness calling. "), run("Making a borrower aware in time can be done by an IVR call or a reminder. The talking, and the intent worth capturing, happens after the bounce, so that is where we started.")]),
+        bullet([b("One playbook for every lender. "), run("Each bank or NBFC sets up its own agent, so the demo journey is a sample. The product is the layer beneath any agent: better signals and the next step, not just another collections bot.")]),
+
         H("Known limitations, risks and verification steps"),
         bullet([b("The numbers are synthetic. "), run("Every metric on the performance screens comes from a 100-call sample book, not from live borrowers. They show the measurement works, not that the agent works.")]),
         bullet([b("The weights are uncalibrated. "), run("Nothing yet records whether a promise was kept, so the confidence walk behind the decision has never been checked against a real outcome. Until it is, the thresholds are reasoned, not proven.")]),
+        bullet([b("The plan is shown, not executed. "), run("The Plan tab says what to do this cycle, but nothing yet dials, hands a case over or sends a reminder, and the sample holds no results for person calls, so none are assumed.")]),
         bullet([b("The AI reviewer is untuned. "), run("The 29.7% hard-rule breach rate on sample calls is partly the reviewer being strict and partly the agent being wrong, and I cannot yet separate the two.")]),
-        bullet([b("How it was verified. "), run("Rules are checked twice, by exact code and by the model, and a flag from either counts. 37 automated tests pin the decision thresholds and the metric arithmetic. Screens were checked by screenshot, not by assertion. Every figure in the product note carries a source and a confidence level, and the figures I calculated myself are labelled as mine.")]),
-        bullet([b("Where I had to verify the AI directly. "), run("It produced a statistic that was not in the data. It is the reason every number in these documents was traced back to either a source or a computation before it shipped.")]),
+        bullet([b("How it was verified. "), run("Rules are checked twice, by exact code and by the model, and a flag from either counts. 37 automated tests pin the decision thresholds and the metric arithmetic. Screens were checked by screenshot, not by assertion. Every figure in the product note carries a source, or is labelled as my own calculation, because the AI once wrote a statistic that was not in the data.")]),
       ],
     },
   ],
