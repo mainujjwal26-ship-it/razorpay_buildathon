@@ -80,8 +80,8 @@ const doc = new Document({
       properties: {
         page: {
           margin: {
-            top: convertInchesToTwip(0.45),
-            bottom: convertInchesToTwip(0.4),
+            top: convertInchesToTwip(0.4),
+            bottom: convertInchesToTwip(0.35),
             left: convertInchesToTwip(0.6),
             right: convertInchesToTwip(0.6),
           },
@@ -128,25 +128,27 @@ const doc = new Document({
         P([run("A platform that makes the collection call for you, reviews what happened on it, and then recommends the next step, so you can plan your next collections. It works in three layers.")]),
         bullet([b("1 · The calling bot. "), run("Calls the borrower within minutes, in Hindi and Hinglish, while the bounce is hours old. It asks why the EMI was missed, listens, and asks for a date and an amount. It follows the lender's rules: confirms who it is speaking to first, sends one payment link, and raises a ticket for anything it cannot promise.")]),
         bullet([b("2 · The call review bot. "), run("Reads every call after it ends and notes the reason for the miss, the borrower's mood and how firm the promise was, then checks the call against the lender's rules.")]),
-        bullet([b("3 · The bot that recommends an action plan. "), run("Uses the call and the borrower's history to say who should call next, the AI or a person, then turns that into a plan for the cycle: how many calls, how much money, by when. A borrower with a firm promise but four bounces in six months, for example, goes to a person.")]),
+        bullet([b("3 · The bot that recommends an action plan. "), run("Uses the call and the borrower's history to say who should call next, the AI or a person, then turns that into a plan for the cycle: how many calls, how much money, by when.")]),
 
         H("Key product and AI decisions"),
-        bullet([b("The product ends in a plan, not a recommendation. "), run("A route for one borrower does not change collections. The Plan tab turns the routes into resource allocation for the cycle: how many AI calls, person calls and reminders, how much lands by day 1, 3 and 7, and where the gap to target sits (the agent, our callers, or where effort goes).")]),
+        bullet([b("The product ends in a plan, not a recommendation. "), run("One borrower's route does not change collections. The Plan tab turns the routes into resource allocation for the cycle: AI calls, person calls and reminders, how much lands by day 1, 3 and 7, and where the gap to target sits.")]),
         bullet([b("Two questions decide the route, and rules decide, not the model. "), run("Has intent shifted (four or more bounces in the window)? Did the AI let the borrower down on this call? Either yes sends the borrower to a person. The model only extracts facts (reason, promise, tone).")]),
-        bullet([b("Hard rules and judgement rules, so every verdict can be explained. "), run("Hard rules (one link, no threat, nothing unapproved) are checked in code; judgement rules (listened first) are scored by a model against a quote from the call. AI suggested leaving all judgement to the model; I kept the split because a lender cannot audit a verdict it cannot explain.")]),
+        bullet([b("Hard rules and judgement rules, so every verdict can be explained. "), run("Hard rules are checked in code; judgement rules are scored by a model against a quote from the call. AI suggested leaving all judgement to the model; I kept the split because a lender cannot audit a verdict it cannot explain.")]),
 
         H("Deliberately left out"),
-        bullet([b("Pre-bounce awareness calling. "), run("That is about making the borrower aware in time, which an IVR call or a reminder already does. The talking happens after the bounce, and that is where capturing intent matters, so that is where we started.", { size: 16 })]),
+        bullet([b("Pre-bounce awareness calling. "), run("That is about making the borrower aware in time, which an IVR call or a reminder already does. The talking, and the intent worth capturing, happens after the bounce.", { size: 16 })]),
         bullet([b("One collections playbook for every lender. "), run("Each bank or NBFC sets up its own agent, so the demo journey is a sample, not a standard. We provide the layer beneath any agent, better signals and the next step rather than another collections bot, so teams can build their own agent on it.", { size: 16 })]),
 
         H("Why Razorpay"),
-        bullet([b("It already runs the mandate that bounced. "), run("A failed debit already fires a webhook, which is the trigger this needs, and the payment link and the measurement sit on the same rails. Razorpay would sell rupees recovered, not plumbing.")]),
+        bullet([b("It already runs the mandate that bounced. "), run("A failed debit already fires a webhook, which is the trigger this needs, and the payment link and the measurement sit on the same rails.")]),
+        bullet([b("It can add a new kind of signal. "), run("Razorpay already sees payment signals across many merchants. Every call adds creditworthiness signals: why the EMI was missed, how firm the promise was, whether it was kept. With the lender's consent, that is a base for AI in lending later.")]),
+        bullet([b("It has the first customers for a pilot. "), run("Financial merchants already use Razorpay's NACH debit service. That is where a pilot starts, and where this product can be cross-sold.")]),
 
         H("Success metric and what to test next"),
         METRICS,
         P([
           b("Next test: "),
-          run("send half of one month's bounced EMIs through the agent and half through today's process, and compare rupees collected in nine days. Sample figures are synthetic; the weights are not yet tuned and the plan is shown, not executed.", { size: 15, color: MUTED }),
+          run("send half of one month's bounced EMIs through the agent and half through today's process, and compare rupees collected in nine days. Figures are from a synthetic sample; the plan is shown, not executed.", { size: 15, color: MUTED }),
         ], { spacing: { before: 55 } }),
       ],
     },
