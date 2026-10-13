@@ -1,7 +1,7 @@
 import type { FullCustomer } from "../lib/api";
 import { inr } from "../lib/format";
 
-export function CustomerCard({ customer, lender }: { customer: FullCustomer; lender: string }) {
+export function CustomerCard({ customer, lender, spotRow }: { customer: FullCustomer; lender: string; spotRow?: string }) {
   const rows: [string, string][] = [
     ["EMI amount", inr(customer.emiAmount)],
     ...(typeof customer.bounceCharge === "number"
@@ -26,7 +26,7 @@ export function CustomerCard({ customer, lender }: { customer: FullCustomer; len
       <div className="muted small">{lender} · personal loan</div>
       <dl className="kv">
         {rows.map(([k, v]) => (
-          <div key={k}>
+          <div key={k} className={k === spotRow ? "spot" : undefined}>
             <dt>{k}</dt>
             <dd>{v}</dd>
           </div>

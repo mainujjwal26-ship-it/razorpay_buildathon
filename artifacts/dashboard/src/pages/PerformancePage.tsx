@@ -64,6 +64,7 @@ export function PerformancePage() {
             <h3 className="grp">Outcomes</h3>
             <div className="mgrid">
               <Metric
+                spot={isDemoMode()}
                 label="Payment collected"
                 what="Rupees recovered out of the rupees we set out to recover. A payment link that has been sent counts as paid."
                 value={c.collected ? pct(c.collected.pct) : "–"}

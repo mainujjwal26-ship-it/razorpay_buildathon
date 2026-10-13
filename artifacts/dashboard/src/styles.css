@@ -275,3 +275,14 @@ code{font-family:"IBM Plex Mono",monospace;font-size:.92em}
 .watch-prog i.on{background:#2b6be4}
 .callrow .stack{flex:1 1 340px;max-width:460px;gap:16px}
 .callrow .stack .cust{width:auto}
+
+/* Demo mode: a soft ring that draws the eye to what the current step is about. */
+.spot{position:relative;border-radius:10px;animation:spotpulse 2.4s ease-in-out infinite}
+@keyframes spotpulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(43,107,228,.55), 0 0 0 0 rgba(43,107,228,0)}
+  50%{box-shadow:0 0 0 2px rgba(43,107,228,.95), 0 0 0 9px rgba(43,107,228,.13)}
+}
+td.spot{border-radius:8px}
+@media (prefers-reduced-motion:reduce){.spot{animation:none;box-shadow:0 0 0 2px rgba(43,107,228,.8)}}
+.chip.spot{border-radius:99px}
+.kv .spot{border-radius:8px}

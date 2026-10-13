@@ -44,7 +44,7 @@ export function CallPage({ config, demo = false }: { config: CallConfig; demo?: 
       />
       <div className="stack">
         {demo && (
-          <section className="panel watch" aria-live="polite">
+          <section className={`panel watch${demoCall.step === 8 ? " spot" : ""}`} aria-live="polite">
             <header className="panel-h">
               <h2>{note ? note.title : "What to watch"}</h2>
               {note && <span className="chip neutral">{demoCall.step + 1} of {DEMO_LINES.length}</span>}
@@ -66,7 +66,7 @@ export function CallPage({ config, demo = false }: { config: CallConfig; demo?: 
             )}
           </section>
         )}
-        {customer && <CustomerCard customer={customer} lender={config.lenderName} />}
+        {customer && <CustomerCard customer={customer} lender={config.lenderName} spotRow={demo && call.phase === "idle" ? "Total due" : undefined} />}
       </div>
     </div>
   );

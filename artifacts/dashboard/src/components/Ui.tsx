@@ -36,8 +36,8 @@ export const By = ({ by }: { by: string }) => (
 );
 
 /** A metric: header, a one-line explanation of what it measures, then the number and its detail. */
-export const Metric = ({ label, what, value, detail }: { label: string; what: string; value: ReactNode; detail?: string }) => (
-  <div className="metric">
+export const Metric = ({ label, what, value, detail, spot }: { label: string; what: string; value: ReactNode; detail?: string; spot?: boolean }) => (
+  <div className={`metric${spot ? " spot" : ""}`}>
     <div className="m-h">{label}</div>
     <div className="m-w">{what}</div>
     <div className="m-v">{value}</div>
